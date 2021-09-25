@@ -83,7 +83,7 @@ class SuppliersEchelon:  # supplier object s
 
 
 @dataclass
-class PlantsEchelon:
+class PlantsEchelon:  # plant i
     products_prod_cost: Dict  # CPip cost of producing product p at plant I;
     products_trans_cost: Dict  # CTijp transportation cost of product p per km between plant i and warehouse j;
     fixed_cost: float  # Ei fixed cost for opening plant i;
@@ -100,7 +100,7 @@ class PlantsEchelon:
 
 
 @dataclass
-class WarehouseEchelon:
+class WarehouseEchelon:  # warehouse j
     products_trans_cost: Dict  # CDjkp transportation cost of product p per km between warehouse j and distribution center k;
     fixed_cost: float  # Fj fixed cost for opening warehouse j;
     product_capacity: Dict  # Cjp capacity of warehouse j for product p;
@@ -113,7 +113,7 @@ class WarehouseEchelon:
 
 
 @dataclass
-class DistributionCenter:
+class DistributionCenter:  # center k
     products_trans_cost: Dict
     fixed_cost: float  # Gk fixed cost for opening distribution center k;
     product_capacity: Dict  # Ckp capacity of distribution center k for product p;
