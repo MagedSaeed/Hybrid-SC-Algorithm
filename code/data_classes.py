@@ -6,7 +6,14 @@ import numpy as np
 
 @dataclass
 class Product:  # product p
-    customer_demand: Dict  # Dmp demand of customer m;
+    customer_demands: List  # Dmp demand of customers 1..m;
+
+    @classmethod
+    def get_random_products(cls, howmany=5, number_of_customers=5):
+        products = list()
+        random_demands = np.random.randint(1000, size=(howmany, number_of_customers))
+        products = [cls(customer_demands=random_demands[i]) for i in range(howmany)]
+        return products
 
 
 @dataclass
