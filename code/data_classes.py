@@ -32,15 +32,15 @@ class RawMaterial:  # raw material t
 @dataclass
 class SuppliersEchelon:  # supplier object s
     raw_materials: List[RawMaterial]
-    material_purchase_cost: Dict  # CCst purchase cost of raw material t from supplier s;
-    material_trans_cost: Dict  # CBsit transportation cost of raw material t per km between supplier s and plant i ;
-    material_capacity: Dict  # Cst capacity of supplier s for raw material t;
-    distances: Dict  # Tsi the distance between supplier s and plant at location i
-    material_trans_env_impact: Dict  # ETSsit environmental impact per unit and per distance caused by transporting raw material t from supplier s to plant i;
-    prop_delivery_risk: Dict  # Prdst probability of delivery risk for raw material t from supplier s;
-    prop_quality_risk: Dict  # Prqst probability of quality risk for raw material t from supplier s;
-    delivery_risk_impact: Dict  # IRDst impact caused by risk of delivery for raw material t from supplier s;
-    quality_risk_impact: Dict  # IRQst impact caused by risk of quality for raw material t from supplier s;
+    material_purchase_cost: List  # CCst purchase cost of raw material t from supplier s;
+    material_trans_cost: List  # CBsit transportation cost of raw material t per km between supplier s and plant i ;
+    material_capacity: List  # Cst capacity of supplier s for raw material t;
+    plants_distances: List  # Tsi the distance between supplier s and plant at location i
+    material_trans_env_impact: List  # ETSsit environmental impact per unit and per distance caused by transporting raw material t from supplier s to plant i;
+    prop_delivery_risk: List  # Prdst probability of delivery risk for raw material t from supplier s;
+    prop_quality_risk: List  # Prqst probability of quality risk for raw material t from supplier s;
+    delivery_risk_impact: List  # IRDst impact caused by risk of delivery for raw material t from supplier s;
+    quality_risk_impact: List  # IRQst impact caused by risk of quality for raw material t from supplier s;
     is_open: bool = field(default=False)
 
     @classmethod
