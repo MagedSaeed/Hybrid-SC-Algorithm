@@ -18,7 +18,15 @@ class Product:  # product p
 
 @dataclass
 class RawMaterial:  # raw material t
-    product_yield: Dict  # Wtp yields of product p;
+    products_yields: List  # Wtp yields of product 1..p;
+
+    @classmethod
+    def get_random_materials(cls, howmany=5, number_of_products=5):
+        random_yields = 1000 * np.random.rand(
+            howmany, number_of_products
+        )  # random values between 0 and 1000
+        materials = [cls(products_yields=random_yields[i]) for i in range(howmany)]
+        return materials
 
 
 @dataclass
