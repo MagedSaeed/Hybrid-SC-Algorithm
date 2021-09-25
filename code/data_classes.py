@@ -44,8 +44,42 @@ class SuppliersEchelon:  # supplier object s
     is_open: bool = field(default=False)
 
     @classmethod
-    def get_random_echelon(cls):
-        pass
+    def get_random_echelon(cls, howmany=5, number_of_plants=5):
+        raw_materials = RawMaterial.get_random_materials()
+        random_material_purchase_cost = (
+            np.random.rand(howmany, len(raw_materials)) * 1000
+        )
+        random_material_trans_cost = np.random.rand(howmany, len(raw_materials)) * 1000
+        random_material_capacity = np.random.rand(howmany, len(raw_materials)) * 100
+        random_plants_distances = np.random.rand(howmany, number_of_plants) * 100
+        random_material_trans_env_impact = (
+            np.random.rand(howmany, len(raw_materials), number_of_plants) * 100
+        )
+        random_prop_delivery_risk = np.random.rand(howmany, len(raw_materials))
+        random_prop_quality_risk = np.random.rand(howmany, len(raw_materials))
+        random_delivery_risk_impact = np.random.rand(howmany, len(raw_materials)) * 100
+        random_quality_risk_impact = np.random.rand(howmany, len(raw_materials)) * 100
+        facilities = list()
+        for i in range(howmany):
+            facility = cls(
+                raw_materials=raw_materials,
+                material_purchase_cost=random_material_purchase_cost[i],
+                material_trans_cost=random_material_trans_cost[i],
+                material_capacity=random_material_capacity[i],
+                plants_distances=random_plants_distances[i],
+                material_trans_env_impact={
+                    material_index: plant_impact
+                    for material_index, plant_impact in enumerate(
+                        random_material_trans_env_impact[i]
+                    )
+                },
+                prop_delivery_risk=random_prop_delivery_risk[i],
+                prop_quality_risk=random_prop_quality_risk[i],
+                delivery_risk_impact=random_delivery_risk_impact[i],
+                quality_risk_impact=random_quality_risk_impact[i],
+            )
+            facilities.append(facility)
+        return facilities
 
 
 @dataclass
