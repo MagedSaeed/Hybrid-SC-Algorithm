@@ -36,7 +36,7 @@ class SuppliersEchelon:  # supplier object s
     material_trans_cost: List  # CBsit transportation cost of raw material t per km between supplier s and plant i ;
     material_capacity: List  # Cst capacity of supplier s for raw material t;
     plants_distances: List  # Tsi the distance between supplier s and plant at location i
-    material_trans_env_impact: List  # ETSsit environmental impact per unit and per distance caused by transporting raw material t from supplier s to plant i;
+    material_trans_env_impact: Dict  # ETSsit environmental impact per unit and per distance caused by transporting raw material t from supplier s to plant i;
     prop_delivery_risk: List  # Prdst probability of delivery risk for raw material t from supplier s;
     prop_quality_risk: List  # Prqst probability of quality risk for raw material t from supplier s;
     delivery_risk_impact: List  # IRDst impact caused by risk of delivery for raw material t from supplier s;
@@ -84,43 +84,42 @@ class SuppliersEchelon:  # supplier object s
 
 @dataclass
 class PlantsEchelon:  # plant i
-    products_prod_cost: Dict  # CPip cost of producing product p at plant I;
-    products_trans_cost: Dict  # CTijp transportation cost of product p per km between plant i and warehouse j;
+    products_prod_cost: List  # CPip cost of producing product p at plant I;
+    products_trans_cost: List  # CTijp transportation cost of product p per km between plant i and warehouse j;
     fixed_cost: float  # Ei fixed cost for opening plant i;
-    product_capacity: Dict  # Cip capacity of plant i for product p;
-    distances: Dict  # Tij the distance between plant at location i and warehouse at location j
+    product_capacity: List  # Cip capacity of plant i for product p;
+    warehouse_distances: List  # Tij the distance between plant at location i and warehouse at location j
     opening_env_impact: float  # EFi environmental impact of openingplant at location i;
     production_env_impact: float  # EPi environmental impact caused by production at plant i;
-    product_trans_env_impact: Dict  # ETPijp environmental impact per unit and per distance caused by transporting product p from plant i to warehouse j;
-    prop_delivery_risk: Dict  # Prdip probability of delivery risk for product p from plant i;
-    prop_quality_risk: Dict  # Prqip probability of quality risk for product p produced at plant i;
-    delivery_risk_impact: Dict  # IRDip impact caused by risk of delivery for product p from plant i;
-    quality_risk_impact: Dict  # IRQip impact caused by risk of poor quality for product p from plant i;
+    products_trans_env_impact: Dict  # ETPijp environmental impact per unit and per distance caused by transporting product p from plant i to warehouse j;
+    prop_delivery_risk: List  # Prdip probability of delivery risk for product p from plant i;
+    prop_quality_risk: List  # Prqip probability of quality risk for product p produced at plant i;
+    delivery_risk_impact: List  # IRDip impact caused by risk of delivery for product p from plant i;
+    quality_risk_impact: List  # IRQip impact caused by risk of poor quality for product p from plant i;
     is_open: bool = field(default=False)
 
 
 @dataclass
-class WarehouseEchelon:  # warehouse j
-    products_trans_cost: Dict  # CDjkp transportation cost of product p per km between warehouse j and distribution center k;
+    products_trans_cost: List  # CDjkp transportation cost of product p per km between warehouse j and distribution center k;
     fixed_cost: float  # Fj fixed cost for opening warehouse j;
-    product_capacity: Dict  # Cjp capacity of warehouse j for product p;
-    distances: Dict  # Tjk the distance between warehouse at location j and distribution center at location k
+    product_capacity: List  # Cjp capacity of warehouse j for product p;
+    dist_centers_distances: List  # Tjk the distance between warehouse at location j and distribution center at location k
     opening_env_impact: float  # EWj environmental impact of opening warehouse center at location j;
-    product_trans_env_impact: Dict  # ETDjkp environmental impact per unit and per distance caused by transporting product p from warehouse j to distribution center k;
-    prop_delivery_risk: Dict  # Prdjp probability of delivery risk for product p from warehouse j;
-    delivery_risk_impact: Dict  # IRDjp impact caused by risk of delivery for product p from warehouse j;
+    products_trans_env_impact: Dict  # ETDjkp environmental impact per unit and per distance caused by transporting product p from warehouse j to distribution center k;
+    prop_delivery_risk: List  # Prdjp probability of delivery risk for product p from warehouse j;
+    delivery_risk_impact: List  # IRDjp impact caused by risk of delivery for product p from warehouse j;
     is_open: bool = field(default=False)
 
 
 @dataclass
-class DistributionCenter:  # center k
-    products_trans_cost: Dict
+class DistributionCentersEchelon:  # center k
+    products_trans_cost: List
     fixed_cost: float  # Gk fixed cost for opening distribution center k;
-    product_capacity: Dict  # Ckp capacity of distribution center k for product p;
-    distances: Dict  # tkm the distance between distribution center at location k and market m
+    product_capacity: List  # Ckp capacity of distribution center k for product p;
+    market_distances: List  # tkm the distance between distribution center at location k and market m
     opening_env_impact: float  # EDk environmental impact of opening distribution center at location k;
     product_trans_env_impact: Dict  # ETWkmp environmental impact per unit and per distance caused by transporting product p from distribution center k to market m;
-    selling_prices: Dict  # SPkmp selling price of product p transported from distribution centerk at market m;
-    prop_delivery_risk: Dict  # Prdkp probability of delivery risk for product p from distribution center k;
-    delivery_risk_impact: Dict  # IRDkp impactcaused by risk of delivery for product p from distribution center k.
+    selling_prices: List  # SPkmp selling price of product p transported from distribution centerk at market m;
+    prop_delivery_risk: List  # Prdkp probability of delivery risk for product p from distribution center k;
+    delivery_risk_impact: List  # IRDkp impactcaused by risk of delivery for product p from distribution center k.
     is_open: bool = field(default=False)
