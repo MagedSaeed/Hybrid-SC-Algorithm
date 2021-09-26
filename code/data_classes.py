@@ -100,6 +100,7 @@ class PlantsEchelon:  # plant i
 
 
 @dataclass
+class WarehousesEchelon:  # warehouse j
     products_trans_cost: List  # CDjkp transportation cost of product p per km between warehouse j and distribution center k;
     fixed_cost: float  # Fj fixed cost for opening warehouse j;
     product_capacity: List  # Cjp capacity of warehouse j for product p;
