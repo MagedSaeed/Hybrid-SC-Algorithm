@@ -98,6 +98,50 @@ class PlantsEchelon:  # plant i
     quality_risk_impact: List  # IRQip impact caused by risk of poor quality for product p from plant i;
     is_open: bool = field(default=False)
 
+    @classmethod
+    def get_random_echelon(
+        cls, howmany=5, number_of_products=5, number_of_warehouses=5
+    ):
+        random_products_prod_cost = np.random.rand(howmany, number_of_products) * 100
+        random_products_trans_cost = np.random.rand(howmany, number_of_products) * 100
+        random_fixed_cost = np.random.rand(howmany) * 1000
+        random_product_capacity = np.random.rand(howmany, number_of_products) * 500
+        random_warehouse_distances = np.random.rand(howmany, number_of_warehouses) * 100
+        random_opening_env_impact = np.random.rand(howmany) * 1000
+        random_production_env_impact = (
+            np.random.rand(howmany, number_of_products, number_of_warehouses) * 100
+        )
+        random_products_trans_env_impact = (
+            np.random.rand(howmany, number_of_products) * 1000
+        )
+        random_prop_delivery_risk = np.random.rand(howmany, number_of_products) * 1000
+        random_prop_quality_risk = np.random.rand(howmany, number_of_products) * 1000
+        random_delivery_risk_impact = np.random.rand(howmany, number_of_products) * 1000
+        random_quality_risk_impact = np.random.rand(howmany, number_of_products) * 1000
+        facilities = list()
+        for i in range(howmany):
+            facility = cls(
+                products_prod_cost=random_products_prod_cost[i],
+                products_trans_cost=random_products_trans_cost[i],
+                fixed_cost=random_fixed_cost[i],
+                product_capacity=random_product_capacity[i],
+                warehouse_distances=random_warehouse_distances[i],
+                opening_env_impact=random_opening_env_impact[i],
+                production_env_impact=random_production_env_impact[i],
+                products_trans_env_impact={
+                    product_index: warehouse_impact
+                    for product_index, warehouse_impact in enumerate(
+                        random_products_trans_env_impact[i]
+                    )
+                },
+                prop_delivery_risk=random_prop_delivery_risk[i],
+                prop_quality_risk=random_prop_quality_risk[i],
+                delivery_risk_impact=random_delivery_risk_impact[i],
+                quality_risk_impact=random_quality_risk_impact[i],
+            )
+            facilities.append(facility)
+        return facilities
+
 
 @dataclass
 class WarehousesEchelon:  # warehouse j
@@ -110,6 +154,42 @@ class WarehousesEchelon:  # warehouse j
     prop_delivery_risk: List  # Prdjp probability of delivery risk for product p from warehouse j;
     delivery_risk_impact: List  # IRDjp impact caused by risk of delivery for product p from warehouse j;
     is_open: bool = field(default=False)
+
+    @classmethod
+    def get_random_echelon(
+        cls, howmany=5, number_of_products=5, number_of_dist_centers=5
+    ):
+        random_products_trans_cost = np.random.rand(howmany, number_of_products) * 100
+        random_fixed_cost = np.random.rand(howmany) * 1000
+        random_product_capacity = np.random.rand(howmany, number_of_products) * 500
+        random_dist_centers_distances = (
+            np.random.rand(howmany, number_of_dist_centers) * 100
+        )
+        random_opening_env_impact = np.random.rand(howmany) * 1000
+        random_products_trans_env_impact = (
+            np.random.rand(howmany, number_of_products) * 1000
+        )
+        random_prop_delivery_risk = np.random.rand(howmany, number_of_products) * 1000
+        random_delivery_risk_impact = np.random.rand(howmany, number_of_products) * 1000
+        facilities = list()
+        for i in range(howmany):
+            facility = cls(
+                products_trans_cost=random_products_trans_cost[i],
+                fixed_cost=random_fixed_cost[i],
+                product_capacity=random_product_capacity[i],
+                dist_centers_distances=random_dist_centers_distances[i],
+                opening_env_impact=random_opening_env_impact[i],
+                products_trans_env_impact={
+                    product_index: dist_center_impact
+                    for product_index, dist_center_impact in enumerate(
+                        random_products_trans_env_impact[i]
+                    )
+                },
+                prop_delivery_risk=random_prop_delivery_risk[i],
+                delivery_risk_impact=random_delivery_risk_impact[i],
+            )
+            facilities.append(facility)
+        return facilities
 
 
 @dataclass
@@ -124,3 +204,46 @@ class DistributionCentersEchelon:  # center k
     prop_delivery_risk: List  # Prdkp probability of delivery risk for product p from distribution center k;
     delivery_risk_impact: List  # IRDkp impactcaused by risk of delivery for product p from distribution center k.
     is_open: bool = field(default=False)
+
+    @classmethod
+    def get_random_echelon(cls, howmany=5, number_of_products=5, number_of_markets=5):
+        random_products_trans_cost = np.random.rand(howmany, number_of_products) * 100
+        random_fixed_cost = np.random.rand(howmany) * 1000
+        random_product_capacity = np.random.rand(howmany, number_of_products) * 500
+        random_market_distances_distances = (
+            np.random.rand(howmany, number_of_markets) * 100
+        )
+        random_opening_env_impact = np.random.rand(howmany) * 1000
+        random_products_trans_env_impact = (
+            np.random.rand(howmany, number_of_products) * 1000
+        )
+        random_selling_prices = np.random.rand(
+            howmany, number_of_products, number_of_markets
+        )
+        random_prop_delivery_risk = np.random.rand(howmany, number_of_products) * 1000
+        random_delivery_risk_impact = np.random.rand(howmany, number_of_products) * 1000
+        facilities = list()
+        for i in range(howmany):
+            facility = cls(
+                products_trans_cost=random_products_trans_cost[i],
+                fixed_cost=random_fixed_cost[i],
+                product_capacity=random_product_capacity[i],
+                market_distances=random_market_distances_distances[i],
+                opening_env_impact=random_opening_env_impact[i],
+                products_trans_env_impact={
+                    product_index: market_impact
+                    for product_index, market_impact in enumerate(
+                        random_products_trans_env_impact[i]
+                    )
+                },
+                selling_prices={
+                    product_index: market_prices
+                    for product_index, market_prices in enumerate(
+                        random_selling_prices[i]
+                    )
+                },
+                prop_delivery_risk=random_prop_delivery_risk[i],
+                delivery_risk_impact=random_delivery_risk_impact[i],
+            )
+            facilities.append(facility)
+        return facilities
