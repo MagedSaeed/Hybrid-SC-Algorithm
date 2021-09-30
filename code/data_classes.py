@@ -43,6 +43,7 @@ class SupplierFacility:  # supplier object s
     delivery_risk_impact: List  # IRDst impact caused by risk of delivery for raw material t from supplier s;
     quality_risk_impact: List  # IRQst impact caused by risk of quality for raw material t from supplier s;
     is_open: int = field(default=1)
+
     @property
     def capacity(self):
         return self.material_capacity
@@ -169,6 +170,7 @@ class WarehouseFacility:  # warehouse j
     prop_delivery_risk: List  # Prdjp probability of delivery risk for product p from warehouse j;
     delivery_risk_impact: List  # IRDjp impact caused by risk of delivery for product p from warehouse j;
     is_open: int = field(default=0)
+
     @property
     def transportation_cost(self):
         return self.products_trans_cost
@@ -221,11 +223,12 @@ class DistributionCenterFacility:  # center k
     product_capacity: List  # Ckp capacity of distribution center k for product p;
     market_distances: List  # tkm the distance between distribution center at location k and market m
     opening_env_impact: float  # EDk environmental impact of opening distribution center at location k;
-    product_trans_env_impact: Dict  # ETWkmp environmental impact per unit and per distance caused by transporting product p from distribution center k to market m;
+    products_trans_env_impact: Dict  # ETWkmp environmental impact per unit and per distance caused by transporting product p from distribution center k to market m;
     selling_prices: List  # SPkmp selling price of product p transported from distribution centerk at market m;
     prop_delivery_risk: List  # Prdkp probability of delivery risk for product p from distribution center k;
     delivery_risk_impact: List  # IRDkp impactcaused by risk of delivery for product p from distribution center k.
     is_open: int = field(default=0)
+
     @property
     def transportation_cost(self):
         return self.products_trans_cost
