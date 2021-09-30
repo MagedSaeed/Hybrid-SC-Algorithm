@@ -30,7 +30,7 @@ class RawMaterial:  # raw material t
 
 
 @dataclass
-class SuppliersEchelon:  # supplier object s
+class SupplierFacility:  # supplier object s
     raw_materials: List[RawMaterial]
     material_purchase_cost: List  # CCst purchase cost of raw material t from supplier s;
     material_trans_cost: List  # CBsit transportation cost of raw material t per km between supplier s and plant i ;
@@ -83,7 +83,7 @@ class SuppliersEchelon:  # supplier object s
 
 
 @dataclass
-class PlantsEchelon:  # plant i
+class PlantFacility:  # plant i
     products_prod_cost: List  # CPip cost of producing product p at plant I;
     products_trans_cost: List  # CTijp transportation cost of product p per km between plant i and warehouse j;
     fixed_cost: float  # Ei fixed cost for opening plant i;
@@ -144,7 +144,7 @@ class PlantsEchelon:  # plant i
 
 
 @dataclass
-class WarehousesEchelon:  # warehouse j
+class WarehouseFacility:  # warehouse j
     products_trans_cost: List  # CDjkp transportation cost of product p per km between warehouse j and distribution center k;
     fixed_cost: float  # Fj fixed cost for opening warehouse j;
     product_capacity: List  # Cjp capacity of warehouse j for product p;
@@ -193,7 +193,7 @@ class WarehousesEchelon:  # warehouse j
 
 
 @dataclass
-class DistributionCentersEchelon:  # center k
+class DistributionCenterFacility:  # center k
     products_trans_cost: List
     fixed_cost: float  # Gk fixed cost for opening distribution center k;
     product_capacity: List  # Ckp capacity of distribution center k for product p;
