@@ -42,7 +42,13 @@ class SupplierFacility:  # supplier object s
     prop_quality_risk: List  # Prqst probability of quality risk for raw material t from supplier s;
     delivery_risk_impact: List  # IRDst impact caused by risk of delivery for raw material t from supplier s;
     quality_risk_impact: List  # IRQst impact caused by risk of quality for raw material t from supplier s;
-    is_open: bool = field(default=False)
+    @property
+    def capacity(self):
+        return self.material_capacity
+
+    @property
+    def transportation_cost(self):
+        return self.material_trans_cost
 
     @classmethod
     def get_random_echelon(cls, howmany=5, number_of_plants=5):
@@ -97,7 +103,13 @@ class PlantFacility:  # plant i
     prop_quality_risk: List  # Prqip probability of quality risk for product p produced at plant i;
     delivery_risk_impact: List  # IRDip impact caused by risk of delivery for product p from plant i;
     quality_risk_impact: List  # IRQip impact caused by risk of poor quality for product p from plant i;
-    is_open: bool = field(default=False)
+    @property
+    def capacity(self):
+        return self.product_capacity
+
+    @property
+    def transportation_cost(self):
+        return self.products_trans_cost
 
     @classmethod
     def get_random_echelon(
@@ -154,7 +166,13 @@ class WarehouseFacility:  # warehouse j
     products_trans_env_impact: Dict  # ETDjkp environmental impact per unit and per distance caused by transporting product p from warehouse j to distribution center k;
     prop_delivery_risk: List  # Prdjp probability of delivery risk for product p from warehouse j;
     delivery_risk_impact: List  # IRDjp impact caused by risk of delivery for product p from warehouse j;
-    is_open: bool = field(default=False)
+    @property
+    def transportation_cost(self):
+        return self.products_trans_cost
+
+    @property
+    def capacity(self):
+        return self.product_capacity
 
     @classmethod
     def get_random_echelon(
@@ -204,7 +222,13 @@ class DistributionCenterFacility:  # center k
     selling_prices: List  # SPkmp selling price of product p transported from distribution centerk at market m;
     prop_delivery_risk: List  # Prdkp probability of delivery risk for product p from distribution center k;
     delivery_risk_impact: List  # IRDkp impactcaused by risk of delivery for product p from distribution center k.
-    is_open: bool = field(default=False)
+    @property
+    def transportation_cost(self):
+        return self.products_trans_cost
+
+    @property
+    def capacity(self):
+        return self.product_capacity
 
     @classmethod
     def get_random_echelon(cls, howmany=5, number_of_products=5, number_of_markets=5):
