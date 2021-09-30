@@ -106,6 +106,7 @@ class PlantFacility:  # plant i
     delivery_risk_impact: List  # IRDip impact caused by risk of delivery for product p from plant i;
     quality_risk_impact: List  # IRQip impact caused by risk of poor quality for product p from plant i;
     is_open: int = field(default=0)
+
     @property
     def capacity(self):
         return self.product_capacity
