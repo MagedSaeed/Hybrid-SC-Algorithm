@@ -42,5 +42,48 @@ Zk_sum = lpSum(Zk[k] for k in range(3))
 
 objective_function = Qkmp_sum - ()
 
+class LPModel:
+    def __init__(self, network):
+        self.network = network
 
-model += objective_function
+    @property
+    def Z1(self):
+        net = self.network
+        Q = LpVariable.dicts(
+            "Qkmp",
+            [
+                (Qk, Qm, Qp)
+                for Qk, center in enumerate(net.distribution_centers_echelon)
+                for Qm in center.products_trans_cost.keys()
+                for Qp in range(len(center.products_trans_cost[Qm]))
+            ],
+        )
+        spQ = lpSum(
+            price * Q[(center_index, Qm, Qp_index)]
+            for center_index, center in enumerate(net.distribution_centers_echelon)
+            for Qm in center.products_trans_cost.keys()
+            for Qp_index, price in enumerate(center.products_trans_cost[Qm])
+        )
+        EXsum = sum(
+            facility.is_open * facility.fixed_cost for facility in net.plants_echelon
+        )
+        FYsum = sum(
+            facility.is_open * facility.fixed_cost
+            for facility in net.warehouses_echelon
+        )
+        FYsum = sum(
+            facility.is_open * facility.fixed_cost
+            for facility in net.distribution_centers_echelon
+        )
+        CCst = sum(
+            supplier.material_purchase_cost for supplier in net.suppliers_echelon
+        )
+        X = LpVariable.dicts(
+            "Xsit",
+            [
+                (Xs, Xi, Xt)
+                for Xs, supplier in enumerate(net.suppliers_echelon)
+                for Xt in supplier.material_trans_cost
+                for Xi in range(len(supplier.material_trans_cost[Xt]))
+            ],
+        )
