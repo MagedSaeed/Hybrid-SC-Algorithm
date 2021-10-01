@@ -354,7 +354,7 @@ class SupplyChainNetwork:
         )
         return sorted_facilities
 
-    def apply_initial_greedy_solution(self, demand):
+    def apply_initial_greedy_solution(self, demand=1000):
         echelons = self.echelons[::-1]
         # close all facilities except
         for echelon in echelons:
