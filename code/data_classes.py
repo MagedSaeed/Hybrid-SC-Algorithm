@@ -42,6 +42,7 @@ class SupplierFacility:  # supplier object s
     prop_quality_risk: List  # Prqst probability of quality risk for raw material t from supplier s;
     delivery_risk_impact: List  # IRDst impact caused by risk of delivery for raw material t from supplier s;
     quality_risk_impact: List  # IRQst impact caused by risk of quality for raw material t from supplier s;
+    fixed_cost: float
     is_open: int = field(default=1)
 
     @property
@@ -73,6 +74,7 @@ class SupplierFacility:  # supplier object s
         random_prop_quality_risk = np.random.rand(howmany, len(raw_materials))
         random_delivery_risk_impact = np.random.rand(howmany, len(raw_materials)) * 100
         random_quality_risk_impact = np.random.rand(howmany, len(raw_materials)) * 100
+        random_fixed_costs = np.random.rand(howmany) * 1000
         facilities = list()
         for i in range(howmany):
             facility = cls(
@@ -96,6 +98,7 @@ class SupplierFacility:  # supplier object s
                 prop_quality_risk=random_prop_quality_risk[i],
                 delivery_risk_impact=random_delivery_risk_impact[i],
                 quality_risk_impact=random_quality_risk_impact[i],
+                fixed_cost=random_fixed_costs[i],
             )
             facilities.append(facility)
         return facilities
@@ -353,11 +356,11 @@ class SupplyChainNetwork:
 
     def apply_initial_greedy_solution(self, demand):
         echelons = self.echelons[::-1]
-        # close all facilities
-        for echelon in echelons[:-1]:
+        # close all facilities except
+        for echelon in echelons:
             for facility in echelon:
                 facility.is_open = False
-        for k in range(len(echelons) - 1):
+        for k in range(len(echelons)):
             echelon = echelons[k]
             echelon_open_facilities_capacity = 0
             sorted_echelon = SupplyChainNetwork.echelon_greedy_sort(echelon)
