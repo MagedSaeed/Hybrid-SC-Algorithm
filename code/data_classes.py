@@ -50,7 +50,10 @@ class SupplierFacility:  # supplier object s
 
     @property
     def transportation_cost(self):
-        return self.material_trans_cost
+        return sum(
+            materials_costs.sum()
+            for materials_costs in self.material_trans_cost.values()
+        )
 
     @classmethod
     def get_random_echelon(cls, howmany=5, number_of_plants=5):
@@ -120,7 +123,9 @@ class PlantFacility:  # plant i
 
     @property
     def transportation_cost(self):
-        return self.products_trans_cost
+        return sum(
+            products_costs.sum() for products_costs in self.products_trans_cost.values()
+        )
 
     @classmethod
     def get_random_echelon(
@@ -188,7 +193,9 @@ class WarehouseFacility:  # warehouse j
 
     @property
     def transportation_cost(self):
-        return self.products_trans_cost
+        return sum(
+            products_costs.sum() for products_costs in self.products_trans_cost.values()
+        )
 
     @property
     def capacity(self):
@@ -253,7 +260,9 @@ class DistributionCenterFacility:  # center k
 
     @property
     def transportation_cost(self):
-        return self.products_trans_cost
+        return sum(
+            products_costs.sum() for products_costs in self.products_trans_cost.values()
+        )
 
     @property
     def capacity(self):
@@ -338,7 +347,7 @@ class SupplyChainNetwork:
         sorted_facilities = sorted(
             echelon,
             key=lambda facility: (facility.fixed_cost / facility.capacity.sum())
-            * facility.transportation_cost.sum(),
+            * facility.transportation_cost,
         )
         return sorted_facilities
 
