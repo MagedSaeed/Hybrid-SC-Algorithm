@@ -34,7 +34,7 @@ class RawMaterial:  # raw material t
 class SupplierFacility:  # supplier object s
     raw_materials: List[RawMaterial]
     material_purchase_cost: List  # CCst purchase cost of raw material t from supplier s;
-    material_trans_cost: List  # CBsit transportation cost of raw material t per km between supplier s and plant i ;
+    material_trans_cost: Dict  # CBsit transportation cost of raw material t per km between supplier s and plant i ;
     material_capacity: List  # Cst capacity of supplier s for raw material t;
     plants_distances: List  # Tsi the distance between supplier s and plant at location i
     material_trans_env_impact: Dict  # ETSsit environmental impact per unit and per distance caused by transporting raw material t from supplier s to plant i;
@@ -58,7 +58,9 @@ class SupplierFacility:  # supplier object s
         random_material_purchase_cost = (
             np.random.rand(howmany, len(raw_materials)) * 1000
         )
-        random_material_trans_cost = np.random.rand(howmany, len(raw_materials)) * 1000
+        random_material_trans_cost = (
+            np.random.rand(howmany, len(raw_materials), number_of_plants) * 1000
+        )
         random_material_capacity = np.random.rand(howmany, len(raw_materials)) * 100
         random_plants_distances = np.random.rand(howmany, number_of_plants) * 100
         random_material_trans_env_impact = (
@@ -73,7 +75,12 @@ class SupplierFacility:  # supplier object s
             facility = cls(
                 raw_materials=raw_materials,
                 material_purchase_cost=random_material_purchase_cost[i],
-                material_trans_cost=random_material_trans_cost[i],
+                material_trans_cost={
+                    material_index: plants_trans_costs
+                    for material_index, plants_trans_costs in enumerate(
+                        random_material_trans_cost[i]
+                    )
+                },
                 material_capacity=random_material_capacity[i],
                 plants_distances=random_plants_distances[i],
                 material_trans_env_impact={
@@ -94,7 +101,7 @@ class SupplierFacility:  # supplier object s
 @dataclass
 class PlantFacility:  # plant i
     products_prod_cost: List  # CPip cost of producing product p at plant I;
-    products_trans_cost: List  # CTijp transportation cost of product p per km between plant i and warehouse j;
+    products_trans_cost: Dict  # CTijp transportation cost of product p per km between plant i and warehouse j;
     fixed_cost: float  # Ei fixed cost for opening plant i;
     product_capacity: List  # Cip capacity of plant i for product p;
     warehouse_distances: List  # Tij the distance between plant at location i and warehouse at location j
@@ -120,7 +127,9 @@ class PlantFacility:  # plant i
         cls, howmany=5, number_of_products=5, number_of_warehouses=5
     ):
         random_products_prod_cost = np.random.rand(howmany, number_of_products) * 100
-        random_products_trans_cost = np.random.rand(howmany, number_of_products) * 100
+        random_products_trans_cost = (
+            np.random.rand(howmany, number_of_products, number_of_warehouses) * 100
+        )
         random_fixed_cost = np.random.rand(howmany) * 1000
         random_product_capacity = np.random.rand(howmany, number_of_products) * 500
         random_warehouse_distances = np.random.rand(howmany, number_of_warehouses) * 100
@@ -139,7 +148,12 @@ class PlantFacility:  # plant i
         for i in range(howmany):
             facility = cls(
                 products_prod_cost=random_products_prod_cost[i],
-                products_trans_cost=random_products_trans_cost[i],
+                products_trans_cost={
+                    product_index: warehouse_trans_costs
+                    for product_index, warehouse_trans_costs in enumerate(
+                        random_products_trans_cost[i]
+                    )
+                },
                 fixed_cost=random_fixed_cost[i],
                 product_capacity=random_product_capacity[i],
                 warehouse_distances=random_warehouse_distances[i],
@@ -184,7 +198,9 @@ class WarehouseFacility:  # warehouse j
     def get_random_echelon(
         cls, howmany=5, number_of_products=5, number_of_dist_centers=5
     ):
-        random_products_trans_cost = np.random.rand(howmany, number_of_products) * 100
+        random_products_trans_cost = (
+            np.random.rand(howmany, number_of_products, number_of_dist_centers) * 100
+        )
         random_fixed_cost = np.random.rand(howmany) * 1000
         random_product_capacity = np.random.rand(howmany, number_of_products) * 500
         random_dist_centers_distances = (
@@ -199,7 +215,12 @@ class WarehouseFacility:  # warehouse j
         facilities = list()
         for i in range(howmany):
             facility = cls(
-                products_trans_cost=random_products_trans_cost[i],
+                products_trans_cost={
+                    product_index: dist_center_trans_costs
+                    for product_index, dist_center_trans_costs in enumerate(
+                        random_products_trans_cost[i]
+                    )
+                },
                 fixed_cost=random_fixed_cost[i],
                 product_capacity=random_product_capacity[i],
                 dist_centers_distances=random_dist_centers_distances[i],
@@ -219,13 +240,13 @@ class WarehouseFacility:  # warehouse j
 
 @dataclass
 class DistributionCenterFacility:  # center k
-    products_trans_cost: List
+    products_trans_cost: Dict  # COkmp transportation cost of product p per km between distribution center k and demand market m ;
     fixed_cost: float  # Gk fixed cost for opening distribution center k;
     product_capacity: List  # Ckp capacity of distribution center k for product p;
     market_distances: List  # tkm the distance between distribution center at location k and market m
     opening_env_impact: float  # EDk environmental impact of opening distribution center at location k;
     products_trans_env_impact: Dict  # ETWkmp environmental impact per unit and per distance caused by transporting product p from distribution center k to market m;
-    selling_prices: List  # SPkmp selling price of product p transported from distribution centerk at market m;
+    selling_prices: Dict  # SPkmp selling price of product p transported from distribution center k at market m;
     prop_delivery_risk: List  # Prdkp probability of delivery risk for product p from distribution center k;
     delivery_risk_impact: List  # IRDkp impactcaused by risk of delivery for product p from distribution center k.
     is_open: int = field(default=0)
@@ -240,7 +261,9 @@ class DistributionCenterFacility:  # center k
 
     @classmethod
     def get_random_echelon(cls, howmany=5, number_of_products=5, number_of_markets=5):
-        random_products_trans_cost = np.random.rand(howmany, number_of_products) * 100
+        random_products_trans_cost = (
+            np.random.rand(howmany, number_of_products, number_of_markets) * 100
+        )
         random_fixed_cost = np.random.rand(howmany) * 1000
         random_product_capacity = np.random.rand(howmany, number_of_products) * 500
         random_market_distances_distances = (
@@ -258,7 +281,12 @@ class DistributionCenterFacility:  # center k
         facilities = list()
         for i in range(howmany):
             facility = cls(
-                products_trans_cost=random_products_trans_cost[i],
+                products_trans_cost={
+                    product_index: market_trans_costs
+                    for product_index, market_trans_costs in enumerate(
+                        random_products_trans_cost[i]
+                    )
+                },
                 fixed_cost=random_fixed_cost[i],
                 product_capacity=random_product_capacity[i],
                 market_distances=random_market_distances_distances[i],
