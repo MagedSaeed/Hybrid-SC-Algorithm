@@ -79,6 +79,7 @@ class LPModel:
             facility.is_open * facility.fixed_cost
             for facility in net.distribution_centers_echelon
         )
+
         X_coeffs = [
             [
                 [
