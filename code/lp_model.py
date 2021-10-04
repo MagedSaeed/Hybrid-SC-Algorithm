@@ -62,20 +62,20 @@ class LPModel:
                 for Qp in range(len(center.products_trans_cost[Qm]))
             ],
         )
-        spQ = lpSum(
+        sp_Q = lpSum(
             price * Q[(center_index, Qm, Qp_index)]
             for center_index, center in enumerate(net.distribution_centers_echelon)
             for Qm in center.products_trans_cost.keys()
             for Qp_index, price in enumerate(center.products_trans_cost[Qm])
         )
-        EXsum = sum(
+        EX = sum(
             facility.is_open * facility.fixed_cost for facility in net.plants_echelon
         )
-        FYsum = sum(
+        FY = sum(
             facility.is_open * facility.fixed_cost
             for facility in net.warehouses_echelon
         )
-        FYsum = sum(
+        FY = sum(
             facility.is_open * facility.fixed_cost
             for facility in net.distribution_centers_echelon
         )
