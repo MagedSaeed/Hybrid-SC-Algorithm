@@ -63,7 +63,7 @@ class SupplierFacility:  # supplier object s
             np.random.rand(howmany, len(raw_materials)) * 1000
         )
         random_material_trans_cost = (
-            np.random.rand(howmany, len(raw_materials), number_of_plants) * 1000
+            np.random.rand(howmany, number_of_plants, len(raw_materials)) * 1000
         )
         random_material_capacity = np.random.rand(howmany, len(raw_materials)) * 100
         random_plants_distances = np.random.rand(howmany, number_of_plants) * 100
