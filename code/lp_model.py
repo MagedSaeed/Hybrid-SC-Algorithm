@@ -79,9 +79,18 @@ class LPModel:
             facility.is_open * facility.fixed_cost
             for facility in net.distribution_centers_echelon
         )
-        CCst = sum(
-            supplier.material_purchase_cost for supplier in net.suppliers_echelon
-        )
+        X_coeffs = [
+            [
+                [
+                    supplier.material_purchase_cost[plant_index]
+                    + supplier.plants_distances[plant_index] * material_trans_cost
+                    for material_trans_cost in supplier.material_trans_cost[plant_index]
+                ]
+                for plant_index in supplier.material_trans_cost.keys()
+            ]
+            for supplier in net.suppliers_echelon
+        ]
+
         X = LpVariable.dicts(
             "Xsit",
             [
@@ -90,4 +99,11 @@ class LPModel:
                 for Xt in supplier.material_trans_cost
                 for Xi in range(len(supplier.material_trans_cost[Xt]))
             ],
+        )
+
+        cc_cb_tX = lpSum(
+            coeff * X[(s, i, t)]
+            for s, supplier in enumerate(X_coeffs)
+            for i, plant in enumerate(X_coeffs[s])
+            for t, coeff in enumerate(X_coeffs[s][i])
         )
