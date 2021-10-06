@@ -111,3 +111,98 @@ class LPModel:
             for i, plant in enumerate(X_coeffs[s])
             for t, coeff in enumerate(X_coeffs[s][i])
         )
+
+        Y_coeffs = [
+            [
+                [
+                    production_cost
+                    + plant.warehouse_distances[warehouse_index] * product_trans_cost
+                    for product_trans_cost in plant.products_trans_cost[warehouse_index]
+                ]
+                for warehouse_index, production_cost in zip(
+                    plant.products_trans_cost.keys(),
+                    plant.products_prod_cost,
+                )
+            ]
+            for plant in net.plants_echelon
+        ]
+
+        Y = LpVariable.dicts(
+            "Yijp",
+            [
+                (Yi, Yp, Yj)
+                for Yi, plant in enumerate(net.plants_echelon)
+                for Yp in plant.products_trans_cost
+                for Yj in range(len(plant.products_trans_cost[Yp]))
+            ],
+        )
+
+        cp_ct_t_Y = lpSum(
+            coeff * Y[(i, p, j)]
+            for i, plant in enumerate(Y_coeffs)
+            for p, warehouse in enumerate(Y_coeffs[i])
+            for j, coeff in enumerate(Y_coeffs[i][p])
+        )
+
+        Z_coeffs = [
+            [
+                [
+                    warehouse.dist_centers_distances[dist_center_index]
+                    * product_trans_cost
+                    for product_trans_cost in warehouse.products_trans_cost[
+                        dist_center_index
+                    ]
+                ]
+                for dist_center_index in warehouse.products_trans_cost.keys()
+            ]
+            for warehouse in net.warehouses_echelon
+        ]
+
+        Z = LpVariable.dicts(
+            "Zjkp",
+            [
+                (Zj, Zk, Zp)
+                for Zj, warehouse in enumerate(net.warehouses_echelon)
+                for Zk in warehouse.products_trans_cost
+                for Zp in range(len(warehouse.products_trans_cost[Zk]))
+            ],
+        )
+
+        cd_t_Z = lpSum(
+            coeff * Z[(j, k, p)]
+            for j, warehouse in enumerate(Z_coeffs)
+            for k, dist_center in enumerate(Z_coeffs[j])
+            for p, coeff in enumerate(Z_coeffs[j][k])
+        )
+
+        Q2_coeffs = [
+            [
+                [
+                    dist_center.market_distances[market_index] * product_trans_cost
+                    for product_trans_cost in dist_center.products_trans_cost[
+                        market_index
+                    ]
+                ]
+                for market_index in dist_center.products_trans_cost.keys()
+            ]
+            for dist_center in net.distribution_centers_echelon
+        ]
+
+        Q2 = LpVariable.dicts(
+            "Qkmp",
+            [
+                (Qk, Qm, Qp)
+                for Qk, dist_center in enumerate(net.distribution_centers_echelon)
+                for Qm in dist_center.products_trans_cost
+                for Qp in range(len(dist_center.products_trans_cost[Qm]))
+            ],
+        )
+
+        co_t_Q2 = lpSum(
+            coeff * Q2[(k, m, p)]
+            for k, dist_center in enumerate(Q2_coeffs)
+            for m, market in enumerate(Q2_coeffs[k])
+            for p, coeff in enumerate(Q2_coeffs[k][m])
+        )
+
+        return sp_Q - (EX + FY + GZ + cc_cb_t_X + cp_ct_t_Y + cd_t_Z + co_t_Q2)
