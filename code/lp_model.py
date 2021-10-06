@@ -83,11 +83,14 @@ class LPModel:
         X_coeffs = [
             [
                 [
-                    supplier.material_purchase_cost[plant_index]
+                    material_cost
                     + supplier.plants_distances[plant_index] * material_trans_cost
                     for material_trans_cost in supplier.material_trans_cost[plant_index]
                 ]
-                for plant_index in supplier.material_trans_cost.keys()
+                for plant_index, material_cost in zip(
+                    supplier.material_trans_cost.keys(),
+                    supplier.material_purchase_cost,
+                )
             ]
             for supplier in net.suppliers_echelon
         ]
@@ -102,7 +105,7 @@ class LPModel:
             ],
         )
 
-        cc_cb_tX = lpSum(
+        cc_cb_t_X = lpSum(
             coeff * X[(s, i, t)]
             for s, supplier in enumerate(X_coeffs)
             for i, plant in enumerate(X_coeffs[s])
