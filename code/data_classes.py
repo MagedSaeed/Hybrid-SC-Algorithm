@@ -68,7 +68,12 @@ class SupplierFacility:  # supplier object s
         random_material_capacity = np.random.rand(howmany, len(raw_materials)) * 100
         random_plants_distances = np.random.rand(howmany, number_of_plants) * 100
         random_material_trans_env_impact = (
-            np.random.rand(howmany, len(raw_materials), number_of_plants) * 100
+            np.random.rand(
+                howmany,
+                number_of_plants,
+                len(raw_materials),
+            )
+            * 100
         )
         random_prop_delivery_risk = np.random.rand(howmany, len(raw_materials))
         random_prop_quality_risk = np.random.rand(howmany, len(raw_materials))
@@ -81,16 +86,16 @@ class SupplierFacility:  # supplier object s
                 raw_materials=raw_materials,
                 material_purchase_cost=random_material_purchase_cost[i],
                 material_trans_cost={
-                    material_index: plants_trans_costs
-                    for material_index, plants_trans_costs in enumerate(
+                    plant_index: materials_trans_costs
+                    for plant_index, materials_trans_costs in enumerate(
                         random_material_trans_cost[i]
                     )
                 },
                 material_capacity=random_material_capacity[i],
                 plants_distances=random_plants_distances[i],
                 material_trans_env_impact={
-                    material_index: plant_impact
-                    for material_index, plant_impact in enumerate(
+                    plant_index: material_impact
+                    for plant_index, material_impact in enumerate(
                         random_material_trans_env_impact[i]
                     )
                 },
@@ -136,14 +141,14 @@ class PlantFacility:  # plant i
     ):
         random_products_prod_cost = np.random.rand(howmany, number_of_products) * 100
         random_products_trans_cost = (
-            np.random.rand(howmany, number_of_products, number_of_warehouses) * 100
+            np.random.rand(howmany, number_of_warehouses, number_of_products) * 100
         )
         random_fixed_cost = np.random.rand(howmany) * 1000
         random_product_capacity = np.random.rand(howmany, number_of_products) * 500
         random_warehouse_distances = np.random.rand(howmany, number_of_warehouses) * 100
         random_opening_env_impact = np.random.rand(howmany) * 1000
         random_production_env_impact = (
-            np.random.rand(howmany, number_of_products, number_of_warehouses) * 100
+            np.random.rand(howmany, number_of_warehouses, number_of_products) * 100
         )
         random_products_trans_env_impact = (
             np.random.rand(howmany, number_of_products) * 1000
@@ -157,8 +162,8 @@ class PlantFacility:  # plant i
             facility = cls(
                 products_prod_cost=random_products_prod_cost[i],
                 products_trans_cost={
-                    product_index: warehouse_trans_costs
-                    for product_index, warehouse_trans_costs in enumerate(
+                    warehouse_index: products_trans_costs
+                    for warehouse_index, products_trans_costs in enumerate(
                         random_products_trans_cost[i]
                     )
                 },
@@ -168,8 +173,8 @@ class PlantFacility:  # plant i
                 opening_env_impact=random_opening_env_impact[i],
                 production_env_impact=random_production_env_impact[i],
                 products_trans_env_impact={
-                    product_index: warehouse_impact
-                    for product_index, warehouse_impact in enumerate(
+                    warehouse_index: products_impact
+                    for warehouse_index, products_impact in enumerate(
                         random_products_trans_env_impact[i]
                     )
                 },
@@ -209,7 +214,7 @@ class WarehouseFacility:  # warehouse j
         cls, howmany=5, number_of_products=5, number_of_dist_centers=5
     ):
         random_products_trans_cost = (
-            np.random.rand(howmany, number_of_products, number_of_dist_centers) * 100
+            np.random.rand(howmany, number_of_dist_centers, number_of_products) * 100
         )
         random_fixed_cost = np.random.rand(howmany) * 1000
         random_product_capacity = np.random.rand(howmany, number_of_products) * 500
@@ -218,7 +223,7 @@ class WarehouseFacility:  # warehouse j
         )
         random_opening_env_impact = np.random.rand(howmany) * 1000
         random_products_trans_env_impact = (
-            np.random.rand(howmany, number_of_products) * 1000
+            np.random.rand(howmany, number_of_dist_centers, number_of_products) * 1000
         )
         random_prop_delivery_risk = np.random.rand(howmany, number_of_products) * 1000
         random_delivery_risk_impact = np.random.rand(howmany, number_of_products) * 1000
@@ -226,8 +231,8 @@ class WarehouseFacility:  # warehouse j
         for i in range(howmany):
             facility = cls(
                 products_trans_cost={
-                    product_index: dist_center_trans_costs
-                    for product_index, dist_center_trans_costs in enumerate(
+                    dist_center_index: products_trans_costs
+                    for dist_center_index, products_trans_costs in enumerate(
                         random_products_trans_cost[i]
                     )
                 },
@@ -236,8 +241,8 @@ class WarehouseFacility:  # warehouse j
                 dist_centers_distances=random_dist_centers_distances[i],
                 opening_env_impact=random_opening_env_impact[i],
                 products_trans_env_impact={
-                    product_index: dist_center_impact
-                    for product_index, dist_center_impact in enumerate(
+                    dist_center_index: products_impact
+                    for dist_center_index, products_impact in enumerate(
                         random_products_trans_env_impact[i]
                     )
                 },
@@ -274,7 +279,7 @@ class DistributionCenterFacility:  # center k
     @classmethod
     def get_random_echelon(cls, howmany=5, number_of_products=5, number_of_markets=5):
         random_products_trans_cost = (
-            np.random.rand(howmany, number_of_products, number_of_markets) * 100
+            np.random.rand(howmany, number_of_markets, number_of_products) * 100
         )
         random_fixed_cost = np.random.rand(howmany) * 1000
         random_product_capacity = np.random.rand(howmany, number_of_products) * 500
@@ -286,7 +291,7 @@ class DistributionCenterFacility:  # center k
             np.random.rand(howmany, number_of_products) * 1000
         )
         random_selling_prices = np.random.rand(
-            howmany, number_of_products, number_of_markets
+            howmany, number_of_markets, number_of_products
         )
         random_prop_delivery_risk = np.random.rand(howmany, number_of_products) * 1000
         random_delivery_risk_impact = np.random.rand(howmany, number_of_products) * 1000
@@ -294,8 +299,8 @@ class DistributionCenterFacility:  # center k
         for i in range(howmany):
             facility = cls(
                 products_trans_cost={
-                    product_index: market_trans_costs
-                    for product_index, market_trans_costs in enumerate(
+                    market_index: products_trans_costs
+                    for market_index, products_trans_costs in enumerate(
                         random_products_trans_cost[i]
                     )
                 },
@@ -304,8 +309,8 @@ class DistributionCenterFacility:  # center k
                 market_distances=random_market_distances_distances[i],
                 opening_env_impact=random_opening_env_impact[i],
                 products_trans_env_impact={
-                    product_index: market_impact
-                    for product_index, market_impact in enumerate(
+                    market_index: products_impact
+                    for market_index, products_impact in enumerate(
                         random_products_trans_env_impact[i]
                     )
                 },
