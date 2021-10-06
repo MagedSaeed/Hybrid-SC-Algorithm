@@ -53,7 +53,7 @@ class LPModel:
     @property
     def Z1(self):
         net = self.network
-        Q = LpVariable.dicts(
+        Q1 = LpVariable.dicts(
             "Qkmp",
             [
                 (Qk, Qm, Qp)
@@ -63,7 +63,7 @@ class LPModel:
             ],
         )
         sp_Q = lpSum(
-            price * Q[(center_index, Qm, Qp_index)]
+            price * Q1[(center_index, Qm, Qp_index)]
             for center_index, center in enumerate(net.distribution_centers_echelon)
             for Qm in center.products_trans_cost.keys()
             for Qp_index, price in enumerate(center.products_trans_cost[Qm])
@@ -75,7 +75,7 @@ class LPModel:
             facility.is_open * facility.fixed_cost
             for facility in net.warehouses_echelon
         )
-        FY = sum(
+        GZ = sum(
             facility.is_open * facility.fixed_cost
             for facility in net.distribution_centers_echelon
         )
