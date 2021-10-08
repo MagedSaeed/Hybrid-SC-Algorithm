@@ -282,6 +282,12 @@ class LPModel:
         )
 
         return U + X + Y + Z
-        )
-        prd_ird_prq_irq_U = lpSum(coeff * U[(s,)] for s, coeff in enumerate(U_coeffs))
 
+    @property
+    def Z3(self):
+        net = self.network
+        EFX = sum(X.opening_env_impact * X.is_open for X in net.plans_echelon)
+        EWY = sum(Y.opening_env_impact * Y.is_open for Y in net.warehouses_echelon)
+        EDZ = sum(
+            Z.opening_env_impact * Z.is_open for Z in net.distribution_centers_echelon
+        )
