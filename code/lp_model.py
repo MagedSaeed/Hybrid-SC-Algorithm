@@ -105,7 +105,8 @@ class LPModel:
                     for product_trans_cost in plant.products_trans_cost[warehouse_index]
                 ]
                 for warehouse_index, production_cost in zip(
-                    plant.products_trans_cost.keys(), plant.products_prod_cost,
+                    plant.products_trans_cost.keys(),
+                    plant.products_prod_cost,
                 )
             ]
             for plant in net.plants_echelon
