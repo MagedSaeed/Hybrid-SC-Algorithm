@@ -53,21 +53,6 @@ class LPModel:
     @property
     def Z1(self):
         net = self.network
-        Q1 = LpVariable.dicts(
-            "Qkmp",
-            [
-                (Qk, Qm, Qp)
-                for Qk, center in enumerate(net.distribution_centers_echelon)
-                for Qm in center.products_trans_cost.keys()
-                for Qp in range(len(center.products_trans_cost[Qm]))
-            ],
-        )
-        sp_Q = lpSum(
-            price * Q1[(center_index, Qm, Qp_index)]
-            for center_index, center in enumerate(net.distribution_centers_echelon)
-            for Qm in center.products_trans_cost.keys()
-            for Qp_index, price in enumerate(center.products_trans_cost[Qm])
-        )
         EX = sum(
             facility.is_open * facility.fixed_cost for facility in net.plants_echelon
         )
@@ -175,20 +160,22 @@ class LPModel:
             for p, coeff in enumerate(Z_coeffs[j][k])
         )
 
-        Q2_coeffs = [
+        Q_coeffs = [
             [
                 [
-                    dist_center.market_distances[market_index] * product_trans_cost
-                    for product_trans_cost in dist_center.products_trans_cost[
-                        market_index
-                    ]
+                    product_price
+                    - dist_center.market_distances[market_index] * product_trans_cost
+                    for product_trans_cost, product_price in zip(
+                        dist_center.products_trans_cost[market_index],
+                        dist_center.selling_prices[market_index],
+                    )
                 ]
                 for market_index in dist_center.products_trans_cost.keys()
             ]
             for dist_center in net.distribution_centers_echelon
         ]
 
-        Q2 = LpVariable.dicts(
+        Q = LpVariable.dicts(
             "Qkmp",
             [
                 (Qk, Qm, Qp)
@@ -198,11 +185,11 @@ class LPModel:
             ],
         )
 
-        co_t_Q2 = lpSum(
-            coeff * Q2[(k, m, p)]
-            for k, dist_center in enumerate(Q2_coeffs)
-            for m, market in enumerate(Q2_coeffs[k])
-            for p, coeff in enumerate(Q2_coeffs[k][m])
+        sp_co_t_Q = lpSum(
+            coeff * Q[(k, m, p)]
+            for k, dist_center in enumerate(Q_coeffs)
+            for m, market in enumerate(Q_coeffs[k])
+            for p, coeff in enumerate(Q_coeffs[k][m])
         )
 
-        return sp_Q - (EX + FY + GZ + cc_cb_t_X + cp_ct_t_Y + cd_t_Z + co_t_Q2)
+        return EX + FY + GZ + cc_cb_t_X + cp_ct_t_Y + cd_t_Z + sp_co_t_Q
