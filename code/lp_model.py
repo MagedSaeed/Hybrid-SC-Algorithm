@@ -192,3 +192,30 @@ class LPModel:
         )
 
         return EX + FY + GZ + cc_cb_t_X + cp_ct_t_Y + cd_t_Z + sp_co_t_Q
+
+    @property
+    def Z2(self):
+        net = self.network
+        U_coeffs = [
+            sum(
+                [
+                    material_prop_delivery_risk * material_delivery_risk_impact
+                    + material_prop_quality_risk * material_quality_risk_impact
+                    + material_prop_delivery_risk
+                    * material_prop_quality_risk
+                    * max(material_delivery_risk_impact, material_quality_risk_impact)
+                    for material_prop_delivery_risk, material_delivery_risk_impact, material_prop_quality_risk, material_quality_risk_impact in zip(
+                        supplier.prop_delivery_risk,
+                        supplier.delivery_risk_impact,
+                        supplier.prop_quality_risk,
+                        supplier.quality_risk_impact,
+                    )
+                ]
+            )
+            for supplier in net.suppliers_echelon
+        ]
+        U = LpVariable.dicts(
+            "Us", [Us for Us, supplier in enumerate(net.suppliers_echelon)],
+        )
+        prd_ird_prq_irq_U = lpSum(coeff * U[(s,)] for s, coeff in enumerate(U_coeffs))
+
