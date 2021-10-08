@@ -215,8 +215,73 @@ class LPModel:
             )
             for supplier in net.suppliers_echelon
         ]
-        U = LpVariable.dicts(
-            "Us", [Us for Us, supplier in enumerate(net.suppliers_echelon)],
+        U = sum(
+            Us.is_open * U_coeff for U_coeff, Us in zip(U_coeffs, net.suppliers_echelon)
+        )
+        # comment this code just in case Us is a decision variable solved by LP not by the Hybrid.
+        # LpVariable.dicts(
+        #     "Us",
+        #     [Us for Us, supplier in enumerate(net.suppliers_echelon)],
+        # )
+        # prd_ird_prq_irq_U = lpSum(coeff * U[(s,)] for s, coeff in enumerate(U_coeffs))
+
+        X_coeffs = [
+            sum(
+                [
+                    product_prop_delivery_risk * product_delivery_risk_impact
+                    + product_prop_quality_risk * product_quality_risk_impact
+                    + product_prop_delivery_risk
+                    * product_prop_quality_risk
+                    * max(product_delivery_risk_impact, product_quality_risk_impact)
+                    for product_prop_delivery_risk, product_delivery_risk_impact, product_prop_quality_risk, product_quality_risk_impact in zip(
+                        plant.prop_delivery_risk,
+                        plant.delivery_risk_impact,
+                        plant.prop_quality_risk,
+                        plant.quality_risk_impact,
+                    )
+                ]
+            )
+            for plant in net.plants_echelon
+        ]
+        X = sum(
+            Xi.is_open * X_coeff for X_coeff, Xi in zip(X_coeffs, net.plants_echelon)
+        )
+
+        Y_coeffs = [
+            sum(
+                [
+                    product_prop_delivery_risk * product_delivery_risk_impact
+                    for product_prop_delivery_risk, product_delivery_risk_impact in zip(
+                        warehouse.prop_delivery_risk,
+                        warehouse.delivery_risk_impact,
+                    )
+                ]
+            )
+            for warehouse in net.warehouses_echelon
+        ]
+        Y = sum(
+            Yj.is_open * Y_coeff
+            for Y_coeff, Yj in zip(Y_coeffs, net.warehouses_echelon)
+        )
+
+        Z_coeffs = [
+            sum(
+                [
+                    product_prop_delivery_risk * product_delivery_risk_impact
+                    for product_prop_delivery_risk, product_delivery_risk_impact in zip(
+                        dist_center.prop_delivery_risk,
+                        dist_center.delivery_risk_impact,
+                    )
+                ]
+            )
+            for dist_center in net.distribution_centers_echelon
+        ]
+        Z = sum(
+            Zk.is_open * Z_coeff
+            for Z_coeff, Zk in zip(Z_coeffs, net.distribution_centers_echelon)
+        )
+
+        return U + X + Y + Z
         )
         prd_ird_prq_irq_U = lpSum(coeff * U[(s,)] for s, coeff in enumerate(U_coeffs))
 
