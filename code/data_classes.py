@@ -115,9 +115,9 @@ class PlantFacility:  # plant i
     products_trans_cost: Dict  # CTijp transportation cost of product p per km between plant i and warehouse j;
     fixed_cost: float  # Ei fixed cost for opening plant i;
     product_capacity: List  # Cip capacity of plant i for product p;
-    warehouse_distances: List  # Tij the distance between plant at location i and warehouse at location j
+    warehouses_distances: List  # Tij the distance between plant at location i and warehouse at location j
     opening_env_impact: float  # EFi environmental impact of openingplant at location i;
-    production_env_impact: float  # EPi environmental impact caused by production at plant i;
+    products_env_impact: List  # EPi environmental impact caused by production at plant i;
     products_trans_env_impact: Dict  # ETPijp environmental impact per unit and per distance caused by transporting product p from plant i to warehouse j;
     prop_delivery_risk: List  # Prdip probability of delivery risk for product p from plant i;
     prop_quality_risk: List  # Prqip probability of quality risk for product p produced at plant i;
@@ -145,13 +145,13 @@ class PlantFacility:  # plant i
         )
         random_fixed_cost = np.random.rand(howmany) * 1000
         random_product_capacity = np.random.rand(howmany, number_of_products) * 500
-        random_warehouse_distances = np.random.rand(howmany, number_of_warehouses) * 100
-        random_opening_env_impact = np.random.rand(howmany) * 1000
-        random_production_env_impact = (
-            np.random.rand(howmany, number_of_warehouses, number_of_products) * 100
+        random_warehouses_distances = (
+            np.random.rand(howmany, number_of_warehouses) * 100
         )
+        random_opening_env_impact = np.random.rand(howmany) * 1000
+        random_products_env_impact = np.random.rand(howmany, number_of_products) * 100
         random_products_trans_env_impact = (
-            np.random.rand(howmany, number_of_products) * 1000
+            np.random.rand(howmany, number_of_warehouses, number_of_products) * 1000
         )
         random_prop_delivery_risk = np.random.rand(howmany, number_of_products) * 1000
         random_prop_quality_risk = np.random.rand(howmany, number_of_products) * 1000
@@ -169,9 +169,9 @@ class PlantFacility:  # plant i
                 },
                 fixed_cost=random_fixed_cost[i],
                 product_capacity=random_product_capacity[i],
-                warehouse_distances=random_warehouse_distances[i],
+                warehouses_distances=random_warehouses_distances[i],
                 opening_env_impact=random_opening_env_impact[i],
-                production_env_impact=random_production_env_impact[i],
+                products_env_impact=random_products_env_impact[i],
                 products_trans_env_impact={
                     warehouse_index: products_impact
                     for warehouse_index, products_impact in enumerate(
@@ -288,7 +288,7 @@ class DistributionCenterFacility:  # center k
         )
         random_opening_env_impact = np.random.rand(howmany) * 1000
         random_products_trans_env_impact = (
-            np.random.rand(howmany, number_of_products) * 1000
+            np.random.rand(howmany, number_of_markets, number_of_products) * 1000
         )
         random_selling_prices = np.random.rand(
             howmany, number_of_markets, number_of_products
