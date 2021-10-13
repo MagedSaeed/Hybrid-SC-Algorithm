@@ -54,18 +54,19 @@ class LPModel:
     def Z1(self):
         net = self.network
         EX = sum(
-            facility.is_open * facility.fixed_cost for facility in net.plants_echelon
+            facility.is_open * facility.fixed_cost
+            for facility in self.network.plants_echelon
         )
         FY = sum(
             facility.is_open * facility.fixed_cost
-            for facility in net.warehouses_echelon
+            for facility in self.network.warehouses_echelon
         )
         GZ = sum(
             facility.is_open * facility.fixed_cost
-            for facility in net.distribution_centers_echelon
+            for facility in self.network.distribution_centers_echelon
         )
 
-        X_coeffs = [
+        Xsit_coeffs = [
             [
                 [
                     material_cost
@@ -80,24 +81,14 @@ class LPModel:
             for supplier in net.suppliers_echelon
         ]
 
-        X = LpVariable.dicts(
-            "Xsit",
-            [
-                (Xs, Xi, Xt)
-                for Xs, supplier in enumerate(net.suppliers_echelon)
-                for Xt in supplier.material_trans_cost
-                for Xi in range(len(supplier.material_trans_cost[Xt]))
-            ],
+        Xsit_sum = lpSum(
+            coeff * self.Xsit[(s, i, t)]
+            for s, supplier in enumerate(Xsit_coeffs)
+            for i, plant in enumerate(Xsit_coeffs[s])
+            for t, coeff in enumerate(Xsit_coeffs[s][i])
         )
 
-        cc_cb_t_X = lpSum(
-            coeff * X[(s, i, t)]
-            for s, supplier in enumerate(X_coeffs)
-            for i, plant in enumerate(X_coeffs[s])
-            for t, coeff in enumerate(X_coeffs[s][i])
-        )
-
-        Y_coeffs = [
+        Yijp_coeffs = [
             [
                 [
                     production_cost
@@ -112,24 +103,14 @@ class LPModel:
             for plant in net.plants_echelon
         ]
 
-        Y = LpVariable.dicts(
-            "Yijp",
-            [
-                (Yi, Yp, Yj)
-                for Yi, plant in enumerate(net.plants_echelon)
-                for Yp in plant.products_trans_cost
-                for Yj in range(len(plant.products_trans_cost[Yp]))
-            ],
+        Yijp_sum = lpSum(
+            coeff * self.Yijp[(i, p, j)]
+            for i, plant in enumerate(Yijp_coeffs)
+            for p, warehouse in enumerate(Yijp_coeffs[i])
+            for j, coeff in enumerate(Yijp_coeffs[i][p])
         )
 
-        cp_ct_t_Y = lpSum(
-            coeff * Y[(i, p, j)]
-            for i, plant in enumerate(Y_coeffs)
-            for p, warehouse in enumerate(Y_coeffs[i])
-            for j, coeff in enumerate(Y_coeffs[i][p])
-        )
-
-        Z_coeffs = [
+        Zjkp_coeffs = [
             [
                 [
                     warehouse.dist_centers_distances[dist_center_index]
@@ -143,24 +124,14 @@ class LPModel:
             for warehouse in net.warehouses_echelon
         ]
 
-        Z = LpVariable.dicts(
-            "Zjkp",
-            [
-                (Zj, Zk, Zp)
-                for Zj, warehouse in enumerate(net.warehouses_echelon)
-                for Zk in warehouse.products_trans_cost
-                for Zp in range(len(warehouse.products_trans_cost[Zk]))
-            ],
+        Zjkp_sum = lpSum(
+            coeff * self.Zjkp[(j, k, p)]
+            for j, warehouse in enumerate(Zjkp_coeffs)
+            for k, dist_center in enumerate(Zjkp_coeffs[j])
+            for p, coeff in enumerate(Zjkp_coeffs[j][k])
         )
 
-        cd_t_Z = lpSum(
-            coeff * Z[(j, k, p)]
-            for j, warehouse in enumerate(Z_coeffs)
-            for k, dist_center in enumerate(Z_coeffs[j])
-            for p, coeff in enumerate(Z_coeffs[j][k])
-        )
-
-        Q_coeffs = [
+        Qkmp_coeffs = [
             [
                 [
                     product_price
@@ -175,24 +146,14 @@ class LPModel:
             for dist_center in net.distribution_centers_echelon
         ]
 
-        Q = LpVariable.dicts(
-            "Qkmp",
-            [
-                (Qk, Qm, Qp)
-                for Qk, dist_center in enumerate(net.distribution_centers_echelon)
-                for Qm in dist_center.products_trans_cost
-                for Qp in range(len(dist_center.products_trans_cost[Qm]))
-            ],
+        Qkmp_sum = lpSum(
+            coeff * self.Qkmp[(k, m, p)]
+            for k, dist_center in enumerate(Qkmp_coeffs)
+            for m, market in enumerate(Qkmp_coeffs[k])
+            for p, coeff in enumerate(Qkmp_coeffs[k][m])
         )
 
-        sp_co_t_Q = lpSum(
-            coeff * Q[(k, m, p)]
-            for k, dist_center in enumerate(Q_coeffs)
-            for m, market in enumerate(Q_coeffs[k])
-            for p, coeff in enumerate(Q_coeffs[k][m])
-        )
-
-        return EX + FY + GZ + cc_cb_t_X + cp_ct_t_Y + cd_t_Z + sp_co_t_Q
+        return EX + FY + GZ + Xsit_sum + Yijp_sum + Zjkp_sum + Qkmp_sum
 
     @property
     def Z2(self):
