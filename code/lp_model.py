@@ -51,6 +51,60 @@ class LPModel:
         self.network = network
 
     @property
+    def Qkmp(self):
+        Qkmp = LpVariable.dicts(
+            "Qkmp",
+            [
+                (Qk, Qm, Qp)
+                for Qk, dist_center in enumerate(
+                    self.network.distribution_centers_echelon
+                )
+                for Qm in dist_center.products_trans_cost
+                for Qp in range(len(dist_center.products_trans_cost[Qm]))
+            ],
+        )
+        return Qkmp
+
+    @property
+    def Xsit(self):
+        Xsit = LpVariable.dicts(
+            "Xsit",
+            [
+                (Xs, Xi, Xt)
+                for Xs, supplier in enumerate(self.network.suppliers_echelon)
+                for Xt in supplier.material_trans_cost
+                for Xi in range(len(supplier.material_trans_cost[Xt]))
+            ],
+        )
+        return Xsit
+
+    @property
+    def Yijp(self):
+        Yijp = LpVariable.dicts(
+            "Yijp",
+            [
+                (Yi, Yp, Yj)
+                for Yi, plant in enumerate(self.network.plants_echelon)
+                for Yp in plant.products_trans_cost
+                for Yj in range(len(plant.products_trans_cost[Yp]))
+            ],
+        )
+        return Yijp
+
+    @property
+    def Zjkp(self):
+        Zjkp = LpVariable.dicts(
+            "Zjkp",
+            [
+                (Zj, Zk, Zp)
+                for Zj, warehouse in enumerate(self.network.warehouses_echelon)
+                for Zk in warehouse.products_trans_cost
+                for Zp in range(len(warehouse.products_trans_cost[Zk]))
+            ],
+        )
+        return Zjkp
+
+    @property
     def Z1(self):
         net = self.network
         EX = sum(
