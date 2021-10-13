@@ -233,12 +233,6 @@ class LPModel:
         U = sum(
             Us.is_open * U_coeff for U_coeff, Us in zip(U_coeffs, net.suppliers_echelon)
         )
-        # comment this code just in case Us is a decision variable solved by LP not by the Hybrid.
-        # LpVariable.dicts(
-        #     "Us",
-        #     [Us for Us, supplier in enumerate(net.suppliers_echelon)],
-        # )
-        # prd_ird_prq_irq_U = lpSum(coeff * U[(s,)] for s, coeff in enumerate(U_coeffs))
 
         X_coeffs = [
             sum(
@@ -295,14 +289,102 @@ class LPModel:
             Zk.is_open * Z_coeff
             for Z_coeff, Zk in zip(Z_coeffs, net.distribution_centers_echelon)
         )
-
         return U + X + Y + Z
 
     @property
     def Z3(self):
         net = self.network
-        EFX = sum(X.opening_env_impact * X.is_open for X in net.plans_echelon)
+        EFX = sum(X.opening_env_impact * X.is_open for X in net.plants_echelon)
         EWY = sum(Y.opening_env_impact * Y.is_open for Y in net.warehouses_echelon)
         EDZ = sum(
             Z.opening_env_impact * Z.is_open for Z in net.distribution_centers_echelon
         )
+
+        Xsit_coeffs = [
+            [
+                [
+                    material_impact * plant_distance
+                    for material_impact in supplier.material_trans_env_impact[
+                        plant_index
+                    ]
+                ]
+                for plant_index, plant_distance in enumerate(supplier.plants_distances)
+            ]
+            for supplier in self.network.suppliers_echelon
+        ]
+
+        Xsit_sum = lpSum(
+            coeff * self.Xsit[(s, i, t)]
+            for s, supplier in enumerate(Xsit_coeffs)
+            for i, plant in enumerate(Xsit_coeffs[s])
+            for t, coeff in enumerate(Xsit_coeffs[s][i])
+        )
+
+        Yijp_coeffs = [
+            [
+                [
+                    product_env_impact + product_trans_impact * warehouse_distance
+                    for product_trans_impact, product_env_impact in zip(
+                        plant.products_trans_env_impact[warehouse_index],
+                        plant.products_env_impact,
+                    )
+                ]
+                for warehouse_index, warehouse_distance in enumerate(
+                    plant.warehouses_distances
+                )
+            ]
+            for plant in net.plants_echelon
+        ]
+
+        Yijp_sum = lpSum(
+            coeff * self.Yijp[(i, p, j)]
+            for i, plant in enumerate(Yijp_coeffs)
+            for j, warehouse in enumerate(Yijp_coeffs[i])
+            for p, coeff in enumerate(Yijp_coeffs[i][j])
+        )
+
+        Zjkp_coeffs = [
+            [
+                [
+                    product_impact * dist_center_distance
+                    for product_impact in warehouse.products_trans_env_impact[
+                        dist_center_index
+                    ]
+                ]
+                for dist_center_index, dist_center_distance in enumerate(
+                    warehouse.dist_centers_distances,
+                )
+            ]
+            for warehouse in self.network.warehouses_echelon
+        ]
+
+        Zjkp_sum = lpSum(
+            coeff * self.Zjkp[(j, k, p)]
+            for j, warehouse in enumerate(Zjkp_coeffs)
+            for k, dist_center in enumerate(Zjkp_coeffs[j])
+            for p, coeff in enumerate(Zjkp_coeffs[j][k])
+        )
+
+        Qkmp_coeffs = [
+            [
+                [
+                    product_impact * market_distance
+                    for product_impact in dist_center.products_trans_env_impact[
+                        market_index
+                    ]
+                ]
+                for market_index, market_distance in enumerate(
+                    dist_center.market_distances
+                )
+            ]
+            for dist_center in self.network.distribution_centers_echelon
+        ]
+
+        Qkmp_sum = lpSum(
+            coeff * self.Qkmp[(k, m, p)]
+            for k, dist_center in enumerate(Qkmp_coeffs)
+            for m, market in enumerate(Qkmp_coeffs[k])
+            for p, coeff in enumerate(Qkmp_coeffs[k][m])
+        )
+
+        return EFX + EWY + EDZ + Yijp_sum + Xsit_sum + Zjkp_sum + Qkmp_sum
