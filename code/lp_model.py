@@ -1,4 +1,5 @@
 from functools import cached_property
+
 from pulp import LpMaximize, LpProblem, LpStatus, LpVariable, lpSum
 
 # from supply_chain_network import SupplyChainNetwork
@@ -393,3 +394,82 @@ class LPModel:
         )
 
         return EFX + EWY + EDZ + Yijp_sum + Xsit_sum + Zjkp_sum + Qkmp_sum
+
+    @cached_property
+    def constrains(self):
+        net = self.network
+        constrains = list()
+
+        Q = self.Qkmp
+        X = self.Xsit
+        Y = self.Yijp
+        Z = self.Zjkp
+
+        for m, market in enumerate(net.markets_echelon):
+            for p, demand in enumerate(market.products_demand):
+                """(4) constrain"""
+                constrain = (
+                    sum(
+                        Q[k, m, p]
+                        for k, dist_center in enumerate(
+                            net.distribution_centers_echelon
+                        )
+                    )
+                    < demand
+                )
+                constrains.append(constrain)
+
+        for s, supplier in enumerate(net.suppliers_echelon):
+            for t, capacity in enumerate(supplier.material_capacity):
+                """(5) constrain"""
+                constrain = (
+                    sum(X[s, i, t] for i, plant in enumerate(net.plants_echelon))
+                    <= supplier.is_open * capacity
+                )
+                constrains.append(constrain)
+
+        for i, plant in enumerate(net.plants_echelon):
+            for p, capacity in enumerate(plant.product_capacity):
+                """(6) constrain"""
+                wx_sum = sum(
+                    supplier.raw_materials.products_yields[p] * X[s, i, t]
+                    for s, supplier in enumerate(net.suppliers_echelon)
+                )
+                constrain = wx_sum <= plant.is_open * capacity
+                constrains.append(constrain)
+                """(9) constrain"""
+                constrain = wx_sum == sum(
+                    Y[i, j, p] for j, warehouse in enumerate(net.warehouses_echelon)
+                )
+                constrains.append(constrain)
+
+        for j, warehouse in enumerate(net.warehouses_echelon):
+            for p, capacity in enumerate(warehouse.product_capacity):
+                """(7) constrain"""
+                y_sum = sum(Y[i, j, p] for i, plant in net.plants_echelon)
+                constrain = y_sum <= warehouse.is_open * capacity
+                constrains.append(constrain)
+                """(10) constrain"""
+                constrain = y_sum == sum(
+                    Y[i, j, p]
+                    for j, dist_center in enumerate(net.distribution_centers_echelon)
+                )
+                constrains.append(constrain)
+
+        for k, dist_center in enumerate(net.distribution_centers_echelon):
+            for p, capacity in enumerate(dist_center.product_capacity):
+                """(8) constrain"""
+                z_sum = sum(
+                    dist_center.is_open * Z[j, k, p]
+                    for j, warehouse in net.warehouses_echelon
+                )
+                constrain = z_sum <= dist_center.is_open * capacity
+
+                constrains.append(constrain)
+                """(11) constrain"""
+                constrain = z_sum == sum(
+                    Q[k, m, p] for m, market in enumerate(net.markets_echelon)
+                )
+                constrains.append(constrain)
+
+        return constrains
