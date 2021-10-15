@@ -151,7 +151,7 @@ class LPModel:
             [
                 [
                     production_cost
-                    + plant.warehouse_distances[warehouse_index] * product_trans_cost
+                    + plant.warehouses_distances[warehouse_index] * product_trans_cost
                     for product_trans_cost in plant.products_trans_cost[warehouse_index]
                 ]
                 for warehouse_index, production_cost in zip(
