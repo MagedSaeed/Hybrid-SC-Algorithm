@@ -328,6 +328,22 @@ class DistributionCenterFacility:  # center k
 
 
 @dataclass
+class MarketFacility:  # Market M
+    products_demand: List  # demand of customer m for product p
+
+    @classmethod
+    def get_random_echelon(cls, howmany=5, number_of_products=5, number_of_markets=5):
+        random_products_demand = np.random.rand(howmany, number_of_products) * 100
+        facilities = list()
+        for i in range(howmany):
+            facility = cls(
+                products_demand=random_products_demand[i],
+            )
+            facilities.append(facility)
+        return facilities
+
+
+@dataclass
 class SupplyChainNetwork:
     suppliers_echelon: List = field(default_factory=SupplierFacility.get_random_echelon)
     plants_echelon: List = field(default_factory=PlantFacility.get_random_echelon)
@@ -337,6 +353,7 @@ class SupplyChainNetwork:
     distribution_centers_echelon: List = field(
         default_factory=DistributionCenterFacility.get_random_echelon
     )
+    markets_echelon: List = field(default_factory=MarketFacility.get_random_echelon)
 
     @property
     def echelons(self):
