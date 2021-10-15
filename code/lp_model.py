@@ -1,3 +1,4 @@
+from functools import cached_property
 from pulp import LpMaximize, LpProblem, LpStatus, LpVariable, lpSum
 
 # from supply_chain_network import SupplyChainNetwork
@@ -50,7 +51,7 @@ class LPModel:
     def __init__(self, network):
         self.network = network
 
-    @property
+    @cached_property
     def Qkmp(self):
         Qkmp = LpVariable.dicts(
             "Qkmp",
@@ -65,7 +66,7 @@ class LPModel:
         )
         return Qkmp
 
-    @property
+    @cached_property
     def Xsit(self):
         Xsit = LpVariable.dicts(
             "Xsit",
@@ -78,7 +79,7 @@ class LPModel:
         )
         return Xsit
 
-    @property
+    @cached_property
     def Yijp(self):
         Yijp = LpVariable.dicts(
             "Yijp",
@@ -91,7 +92,7 @@ class LPModel:
         )
         return Yijp
 
-    @property
+    @cached_property
     def Zjkp(self):
         Zjkp = LpVariable.dicts(
             "Zjkp",
