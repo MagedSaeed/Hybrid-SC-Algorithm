@@ -63,6 +63,7 @@ class LPModel:
                 for Qm in dist_center.products_trans_cost
                 for Qp in range(len(dist_center.products_trans_cost[Qm]))
             ],
+            lowBound=0,
         )
         return Qkmp
 
@@ -76,6 +77,7 @@ class LPModel:
                 for Xt in supplier.material_trans_cost
                 for Xi in range(len(supplier.material_trans_cost[Xt]))
             ],
+            lowBound=0,
         )
         return Xsit
 
@@ -89,6 +91,7 @@ class LPModel:
                 for Yp in plant.products_trans_cost
                 for Yj in range(len(plant.products_trans_cost[Yp]))
             ],
+            lowBound=0,
         )
         return Yijp
 
@@ -102,6 +105,7 @@ class LPModel:
                 for Zk in warehouse.products_trans_cost
                 for Zp in range(len(warehouse.products_trans_cost[Zk]))
             ],
+            lowBound=0,
         )
         return Zjkp
 
