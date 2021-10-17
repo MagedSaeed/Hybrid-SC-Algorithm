@@ -474,3 +474,13 @@ class LPModel:
                 constrains.append(constrain)
 
         return constrains
+
+    @property
+    def model(self):
+        model = LpProblem(name="Supply-Chain-Network", sense=LpMaximize)
+        model += self.Z2
+        print(model)
+        # for constrain in self.constrains:
+        #     model += constrain
+        status = model.solve()
+        print(status)
