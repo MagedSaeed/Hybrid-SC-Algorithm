@@ -409,13 +409,13 @@ class LPModel:
             for p, demand in enumerate(market.products_demand):
                 """(4) constrain"""
                 constrain = (
-                    sum(
+                    lpSum(
                         Q[k, m, p]
                         for k, dist_center in enumerate(
                             net.distribution_centers_echelon
                         )
                     )
-                    < demand
+                    == demand
                 )
                 constrains.append(constrain)
 
@@ -423,51 +423,52 @@ class LPModel:
             for t, capacity in enumerate(supplier.material_capacity):
                 """(5) constrain"""
                 constrain = (
-                    sum(X[s, i, t] for i, plant in enumerate(net.plants_echelon))
+                    lpSum(X[s, i, t] for i, plant in enumerate(net.plants_echelon))
                     <= supplier.is_open * capacity
                 )
                 constrains.append(constrain)
 
         for i, plant in enumerate(net.plants_echelon):
             for p, capacity in enumerate(plant.product_capacity):
-                """(6) constrain"""
-                wx_sum = sum(
-                    supplier.raw_materials.products_yields[p] * X[s, i, t]
-                    for s, supplier in enumerate(net.suppliers_echelon)
-                )
-                constrain = wx_sum <= plant.is_open * capacity
-                constrains.append(constrain)
-                """(9) constrain"""
-                constrain = wx_sum == sum(
-                    Y[i, j, p] for j, warehouse in enumerate(net.warehouses_echelon)
-                )
-                constrains.append(constrain)
+                for raw_material in supplier.raw_materials:
+                    """(6) constrain"""
+                    wx_sum = lpSum(
+                        raw_material.products_yields[p] * X[s, i, t]
+                        for s, supplier in enumerate(net.suppliers_echelon)
+                    )
+                    constrain = wx_sum <= plant.is_open * capacity
+                    constrains.append(constrain)
+                    """(9) constrain"""
+                    constrain = wx_sum == lpSum(
+                        Y[i, j, p] for j, warehouse in enumerate(net.warehouses_echelon)
+                    )
+                    constrains.append(constrain)
 
         for j, warehouse in enumerate(net.warehouses_echelon):
             for p, capacity in enumerate(warehouse.product_capacity):
                 """(7) constrain"""
-                y_sum = sum(Y[i, j, p] for i, plant in net.plants_echelon)
+                y_sum = lpSum(Y[i, j, p] for i, plant in enumerate(net.plants_echelon))
                 constrain = y_sum <= warehouse.is_open * capacity
                 constrains.append(constrain)
                 """(10) constrain"""
-                constrain = y_sum == sum(
-                    Y[i, j, p]
-                    for j, dist_center in enumerate(net.distribution_centers_echelon)
+                constrain = y_sum == lpSum(
+                    Z[j, k, p]
+                    for k, dist_center in enumerate(net.distribution_centers_echelon)
                 )
                 constrains.append(constrain)
 
         for k, dist_center in enumerate(net.distribution_centers_echelon):
             for p, capacity in enumerate(dist_center.product_capacity):
                 """(8) constrain"""
-                z_sum = sum(
+                z_sum = lpSum(
                     dist_center.is_open * Z[j, k, p]
-                    for j, warehouse in net.warehouses_echelon
+                    for j, warehouse in enumerate(net.warehouses_echelon)
                 )
                 constrain = z_sum <= dist_center.is_open * capacity
 
                 constrains.append(constrain)
                 """(11) constrain"""
-                constrain = z_sum == sum(
+                constrain = z_sum == lpSum(
                     Q[k, m, p] for m, market in enumerate(net.markets_echelon)
                 )
                 constrains.append(constrain)
