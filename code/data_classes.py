@@ -60,12 +60,14 @@ class SupplierFacility:  # supplier object s
     def get_random_echelon(cls, howmany=5, number_of_plants=5):
         raw_materials = RawMaterial.get_random_materials()
         random_material_purchase_cost = (
-            np.random.rand(howmany, len(raw_materials)) * 1000
+            15 * np.random.rand(howmany, len(raw_materials)) + 10
         )
         random_material_trans_cost = (
-            np.random.rand(howmany, number_of_plants, len(raw_materials)) * 1000
+            0.35 * np.random.rand(howmany, number_of_plants, len(raw_materials)) + 1.2
         )
-        random_material_capacity = np.random.rand(howmany, len(raw_materials)) * 100
+        random_material_capacity = (
+            1 * np.random.rand(howmany, len(raw_materials)) * 100_000
+        )
         random_plants_distances = np.random.rand(howmany, number_of_plants) * 100
         random_material_trans_env_impact = (
             np.random.rand(
@@ -139,12 +141,17 @@ class PlantFacility:  # plant i
     def get_random_echelon(
         cls, howmany=5, number_of_products=5, number_of_warehouses=5
     ):
-        random_products_prod_cost = np.random.rand(howmany, number_of_products) * 100
-        random_products_trans_cost = (
-            np.random.rand(howmany, number_of_warehouses, number_of_products) * 100
+        random_products_prod_cost = (
+            25 * np.random.rand(howmany, number_of_products) + 20
         )
-        random_fixed_cost = np.random.rand(howmany) * 1000
-        random_product_capacity = np.random.rand(howmany, number_of_products) * 500
+        random_products_trans_cost = (
+            0.18 * np.random.rand(howmany, number_of_warehouses, number_of_products)
+            + 1.1
+        )
+        random_fixed_cost = 700_000 * np.random.rand(howmany) * 400_000
+        random_product_capacity = (
+            20_000 * np.random.rand(howmany, number_of_products) + 75_000
+        )
         random_warehouses_distances = (
             np.random.rand(howmany, number_of_warehouses) * 100
         )
@@ -214,10 +221,13 @@ class WarehouseFacility:  # warehouse j
         cls, howmany=5, number_of_products=5, number_of_dist_centers=5
     ):
         random_products_trans_cost = (
-            np.random.rand(howmany, number_of_dist_centers, number_of_products) * 100
+            0.18 * np.random.rand(howmany, number_of_dist_centers, number_of_products)
+            + 1.1
         )
-        random_fixed_cost = np.random.rand(howmany) * 1000
-        random_product_capacity = np.random.rand(howmany, number_of_products) * 500
+        random_fixed_cost = 30_000 * np.random.rand(howmany) + 40_000
+        random_product_capacity = (
+            15_000 * np.random.rand(howmany, number_of_products) + 75_000
+        )
         random_dist_centers_distances = (
             np.random.rand(howmany, number_of_dist_centers) * 100
         )
@@ -279,10 +289,12 @@ class DistributionCenterFacility:  # center k
     @classmethod
     def get_random_echelon(cls, howmany=5, number_of_products=5, number_of_markets=5):
         random_products_trans_cost = (
-            np.random.rand(howmany, number_of_markets, number_of_products) * 100
+            0.18 * np.random.rand(howmany, number_of_markets, number_of_products) + 1.1
         )
-        random_fixed_cost = np.random.rand(howmany) * 1000
-        random_product_capacity = np.random.rand(howmany, number_of_products) * 500
+        random_fixed_cost = 40_000 * np.random.rand(howmany) * 40_000
+        random_product_capacity = (
+            10_000 * np.random.rand(howmany, number_of_products) + 80_000
+        )
         random_market_distances_distances = (
             np.random.rand(howmany, number_of_markets) * 100
         )
@@ -376,7 +388,7 @@ class SupplyChainNetwork:
         )
         return sorted_facilities
 
-    def apply_initial_greedy_solution(self, demand=1000):
+    def apply_initial_greedy_solution(self, demand=100):
         echelons = self.echelons[::-1]
         # close all facilities except
         for echelon in echelons:
