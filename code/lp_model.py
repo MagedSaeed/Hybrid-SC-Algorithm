@@ -1,6 +1,7 @@
 from functools import cached_property
 
 from pulp import LpMaximize, LpProblem, LpStatus, LpVariable, lpSum
+from pulp import GLPK
 
 # from supply_chain_network import SupplyChainNetwork
 
@@ -480,7 +481,5 @@ class LPModel:
         model = LpProblem(name="Supply-Chain-Network", sense=LpMaximize)
         model += self.Z2
         print(model)
-        # for constrain in self.constrains:
-        #     model += constrain
-        status = model.solve()
+        status = model.solve(solver=GLPK(msg=True))
         print(status)
