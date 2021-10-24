@@ -12,7 +12,7 @@ class Product:  # product p
     @classmethod
     def get_random_products(cls, howmany=5, number_of_customers=5):
         products = list()
-        random_demands = np.random.randint(1000, size=(howmany, number_of_customers))
+        random_demands = 6000 * np.random.rand(howmany, number_of_customers) + 8000
         products = [cls(customer_demands=random_demands[i]) for i in range(howmany)]
         return products
 
@@ -43,7 +43,7 @@ class SupplierFacility:  # supplier object s
     delivery_risk_impact: List  # IRDst impact caused by risk of delivery for raw material t from supplier s;
     quality_risk_impact: List  # IRQst impact caused by risk of quality for raw material t from supplier s;
     fixed_cost: float
-    is_open: int = field(default=1)
+    is_open: int = field(default=0)
 
     @property
     def capacity(self):
@@ -68,19 +68,26 @@ class SupplierFacility:  # supplier object s
         random_material_capacity = (
             1 * np.random.rand(howmany, len(raw_materials)) * 100_000
         )
-        random_plants_distances = np.random.rand(howmany, number_of_plants) * 100
+        random_plants_distances = 3 * np.random.rand(howmany, number_of_plants) + 35.35
         random_material_trans_env_impact = (
-            np.random.rand(
+            0.75
+            * np.random.rand(
                 howmany,
                 number_of_plants,
                 len(raw_materials),
             )
-            * 100
+            + 2
         )
         random_prop_delivery_risk = np.random.rand(howmany, len(raw_materials))
-        random_prop_quality_risk = np.random.rand(howmany, len(raw_materials))
-        random_delivery_risk_impact = np.random.rand(howmany, len(raw_materials)) * 100
-        random_quality_risk_impact = np.random.rand(howmany, len(raw_materials)) * 100
+        random_prop_quality_risk = (
+            0.6 * np.random.rand(howmany, len(raw_materials)) + 0.1
+        )
+        random_delivery_risk_impact = (
+            210000 * np.random.rand(howmany, len(raw_materials)) + 50000
+        )
+        random_quality_risk_impact = (
+            2000000 * np.random.rand(howmany, len(raw_materials)) + 2200000
+        )
         random_fixed_costs = np.random.rand(howmany) * 1000
         facilities = list()
         for i in range(howmany):
@@ -152,18 +159,28 @@ class PlantFacility:  # plant i
         random_product_capacity = (
             20_000 * np.random.rand(howmany, number_of_products) + 75_000
         )
-        random_warehouses_distances = (
-            np.random.rand(howmany, number_of_warehouses) * 100
+        random_warehouses_distances = 3.38 * (
+            np.random.rand(howmany, number_of_warehouses) + 0.18
         )
-        random_opening_env_impact = np.random.rand(howmany) * 1000
-        random_products_env_impact = np.random.rand(howmany, number_of_products) * 100
+        random_opening_env_impact = (
+            100000000000 * (1 / random_fixed_cost) + np.random.rand(howmany) + 20000
+        )
+        random_products_env_impact = 7 * np.random.rand(howmany, number_of_products) + 2
         random_products_trans_env_impact = (
-            np.random.rand(howmany, number_of_warehouses, number_of_products) * 1000
+            0.75 * np.random.rand(howmany, number_of_warehouses, number_of_products) + 2
         )
-        random_prop_delivery_risk = np.random.rand(howmany, number_of_products) * 1000
-        random_prop_quality_risk = np.random.rand(howmany, number_of_products) * 1000
-        random_delivery_risk_impact = np.random.rand(howmany, number_of_products) * 1000
-        random_quality_risk_impact = np.random.rand(howmany, number_of_products) * 1000
+        random_prop_delivery_risk = (
+            0.6 * np.random.rand(howmany, number_of_products) + 0.1
+        )
+        random_prop_quality_risk = (
+            0.5 * np.random.rand(howmany, number_of_products) + 0.1
+        )
+        random_delivery_risk_impact = (
+            70000 * np.random.rand(howmany, number_of_products) + 40000
+        )
+        random_quality_risk_impact = (
+            50000 * np.random.rand(howmany, number_of_products) + 100000
+        )
         facilities = list()
         for i in range(howmany):
             facility = cls(
@@ -229,14 +246,21 @@ class WarehouseFacility:  # warehouse j
             15_000 * np.random.rand(howmany, number_of_products) + 75_000
         )
         random_dist_centers_distances = (
-            np.random.rand(howmany, number_of_dist_centers) * 100
+            3.38 * np.random.rand(howmany, number_of_dist_centers) + 0.18
         )
-        random_opening_env_impact = np.random.rand(howmany) * 1000
+        random_opening_env_impact = (
+            100000000000 * (1 / random_fixed_cost) + np.random.rand(howmany) + 20000
+        )
         random_products_trans_env_impact = (
-            np.random.rand(howmany, number_of_dist_centers, number_of_products) * 1000
+            0.5 * np.random.rand(howmany, number_of_dist_centers, number_of_products)
+            + 2
         )
-        random_prop_delivery_risk = np.random.rand(howmany, number_of_products) * 1000
-        random_delivery_risk_impact = np.random.rand(howmany, number_of_products) * 1000
+        random_prop_delivery_risk = (
+            0.4 * np.random.rand(howmany, number_of_products) + 0.1
+        )
+        random_delivery_risk_impact = (
+            40000 * np.random.rand(howmany, number_of_products) + 20000
+        )
         facilities = list()
         for i in range(howmany):
             facility = cls(
@@ -296,17 +320,23 @@ class DistributionCenterFacility:  # center k
             10_000 * np.random.rand(howmany, number_of_products) + 80_000
         )
         random_market_distances_distances = (
-            np.random.rand(howmany, number_of_markets) * 100
+            7.31 * np.random.rand(howmany, number_of_markets) + 0.18
         )
-        random_opening_env_impact = np.random.rand(howmany) * 1000
+        random_opening_env_impact = (
+            100000000000 * (1 / random_fixed_cost) + np.random.rand(howmany) + 20000
+        )
         random_products_trans_env_impact = (
-            np.random.rand(howmany, number_of_markets, number_of_products) * 1000
+            1.5 * np.random.rand(howmany, number_of_markets, number_of_products) + 1.5
         )
-        random_selling_prices = np.random.rand(
-            howmany, number_of_markets, number_of_products
+        random_selling_prices = (
+            100 * np.random.rand(howmany, number_of_markets, number_of_products) + 2000
         )
-        random_prop_delivery_risk = np.random.rand(howmany, number_of_products) * 1000
-        random_delivery_risk_impact = np.random.rand(howmany, number_of_products) * 1000
+        random_prop_delivery_risk = (
+            0.5 * np.random.rand(howmany, number_of_products) + 0.1
+        )
+        random_delivery_risk_impact = (
+            50000 * np.random.rand(howmany, number_of_products) + 30000
+        )
         facilities = list()
         for i in range(howmany):
             facility = cls(
@@ -388,7 +418,7 @@ class SupplyChainNetwork:
         )
         return sorted_facilities
 
-    def apply_initial_greedy_solution(self, demand=100):
+    def apply_initial_greedy_solution(self, demand=1000):
         echelons = self.echelons[::-1]
         # close all facilities except
         for echelon in echelons:
