@@ -76,10 +76,10 @@ class LPModel:
         Xsit = LpVariable.dicts(
             "Xsit",
             [
-                (Xs, Xi, Xt)
-                for Xs, supplier in enumerate(self.network.suppliers_echelon)
-                for Xt in supplier.material_trans_cost
-                for Xi in range(len(supplier.material_trans_cost[Xt]))
+                (s, i, t)
+                for s, supplier in enumerate(self.network.suppliers_echelon)
+                for i, plant_trans_cost in enumerate(supplier.material_trans_cost)
+                for t, material_trans_cost in enumerate(supplier.material_trans_cost[i])
             ],
             lowBound=0,
         )
@@ -90,10 +90,10 @@ class LPModel:
         Yijp = LpVariable.dicts(
             "Yijp",
             [
-                (Yi, Yp, Yj)
-                for Yi, plant in enumerate(self.network.plants_echelon)
-                for Yp in plant.products_trans_cost
-                for Yj in range(len(plant.products_trans_cost[Yp]))
+                (i, j, p)
+                for i, plant in enumerate(self.network.plants_echelon)
+                for j, warehouse_trans_cost in enumerate(plant.products_trans_cost)
+                for p, product_trans_cost in enumerate(plant.products_trans_cost[j])
             ],
             lowBound=0,
         )
@@ -104,10 +104,12 @@ class LPModel:
         Zjkp = LpVariable.dicts(
             "Zjkp",
             [
-                (Zj, Zk, Zp)
-                for Zj, warehouse in enumerate(self.network.warehouses_echelon)
-                for Zk in warehouse.products_trans_cost
-                for Zp in range(len(warehouse.products_trans_cost[Zk]))
+                (j, k, p)
+                for j, warehouse in enumerate(self.network.warehouses_echelon)
+                for k, dist_center_trans_cost in enumerate(
+                    warehouse.products_trans_cost
+                )
+                for p, product_trans_cost in enumerate(warehouse.products_trans_cost[k])
             ],
             lowBound=0,
         )
@@ -143,7 +145,6 @@ class LPModel:
             ]
             for supplier in net.suppliers_echelon
         ]
-
         Xsit_sum = lpSum(
             coeff * self.Xsit[(s, i, t)]
             for s, supplier in enumerate(Xsit_coeffs)
