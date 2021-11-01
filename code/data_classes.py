@@ -4,13 +4,24 @@ from typing import Dict, List
 import numpy as np
 from beautifultable import BeautifulTable
 
+NUMBER_OF_SUPPLIERS = 10
+NUMBER_OF_PLANTS = 10
+NUMBER_OF_WAREHOUSES = 10
+NUMBER_OF_DISTRIBUTION_CENTERS = 10
+NUMBER_OF_MARKETS = 10
+NUMBER_OF_RAW_MATERIALS = 30
+NUMBER_OF_PRODUCTS = 50
+NUMBER_OF_CUSTOMERS = 10
+
 
 @dataclass
 class Product:  # product p
     customer_demands: List  # Dmp demand of customers 1..m;
 
     @classmethod
-    def get_random_products(cls, howmany=5, number_of_customers=5):
+    def get_random_products(cls):
+        howmany = NUMBER_OF_PRODUCTS
+        number_of_customers = NUMBER_OF_CUSTOMERS
         products = list()
         random_demands = 6000 * np.random.rand(howmany, number_of_customers) + 8000
         products = [cls(customer_demands=random_demands[i]) for i in range(howmany)]
@@ -22,7 +33,9 @@ class RawMaterial:  # raw material t
     products_yields: List  # Wtp yields of product 1..p;
 
     @classmethod
-    def get_random_materials(cls, howmany=5, number_of_products=5):
+    def get_random_materials(cls):
+        howmany = NUMBER_OF_RAW_MATERIALS
+        number_of_products = NUMBER_OF_PRODUCTS
         random_yields = 1000 * np.random.rand(
             howmany, number_of_products
         )  # random values between 0 and 1000
@@ -57,7 +70,9 @@ class SupplierFacility:  # supplier object s
         )
 
     @classmethod
-    def get_random_echelon(cls, howmany=5, number_of_plants=5):
+    def get_random_echelon(cls):
+        howmany = NUMBER_OF_SUPPLIERS
+        number_of_plants = NUMBER_OF_PLANTS
         raw_materials = RawMaterial.get_random_materials()
         random_material_purchase_cost = (
             15 * np.random.rand(howmany, len(raw_materials)) + 10
@@ -145,9 +160,10 @@ class PlantFacility:  # plant i
         )
 
     @classmethod
-    def get_random_echelon(
-        cls, howmany=5, number_of_products=5, number_of_warehouses=5
-    ):
+    def get_random_echelon(cls):
+        howmany = NUMBER_OF_PLANTS
+        number_of_products = NUMBER_OF_PRODUCTS
+        number_of_warehouses = NUMBER_OF_WAREHOUSES
         random_products_prod_cost = (
             25 * np.random.rand(howmany, number_of_products) + 20
         )
@@ -237,6 +253,9 @@ class WarehouseFacility:  # warehouse j
     def get_random_echelon(
         cls, howmany=5, number_of_products=5, number_of_dist_centers=5
     ):
+        howmany = NUMBER_OF_WAREHOUSES
+        number_of_products = NUMBER_OF_PRODUCTS
+        number_of_dist_centers = NUMBER_OF_DISTRIBUTION_CENTERS
         random_products_trans_cost = (
             0.18 * np.random.rand(howmany, number_of_dist_centers, number_of_products)
             + 1.1
@@ -311,7 +330,10 @@ class DistributionCenterFacility:  # center k
         return self.product_capacity
 
     @classmethod
-    def get_random_echelon(cls, howmany=5, number_of_products=5, number_of_markets=5):
+    def get_random_echelon(cls):
+        howmany = NUMBER_OF_DISTRIBUTION_CENTERS
+        number_of_products = NUMBER_OF_PRODUCTS
+        number_of_markets = NUMBER_OF_MARKETS
         random_products_trans_cost = (
             0.18 * np.random.rand(howmany, number_of_markets, number_of_products) + 1.1
         )
@@ -374,8 +396,10 @@ class MarketFacility:  # Market M
     products_demand: List  # demand of customer m for product p
 
     @classmethod
-    def get_random_echelon(cls, howmany=5, number_of_products=5, number_of_markets=5):
-        random_products_demand = np.random.rand(howmany, number_of_products) * 100
+    def get_random_echelon(cls):
+        howmany = NUMBER_OF_MARKETS
+        number_of_products = NUMBER_OF_PRODUCTS
+        random_products_demand = 600 * np.random.rand(howmany, number_of_products) * 800
         facilities = list()
         for i in range(howmany):
             facility = cls(
