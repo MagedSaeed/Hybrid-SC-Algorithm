@@ -486,7 +486,8 @@ class LPModel:
     @property
     def model(self):
         model = LpProblem(name="Supply-Chain-Network", sense=LpMaximize)
-        model += self.Z1 + self.Z2 - self.Z3
+        # model += self.Z1 + self.Z2 - self.Z3
+        model += self.Z1
         print(model)
         for constrain in self.constrains:
             model += constrain
