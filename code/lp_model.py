@@ -1,7 +1,6 @@
 from functools import cached_property
 
-from pulp import LpMaximize, LpProblem, LpStatus, LpVariable, lpSum
-from pulp import GLPK
+from pulp import GLPK, LpMaximize, LpProblem, LpStatus, LpVariable, lpSum
 
 # from supply_chain_network import SupplyChainNetwork
 
@@ -168,10 +167,10 @@ class LPModel:
         ]
 
         Yijp_sum = lpSum(
-            coeff * self.Yijp[(i, p, j)]
+            coeff * self.Yijp[(i, j, p)]
             for i, plant in enumerate(Yijp_coeffs)
-            for p, warehouse in enumerate(Yijp_coeffs[i])
-            for j, coeff in enumerate(Yijp_coeffs[i][p])
+            for j, warehouse in enumerate(Yijp_coeffs[i])
+            for p, coeff in enumerate(Yijp_coeffs[i][j])
         )
 
         Zjkp_coeffs = [
@@ -419,7 +418,7 @@ class LPModel:
                             net.distribution_centers_echelon
                         )
                     )
-                    == demand
+                    >= demand
                 )
                 constrains.append(constrain)
 
@@ -434,19 +433,19 @@ class LPModel:
 
         for i, plant in enumerate(net.plants_echelon):
             for p, capacity in enumerate(plant.product_capacity):
-                for t, raw_material in enumerate(supplier.raw_materials):
-                    """(6) constrain"""
-                    wx_sum = lpSum(
-                        raw_material.products_yields[p] * X[s, i, t]
-                        for s, supplier in enumerate(net.suppliers_echelon)
-                    )
-                    constrain = wx_sum <= plant.is_open * capacity
-                    constrains.append(constrain)
-                    """(9) constrain"""
-                    constrain = wx_sum == lpSum(
-                        Y[i, j, p] for j, warehouse in enumerate(net.warehouses_echelon)
-                    )
-                    constrains.append(constrain)
+                """(6) constrain"""
+                wx_sum = lpSum(
+                    raw_material.products_yields[p] * X[s, i, t]
+                    for s, supplier in enumerate(net.suppliers_echelon)
+                    for t, raw_material in enumerate(supplier.raw_materials)
+                )
+                constrain = wx_sum <= plant.is_open * capacity
+                constrains.append(constrain)
+                """(9) constrain"""
+                constrain = wx_sum == lpSum(
+                    Y[i, j, p] for j, warehouse in enumerate(net.warehouses_echelon)
+                )
+                constrains.append(constrain)
 
         for j, warehouse in enumerate(net.warehouses_echelon):
             for p, capacity in enumerate(warehouse.product_capacity):
@@ -476,6 +475,7 @@ class LPModel:
                 #         z_sum = lpSum(
                 #             Z[j, k, p] for j, warehouse in enumerate(net.warehouses_echelon)
                 #         )
+                """(11) constrain"""
                 constrain = z_sum == lpSum(
                     Q[k, m, p] for m, market in enumerate(net.markets_echelon)
                 )
