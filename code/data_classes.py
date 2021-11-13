@@ -9,23 +9,21 @@ NUMBER_OF_PLANTS = 10
 NUMBER_OF_WAREHOUSES = 10
 NUMBER_OF_DISTRIBUTION_CENTERS = 10
 NUMBER_OF_MARKETS = 10
-NUMBER_OF_RAW_MATERIALS = 30
-NUMBER_OF_PRODUCTS = 50
-NUMBER_OF_CUSTOMERS = 10
+NUMBER_OF_PRODUCTS = 5
 
 
-@dataclass
-class Product:  # product p
-    customer_demands: List  # Dmp demand of customers 1..m;
+# @dataclass
+# class Product:  # product p
+#     customer_demands: List  # Dmp demand of customers 1..m;
 
-    @classmethod
-    def get_random_products(cls):
-        howmany = NUMBER_OF_PRODUCTS
-        number_of_customers = NUMBER_OF_CUSTOMERS
-        products = list()
-        random_demands = 6000 * np.random.rand(howmany, number_of_customers) + 8000
-        products = [cls(customer_demands=random_demands[i]) for i in range(howmany)]
-        return products
+#     @classmethod
+#     def get_random_products(cls):
+#         howmany = NUMBER_OF_PRODUCTS
+#         number_of_customers = NUMBER_OF_CUSTOMERS
+#         products = list()
+#         random_demands = 6000 * np.random.rand(howmany, number_of_customers) + 8000
+#         products = [cls(customer_demands=random_demands[i]) for i in range(howmany)]
+#         return products
 
 
 @dataclass
