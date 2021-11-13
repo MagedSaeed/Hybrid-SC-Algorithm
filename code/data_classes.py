@@ -9,6 +9,7 @@ NUMBER_OF_PLANTS = 10
 NUMBER_OF_WAREHOUSES = 10
 NUMBER_OF_DISTRIBUTION_CENTERS = 10
 NUMBER_OF_MARKETS = 10
+NUMBER_OF_RAW_MATERIALS = 10
 NUMBER_OF_PRODUCTS = 5
 
 
@@ -79,7 +80,7 @@ class SupplierFacility:  # supplier object s
             0.35 * np.random.rand(howmany, number_of_plants, len(raw_materials)) + 1.2
         )
         random_material_capacity = (
-            1 * np.random.rand(howmany, len(raw_materials)) * 100_000
+            1 * np.random.rand(howmany, len(raw_materials)) + 100_000
         )
         random_plants_distances = 3 * np.random.rand(howmany, number_of_plants) + 35.35
         random_material_trans_env_impact = (
@@ -169,16 +170,14 @@ class PlantFacility:  # plant i
             0.18 * np.random.rand(howmany, number_of_warehouses, number_of_products)
             + 1.1
         )
-        random_fixed_cost = 700_000 * np.random.rand(howmany) * 400_000
+        random_fixed_cost = 700_000 * np.random.rand(howmany) + 400_000
         random_product_capacity = (
             20_000 * np.random.rand(howmany, number_of_products) + 75_000
         )
         random_warehouses_distances = 3.38 * (
             np.random.rand(howmany, number_of_warehouses) + 0.18
         )
-        random_opening_env_impact = (
-            100000000000 * (1 / random_fixed_cost) + np.random.rand(howmany) + 20000
-        )
+        random_opening_env_impact = 100_000_000_000 * (1 / random_fixed_cost) + 20000
         random_products_env_impact = 7 * np.random.rand(howmany, number_of_products) + 2
         random_products_trans_env_impact = (
             0.75 * np.random.rand(howmany, number_of_warehouses, number_of_products) + 2
@@ -248,9 +247,7 @@ class WarehouseFacility:  # warehouse j
         return self.product_capacity
 
     @classmethod
-    def get_random_echelon(
-        cls, howmany=5, number_of_products=5, number_of_dist_centers=5
-    ):
+    def get_random_echelon(cls):
         howmany = NUMBER_OF_WAREHOUSES
         number_of_products = NUMBER_OF_PRODUCTS
         number_of_dist_centers = NUMBER_OF_DISTRIBUTION_CENTERS
@@ -265,9 +262,7 @@ class WarehouseFacility:  # warehouse j
         random_dist_centers_distances = (
             3.38 * np.random.rand(howmany, number_of_dist_centers) + 0.18
         )
-        random_opening_env_impact = (
-            100000000000 * (1 / random_fixed_cost) + np.random.rand(howmany) + 20000
-        )
+        random_opening_env_impact = 100_000_000_000 * (1 / random_fixed_cost) + 20000
         random_products_trans_env_impact = (
             0.5 * np.random.rand(howmany, number_of_dist_centers, number_of_products)
             + 2
@@ -335,16 +330,14 @@ class DistributionCenterFacility:  # center k
         random_products_trans_cost = (
             0.18 * np.random.rand(howmany, number_of_markets, number_of_products) + 1.1
         )
-        random_fixed_cost = 40_000 * np.random.rand(howmany) * 40_000
+        random_fixed_cost = 40_000 * np.random.rand(howmany) + 40_000
         random_product_capacity = (
             10_000 * np.random.rand(howmany, number_of_products) + 80_000
         )
         random_market_distances_distances = (
             7.31 * np.random.rand(howmany, number_of_markets) + 0.18
         )
-        random_opening_env_impact = (
-            100000000000 * (1 / random_fixed_cost) + np.random.rand(howmany) + 20000
-        )
+        random_opening_env_impact = 100_000_000_000 * (1 / random_fixed_cost) + 20000
         random_products_trans_env_impact = (
             1.5 * np.random.rand(howmany, number_of_markets, number_of_products) + 1.5
         )
@@ -355,7 +348,7 @@ class DistributionCenterFacility:  # center k
             0.5 * np.random.rand(howmany, number_of_products) + 0.1
         )
         random_delivery_risk_impact = (
-            50000 * np.random.rand(howmany, number_of_products) + 30000
+            50_000 * np.random.rand(howmany, number_of_products) + 30_000
         )
         facilities = list()
         for i in range(howmany):
@@ -377,8 +370,8 @@ class DistributionCenterFacility:  # center k
                     )
                 },
                 selling_prices={
-                    product_index: market_prices
-                    for product_index, market_prices in enumerate(
+                    market_index: product_prices
+                    for market_index, product_prices in enumerate(
                         random_selling_prices[i]
                     )
                 },
@@ -397,7 +390,7 @@ class MarketFacility:  # Market M
     def get_random_echelon(cls):
         howmany = NUMBER_OF_MARKETS
         number_of_products = NUMBER_OF_PRODUCTS
-        random_products_demand = 600 * np.random.rand(howmany, number_of_products) * 800
+        random_products_demand = 60 * np.random.rand(howmany, number_of_products) + 80
         facilities = list()
         for i in range(howmany):
             facility = cls(
