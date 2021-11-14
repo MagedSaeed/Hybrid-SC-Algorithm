@@ -424,12 +424,6 @@ class LPModel:
                 constrain = z_sum <= dist_center.is_open * capacity
                 constrains.append(constrain)
 
-                # for k, dist_center in enumerate(net.distribution_centers_echelon):
-                #     for p, capacity in enumerate(dist_center.product_capacity):
-                #         """(11) constrain"""
-                #         z_sum = lpSum(
-                #             Z[j, k, p] for j, warehouse in enumerate(net.warehouses_echelon)
-                #         )
                 """(11) constrain"""
                 constrain = z_sum == lpSum(
                     Q[k, m, p] for m, market in enumerate(net.markets_echelon)
