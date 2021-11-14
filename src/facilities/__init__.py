@@ -1,0 +1,5 @@
+from facilities.distribution_centers import DistributionCenterFacility
+from facilities.markets import MarketFacility
+from facilities.plants import PlantFacility
+from facilities.suppliers import SupplierFacility
+from facilities.warehouses import WarehouseFacility
