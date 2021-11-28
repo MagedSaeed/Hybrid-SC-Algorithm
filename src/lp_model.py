@@ -433,13 +433,14 @@ class LPModel:
         return constrains
 
     @property
-    def model(self):
+    def multi_objective_value(self):
         model = LpProblem(name="Supply-Chain-Network", sense=LpMaximize)
         model += self.Z1 + self.Z2 - self.Z3
         # model += self.Z1s.
-        print(model)
+
         for constrain in self.constrains:
             model += constrain
         status = model.solve(solver=GLPK(msg=True))
-        print(status)
-        return model
+        if status == 1:
+            return model.objective.value()
+        return status
