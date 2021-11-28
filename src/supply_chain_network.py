@@ -51,7 +51,7 @@ class SupplyChainNetwork:
         # close all facilities
         for echelon in echelons:
             for facility in echelon:
-                facility.is_open = False
+                facility.is_open = 0
         for k in range(len(echelons)):
             echelon = echelons[k]
             echelon_open_facilities_capacity = 0
