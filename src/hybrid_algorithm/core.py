@@ -1,6 +1,7 @@
+import math
 from vns import VNS
 from lp_model import LPModel
-from tabu_list import TabuList
+from util import TabuList, Solution
 
 # Algorithm parameters:
 T = 100
@@ -63,6 +64,7 @@ class HybridAlgorithm:
         elif x < self.transition_probability(current_solution, best_solution_candidate):
             return best_solution_candidate
         return current_solution
+
     def optimize(self, current_solution=None):
         network = self.net.copy()
         if current_solution is None:
