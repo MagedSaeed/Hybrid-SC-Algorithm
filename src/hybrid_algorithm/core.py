@@ -63,33 +63,39 @@ class HybridAlgorithm:
         elif x < self.transition_probability(current_solution, best_solution_candidate):
             return best_solution_candidate
         return current_solution
+    def optimize(self, current_solution=None):
+        network = self.net.copy()
+        if current_solution is None:
+            network.apply_initial_greedy_solution()
+            current_solution = (
+                Solution(network.facilities_statuses)
+                if current_solution is None
+                else current_solution
+            )
+        else:
+            network.apply_solution(current_solution)
+        vns = VNS(network)
         for shaking_method in ("move_inversion_shaking", "multiple_swaps_shaking"):
+            # -------------------------------
+            # find neighbors
+            # -------------------------------
             for _ in range(number_of_nighbors):
                 # shake
                 getattr(vns, shaking_method)
-                # save the solution and its objective value
-                explored_solution = self.get_facilities_status()
-                explored_objective_value = self.model.multi_objective_value
-                explored_solutions.append(explored_solution)
-                explored_objective_values.append(explored_objective_value)
-            # sort solutions based on their objective values
-            sorted_explored_solutions, sorted_explored_objective_values = list(
-                zip(
-                    *sorted(
-                        list(zip(explored_solutions, explored_objective_values)),
-                        kye=lambda item: item[1],
-                    )
+                # save the solution to the explored solutions
+                current_solution.add_child_solution(
+                    Solution(network.facilities_statuses)
+                )
+            # sort solutions based on their evaluation, i.e. objective value
+            current_solution.childs.sort(key=self.evaluate_solution)
+            # filter non tabu solutions
+            current_solution.childs = list(
+                filter(
+                    lambda solution: solution not in tabu_list,
+                    current_solution.childs,
                 )
             )
-            # select best h non tabu solutions
-            best_h_solutions = list()
-            best_h_objective_values = list()
-            i = 0
-            while i < h:
-                if sorted_explored_solutions[i] not in tabu_list:
-                    i += 1
-                    best_h_solutions.append(sorted_explored_solutions[i])
-                    best_h_objective_values.append(sorted_explored_objective_values[i])
+
             # -------------------------------
             # backtracking if no selected solution found
             # -------------------------------
@@ -98,6 +104,7 @@ class HybridAlgorithm:
                 # backtrack
                 backtracked_solution = self.get_backtracked_solution(current_solution)
                 self.optimize(current_solution=backtracked_solution)
+            self.check_dominant_solution(current_solution)
             # -------------------------------
 
             # If new best solution dominates the current solution
