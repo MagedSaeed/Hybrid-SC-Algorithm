@@ -52,6 +52,17 @@ class HybridAlgorithm:
             if parent_solution is None:
                 return None
             return self.get_backtracked_solution(parent_solution)
+
+    def check_dominant_solution(self, current_solution):
+        # the best solution is the first as they are sorted based on their objective value
+        best_solution_candidate = current_solution.childs[0]
+        if self.evaluate_solution(best_solution_candidate) < self.evaluate_solution(
+            current_solution
+        ):
+            return best_solution_candidate
+        elif x < self.transition_probability(current_solution, best_solution_candidate):
+            return best_solution_candidate
+        return current_solution
         for shaking_method in ("move_inversion_shaking", "multiple_swaps_shaking"):
             for _ in range(number_of_nighbors):
                 # shake
