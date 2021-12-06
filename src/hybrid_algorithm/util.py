@@ -34,3 +34,30 @@ class TabuList(list):
     def __setslice__(self, *args):
         list.__setslice__(self, *args)
         self._truncate()
+
+
+class Solution:
+    def __init__(
+        self,
+        solution_list=[],
+        parent=None,
+    ):
+        self._list = solution_list
+        self.childs = list()
+        self.parent = parent
+        if parent is not None:
+            parent.add_child_solution(self)
+
+    def add_child_solution(self, solution):
+        if solution not in self.childs:
+            solution.parent = self
+            self.childs.append(solution)
+
+    def add_childs_solutions(self, solutions):
+        self.childs.extend(solutions)
+
+    def is_root(self):
+        return self.parent is None
+
+    def __repr__(self) -> str:
+        return str(self._list)
