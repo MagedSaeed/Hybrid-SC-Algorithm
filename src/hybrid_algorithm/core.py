@@ -27,8 +27,21 @@ class HybridAlgorithm:
         E_delta = ((Z - Z_prime) / Z_prime) * 100
         return math.exp(-E_delta / T)
 
-    def transition_probability(self, generated_obj_value, original_obj_value):
-        pass
+    def evaluate_solution(self, solution):
+        # assign the solution
+        temp_net = self.original_net.copy()
+        for echelon_statuses, echelon_facilities in zip(
+            solution, self.temp_net.echelons
+        ):
+            for status, facility in zip(echelon_statuses, echelon_facilities):
+                facility.is_open = status
+        # evaluate it
+        temp_model = LPModel(temp_net)
+        solution_objective_value = temp_model.multi_objective_value
+        # clean stuff
+        del temp_model
+        del temp_net
+        return solution_objective_value
 
     def get_backtracked_solution(self, current_solution):
         parent_solution = current_solution.parent
