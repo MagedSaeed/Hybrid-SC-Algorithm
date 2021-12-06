@@ -20,21 +20,11 @@ class HybridAlgorithm:
         self.net = network
         self.model = LPModel(self.net)
 
-    def get_facilities_status(self):
-        echelons_status = list()
-        echelons_status.append(
-            [facility.is_open for facility in self.net.suppliers_echelon]
-        )
-        echelons_status.append(
-            [facility.is_open for facility in self.net.plants_echelon]
-        )
-        echelons_status.append(
-            [facility.is_open for facility in self.net.warehouses_echelon]
-        )
-        echelons_status.append(
-            [facility.is_open for facility in self.net.distribution_centers_echelon]
-        )
-        return echelons_status
+    def transition_probability(self, current_solution, candidate_solution):
+        Z = self.evaluate_solution(candidate_solution)
+        Z_prime = self.evaluate_solution(current_solution)
+        E_delta = ((Z - Z_prime) / Z_prime) * 100
+        return math.exp(-E_delta / T)
 
     def transition_probability(self, generated_obj_value, original_obj_value):
         pass
