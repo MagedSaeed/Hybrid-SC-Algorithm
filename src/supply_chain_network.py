@@ -72,3 +72,15 @@ class SupplyChainNetwork:
         ]
         table.set_style(BeautifulTable.STYLE_MARKDOWN)
         print(table)
+
+    @property
+    def facilities_statuses(self):
+        echelons_status = list()
+        for echelon in self.echelons:
+            echelons_status.append([facility.is_open for facility in echelon])
+        return echelons_status
+
+    def apply_solution(self, solution):
+        for echelon_index, echelon in enumerate(solution):
+            for facility_inex, facility_status in enumerate(echelon):
+                self.echelons[echelon_index][facility_inex].is_open = facility_status
