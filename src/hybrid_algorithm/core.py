@@ -106,19 +106,26 @@ class HybridAlgorithm:
                 self.optimize(current_solution=backtracked_solution)
             self.check_dominant_solution(current_solution)
             # -------------------------------
-
-            # If new best solution dominates the current solution
-            # best_h_solutions[0] is the best solution and
-            # best_h_objective_values[0] is the best objective value
-            best_objective_value = best_h_objective_values[0]
-            best_solution = best_h_solutions[0]
-            if best_objective_value < current_objective_value:
-                # the new best solution = the current solution;
-                current_solution = best_solution
-                current_objective_value = best_objective_value
-                # update the tabu list;
-                tabu_list.append(best_solution)
-                # keep the best h-1 solutions
-                del sorted_explored_solutions[0]
-                del sorted_explored_objective_values[0]
-            # elif x <
+            # Local Search
+            # -------------------------------
+            for local_search_method in (
+                "two_exchange_local_search",
+                "adjacent_swap_local_search",
+            ):
+                for _ in range(number_of_nighbors):
+                    # local_search
+                    getattr(vns, shaking_method)
+                    # save the solution to the explored solutions
+                    current_solution.add_child_solution(
+                        Solution(network.facilities_statuses)
+                    )
+                # sort solutions based on their evaluation, i.e. objective value
+                current_solution.childs.sort(key=self.evaluate_solution)
+                # filter non tabu solutions
+                current_solution.childs = list(
+                    filter(
+                        lambda solution: solution not in tabu_list,
+                        current_solution.childs,
+                    )
+                )
+                self.check_dominant_solution(current_solution)
