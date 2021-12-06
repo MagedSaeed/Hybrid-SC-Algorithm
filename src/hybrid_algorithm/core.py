@@ -18,6 +18,7 @@ x = 0.4
 class HybridAlgorithm:
     def __init__(self, network):
         self.net = network
+        self.original_net = network.copy()
         self.model = LPModel(self.net)
 
     def transition_probability(self, current_solution, candidate_solution):
