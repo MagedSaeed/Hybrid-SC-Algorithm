@@ -30,13 +30,15 @@ class HybridAlgorithm:
     def transition_probability(self, generated_obj_value, original_obj_value):
         pass
 
-    def optimize(self):
-        self.net.apply_initial_greedy_solution()
-        current_solution = self.get_facilities_status()
-        current_objective_value = self.model.multi_objective_value
-        vns = VNS(self.net)
-        explored_solutions = list()
-        explored_objective_values = list()
+    def get_backtracked_solution(self, current_solution):
+        parent_solution = current_solution.parent
+        parent_solution.childs.remove(current_solution)
+        if len(parent_solution.childs) > 0:
+            return parent_solution.childs[0]
+        else:
+            if parent_solution is None:
+                return None
+            return self.get_backtracked_solution(parent_solution)
         for shaking_method in ("move_inversion_shaking", "multiple_swaps_shaking"):
             for _ in range(number_of_nighbors):
                 # shake
@@ -65,7 +67,13 @@ class HybridAlgorithm:
                     best_h_solutions.append(sorted_explored_solutions[i])
                     best_h_objective_values.append(sorted_explored_objective_values[i])
             # -------------------------------
-            # backtracking needs some checks
+            # backtracking if no selected solution found
+            # -------------------------------
+            # if there is no selected solution,
+            if len(current_solution.childs) == 0:
+                # backtrack
+                backtracked_solution = self.get_backtracked_solution(current_solution)
+                self.optimize(current_solution=backtracked_solution)
             # -------------------------------
 
             # If new best solution dominates the current solution
