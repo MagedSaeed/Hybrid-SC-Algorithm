@@ -116,7 +116,7 @@ class HybridAlgorithm:
             ):
                 for _ in range(number_of_nighbors):
                     # local_search
-                    getattr(vns, shaking_method)
+                    getattr(vns, local_search_method)
                     # save the solution to the explored solutions
                     current_solution.add_child_solution(
                         Solution(network.facilities_statuses)
