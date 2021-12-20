@@ -105,7 +105,7 @@ class HybridAlgorithm:
             if len(current_solution.childs) == 0:
                 # backtrack
                 backtracked_solution = self.get_backtracked_solution(current_solution)
-                self.optimize(current_solution=backtracked_solution)
+                return self.optimize(current_solution=backtracked_solution)
             self.check_dominant_solution(current_solution)
             # -------------------------------
             # Local Search
