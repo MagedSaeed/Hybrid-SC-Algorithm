@@ -1,16 +1,17 @@
 import math
-from vns import VNS
+from .vns import VNS
 from lp_model import LPModel
-from util import TabuList, Solution
+from .util import TabuList, Solution
+import copy
 
 # Algorithm parameters:
 T = 100
 Tf = 10
-alpha = 0.3
-K = 2
+alpha = 0.9
+K = 5
 tabu_size = 5
 tabu_list = TabuList(tabu_size)
-h = 3
+# h = 5
 number_of_nighbors = 5
 best_nighbors = []
 x = 0.4
@@ -19,7 +20,7 @@ x = 0.4
 class HybridAlgorithm:
     def __init__(self, network):
         self.net = network
-        self.original_net = network.copy()
+        self.original_net = copy.deepcopy(network)
         self.model = LPModel(self.net)
 
     def transition_probability(self, current_solution, candidate_solution):
@@ -30,18 +31,17 @@ class HybridAlgorithm:
 
     def evaluate_solution(self, solution):
         # assign the solution
-        temp_net = self.original_net.copy()
-        for echelon_statuses, echelon_facilities in zip(
-            solution, self.temp_net.echelons
-        ):
-            for status, facility in zip(echelon_statuses, echelon_facilities):
-                facility.is_open = status
+        temp_net = copy.deepcopy(self.original_net)
+        temp_net.apply_solution(solution._list)
         # evaluate it
         temp_model = LPModel(temp_net)
         solution_objective_value = temp_model.multi_objective_value
         # clean stuff
         del temp_model
         del temp_net
+        # handler the case where there is no solution
+        if solution_objective_value == -1:
+            return float("inf")
         return solution_objective_value
 
     def get_backtracked_solution(self, current_solution):
@@ -66,7 +66,7 @@ class HybridAlgorithm:
         return current_solution
 
     def optimize(self, current_solution=None):
-        network = self.net.copy()
+        network = copy.deepcopy(self.net)
         if current_solution is None:
             network.apply_initial_greedy_solution()
             current_solution = (
@@ -77,57 +77,85 @@ class HybridAlgorithm:
         else:
             network.apply_solution(current_solution)
         vns = VNS(network)
-        for shaking_method in ("move_inversion_shaking", "multiple_swaps_shaking"):
-            # -------------------------------
-            # find neighbors
-            # -------------------------------
-            for _ in range(number_of_nighbors):
-                # shake
-                getattr(vns, shaking_method)
-                # save the solution to the explored solutions
-                current_solution.add_child_solution(
-                    Solution(network.facilities_statuses)
-                )
-            # sort solutions based on their evaluation, i.e. objective value
-            current_solution.childs.sort(key=self.evaluate_solution)
-            # filter non tabu solutions
-            current_solution.childs = list(
-                filter(
-                    lambda solution: solution not in tabu_list,
-                    current_solution.childs,
-                )
-            )
+        global T, K, Tf
+        print(
+            "initial solution",
+            current_solution,
+            "value",
+            self.evaluate_solution(current_solution),
+        )
+        while T > Tf:
+            k = 0
+            while k < K:
+                for shaking_method in (
+                    "move_inversion_shaking",
+                    "multiple_swaps_shaking",
+                ):
+                    # -------------------------------
+                    # find neighbors
+                    # -------------------------------
+                    for _ in range(number_of_nighbors):
+                        # shake
+                        getattr(vns, shaking_method)()
+                        # save the solution to the explored solutions
+                        current_solution.add_child_solution(
+                            Solution(network.facilities_statuses)
+                        )
+                    # sort solutions based on their evaluation, i.e. objective value
+                    current_solution.childs.sort(key=self.evaluate_solution)
+                    # filter non tabu solutions
+                    current_solution.childs = list(
+                        filter(
+                            lambda solution: solution not in tabu_list,
+                            current_solution.childs,
+                        )
+                    )
 
-            # -------------------------------
-            # backtracking if no selected solution found
-            # -------------------------------
-            # if there is no selected solution,
-            if len(current_solution.childs) == 0:
-                # backtrack
-                backtracked_solution = self.get_backtracked_solution(current_solution)
-                return self.optimize(current_solution=backtracked_solution)
-            self.check_dominant_solution(current_solution)
-            # -------------------------------
-            # Local Search
-            # -------------------------------
-            for local_search_method in (
-                "two_exchange_local_search",
-                "adjacent_swap_local_search",
-            ):
-                for _ in range(number_of_nighbors):
-                    # local_search
-                    getattr(vns, local_search_method)
-                    # save the solution to the explored solutions
-                    current_solution.add_child_solution(
-                        Solution(network.facilities_statuses)
-                    )
-                # sort solutions based on their evaluation, i.e. objective value
-                current_solution.childs.sort(key=self.evaluate_solution)
-                # filter non tabu solutions
-                current_solution.childs = list(
-                    filter(
-                        lambda solution: solution not in tabu_list,
-                        current_solution.childs,
-                    )
+                    # -------------------------------
+                    # backtracking if no selected solution found
+                    # -------------------------------
+                    # if there is no selected solution,
+                    if len(current_solution.childs) == 0:
+                        # backtrack
+                        print("No shaking solutions found. Backtracking..")
+                        backtracked_solution = self.get_backtracked_solution(
+                            current_solution
+                        )
+                        return self.optimize(current_solution=backtracked_solution)
+                    current_solution = self.check_dominant_solution(current_solution)
+                    # -------------------------------
+                    # Local Search
+                    # -------------------------------
+                    for local_search_method in (
+                        "two_exchange_local_search",
+                        "adjacent_swap_local_search",
+                    ):
+                        for _ in range(number_of_nighbors):
+                            # local_search
+                            getattr(vns, local_search_method)()
+                            # save the solution to the explored solutions
+                            current_solution.add_child_solution(
+                                Solution(network.facilities_statuses)
+                            )
+                        # sort solutions based on their evaluation, i.e. objective value
+                        current_solution.childs.sort(key=self.evaluate_solution)
+                        # filter non tabu solutions
+                        current_solution.childs = list(
+                            filter(
+                                lambda solution: solution not in tabu_list,
+                                current_solution.childs,
+                            )
+                        )
+                    current_solution = self.check_dominant_solution(current_solution)
+                print(
+                    "current solution",
+                    current_solution,
+                    "value",
+                    self.evaluate_solution(current_solution),
                 )
-                self.check_dominant_solution(current_solution)
+                print(f"updating k from {k} to {k+1}")
+                k += 1
+            print("previous T".center(40, "-"), T)
+            T *= alpha
+            print("new T".center(40, "-"), T)
+        return current_solution
