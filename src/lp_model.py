@@ -173,7 +173,7 @@ class LPModel:
             for p, coeff in enumerate(Qkmp_coeffs[k][m])
         )
 
-        return EX + FY + GZ + Xsit_sum + Yijp_sum + Zjkp_sum + Qkmp_sum
+        return Qkmp_sum - (EX + FY + GZ + Xsit_sum + Yijp_sum + Zjkp_sum)
 
     @property
     def Z2(self):
