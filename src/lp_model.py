@@ -437,8 +437,8 @@ class LPModel:
     @property
     def multi_objective_value(self):
         model = LpProblem(name="Supply-Chain-Network", sense=LpMaximize)
-        model += self.Z1 + self.Z2 - self.Z3
-        # model += self.Z1s.
+        # model += self.Z1 - self.Z2 - self.Z3
+        model += self.Z1
 
         for constrain in self.constrains:
             model += constrain
