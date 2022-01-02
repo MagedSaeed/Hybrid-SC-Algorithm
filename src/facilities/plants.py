@@ -7,7 +7,7 @@ from constants import *
 
 @dataclass
 class PlantFacility:  # plant i
-    products_prod_cost: List  # CPip cost of producing product p at plant I;
+    products_prod_cost: List  # CPip cost of producing product p at plant I; range within (25*rand+20)
     products_trans_cost: Dict  # CTijp transportation cost of product p per km between plant i and warehouse j;
     fixed_cost: float  # Ei fixed cost for opening plant i;
     product_capacity: List  # Cip capacity of plant i for product p;

@@ -72,24 +72,20 @@ class LPModel:
     @property
     def Z1(self):
         net = self.network
-        EX = sum(
-            facility.is_open * facility.fixed_cost
-            for facility in self.network.plants_echelon
-        )
-        FY = sum(
-            facility.is_open * facility.fixed_cost
-            for facility in self.network.warehouses_echelon
-        )
+        EX = sum(facility.fixed_cost for facility in self.network.plants_echelon)
+        FY = sum(facility.fixed_cost for facility in self.network.warehouses_echelon)
         GZ = sum(
-            facility.is_open * facility.fixed_cost
+            facility.fixed_cost
             for facility in self.network.distribution_centers_echelon
         )
 
         Xsit_coeffs = [
             [
                 [
-                    material_cost
-                    + supplier.plants_distances[plant_index] * material_trans_cost
+                    (
+                        material_cost
+                        + supplier.plants_distances[plant_index] * material_trans_cost
+                    )
                     for material_trans_cost in supplier.material_trans_cost[plant_index]
                 ]
                 for plant_index, material_cost in zip(
@@ -109,8 +105,11 @@ class LPModel:
         Yijp_coeffs = [
             [
                 [
-                    production_cost
-                    + plant.warehouses_distances[warehouse_index] * product_trans_cost
+                    (
+                        production_cost
+                        + plant.warehouses_distances[warehouse_index]
+                        * product_trans_cost
+                    )
                     for product_trans_cost in plant.products_trans_cost[warehouse_index]
                 ]
                 for warehouse_index, production_cost in zip(
@@ -152,8 +151,11 @@ class LPModel:
         Qkmp_coeffs = [
             [
                 [
-                    product_price
-                    - dist_center.market_distances[market_index] * product_trans_cost
+                    (
+                        product_price
+                        - dist_center.market_distances[market_index]
+                        * product_trans_cost
+                    )
                     for product_trans_cost, product_price in zip(
                         dist_center.products_trans_cost[market_index],
                         dist_center.selling_prices[market_index],
@@ -382,7 +384,7 @@ class LPModel:
                 """(5) constrain"""
                 constrain = (
                     lpSum(X[s, i, t] for i, plant in enumerate(net.plants_echelon))
-                    <= supplier.is_open * capacity
+                    <= capacity
                 )
                 constrains.append(constrain)
 
@@ -394,7 +396,7 @@ class LPModel:
                     for s, supplier in enumerate(net.suppliers_echelon)
                     for t, raw_material in enumerate(supplier.raw_materials)
                 )
-                constrain = wx_sum <= plant.is_open * capacity
+                constrain = wx_sum <= capacity
                 constrains.append(constrain)
                 """(9) constrain"""
                 constrain = wx_sum == lpSum(
@@ -406,7 +408,7 @@ class LPModel:
             for p, capacity in enumerate(warehouse.product_capacity):
                 """(7) constrain"""
                 y_sum = lpSum(Y[i, j, p] for i, plant in enumerate(net.plants_echelon))
-                constrain = y_sum <= warehouse.is_open * capacity
+                constrain = y_sum <= capacity
                 constrains.append(constrain)
                 """(10) constrain"""
                 constrain = y_sum == lpSum(
@@ -421,7 +423,7 @@ class LPModel:
                 z_sum = lpSum(
                     Z[j, k, p] for j, warehouse in enumerate(net.warehouses_echelon)
                 )
-                constrain = z_sum <= dist_center.is_open * capacity
+                constrain = z_sum <= capacity
                 constrains.append(constrain)
 
                 """(11) constrain"""

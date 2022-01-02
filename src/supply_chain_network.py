@@ -82,5 +82,5 @@ class SupplyChainNetwork:
 
     def apply_solution(self, solution):
         for echelon_index, echelon in enumerate(solution):
-            for facility_inex, facility_status in enumerate(echelon):
-                self.echelons[echelon_index][facility_inex].is_open = facility_status
+            for facility_index, facility_status in enumerate(echelon):
+                self.echelons[echelon_index][facility_index].is_open = facility_status

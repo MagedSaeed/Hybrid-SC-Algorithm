@@ -9,8 +9,8 @@ from raw_materials import RawMaterial
 @dataclass
 class SupplierFacility:  # supplier object s
     raw_materials: List[RawMaterial]
-    material_purchase_cost: List  # CCst purchase cost of raw material t from supplier s;
-    material_trans_cost: Dict  # CBsit transportation cost of raw material t per km between supplier s and plant i ;
+    material_purchase_cost: List  # CCst purchase cost of raw material t from supplier s; (15*rand+10)
+    material_trans_cost: Dict  # CBsit transportation cost of raw material t per km between supplier s and plant i; (0.35rand+1.2)
     material_capacity: List  # Cst capacity of supplier s for raw material t;
     plants_distances: List  # Tsi the distance between supplier s and plant at location i
     material_trans_env_impact: Dict  # ETSsit environmental impact per unit and per distance caused by transporting raw material t from supplier s to plant i;
