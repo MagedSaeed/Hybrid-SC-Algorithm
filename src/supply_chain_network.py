@@ -10,6 +10,7 @@ from facilities import (
     SupplierFacility,
     WarehouseFacility,
 )
+from utils import get_open_facilities_in_echelon
 
 
 @dataclass
@@ -41,27 +42,34 @@ class SupplyChainNetwork:
         sorted_facilities = sorted(
             echelon,
             key=lambda facility: (facility.fixed_cost / facility.capacity.sum())
-            * facility.transportation_cost,
+            + facility.transportation_cost,
         )
         return sorted_facilities
 
     def apply_initial_greedy_solution(self):
-        demand = sum(self.markets_echelon[0].products_demand)
+        market_demand = sum(
+            market.products_demand.sum() for market in self.markets_echelon
+        )
         echelons = self.echelons[::-1]
         # close all facilities
         for echelon in echelons:
             for facility in echelon:
                 facility.is_open = 0
+        previous_echelon_demand = market_demand
         for k in range(len(echelons)):
             echelon = echelons[k]
             echelon_open_facilities_capacity = 0
             sorted_echelon = SupplyChainNetwork.echelon_greedy_sort(echelon)
             for facility in sorted_echelon:
-                if echelon_open_facilities_capacity < demand:
+                if echelon_open_facilities_capacity < previous_echelon_demand:
                     facility.is_open = 1
                     echelon_open_facilities_capacity += facility.capacity.sum()
                 else:
                     break
+            previous_echelon_demand = sum(
+                facility.capacity.sum()
+                for facility in get_open_facilities_in_echelon(echelon)
+            )
 
     def describe(self):
         table = BeautifulTable()
