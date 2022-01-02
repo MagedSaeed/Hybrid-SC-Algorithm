@@ -1,11 +1,15 @@
 from functools import cached_property
+import copy
+from utils import exclude_closed_facilities
 
-from pulp import GLPK, LpMaximize, LpProblem, LpStatus, LpVariable, lpSum
+from pulp import GLPK, LpMaximize, LpProblem, LpVariable, lpSum, CPLEX_PY
 
 
 class LPModel:
     def __init__(self, network):
-        self.network = network
+        self.network = copy.deepcopy(network)
+        self.network = exclude_closed_facilities(self.network)
+        print(self.network.facilities_statuses)
 
     @cached_property
     def Qkmp(self):
