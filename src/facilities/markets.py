@@ -13,7 +13,9 @@ class MarketFacility:  # Market M
     def get_random_echelon(cls):
         howmany = NUMBER_OF_MARKETS
         number_of_products = NUMBER_OF_PRODUCTS
-        random_products_demand = 600 * np.random.rand(howmany, number_of_products) + 800
+        random_products_demand = (
+            6000 * np.random.rand(howmany, number_of_products) + 8000
+        )
         facilities = list()
         for i in range(howmany):
             facility = cls(

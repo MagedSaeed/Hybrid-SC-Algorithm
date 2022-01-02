@@ -66,7 +66,7 @@ class SupplierFacility:  # supplier object s
         random_quality_risk_impact = (
             2000000 * np.random.rand(howmany, len(raw_materials)) + 2200000
         )
-        random_fixed_costs = np.random.rand(howmany) * 1000
+        random_fixed_costs = 70_000 * np.random.rand(howmany) + 50_000
         facilities = list()
         for i in range(howmany):
             facility = cls(

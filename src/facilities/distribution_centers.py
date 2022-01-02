@@ -34,7 +34,7 @@ class DistributionCenterFacility:  # center k
         number_of_products = NUMBER_OF_PRODUCTS
         number_of_markets = NUMBER_OF_MARKETS
         random_products_trans_cost = (
-            0.18 * np.random.rand(howmany, number_of_markets, number_of_products) + 1.1
+            0.18 * np.random.rand(howmany, number_of_markets, number_of_products) + 1.3
         )
         random_fixed_cost = 40_000 * np.random.rand(howmany) + 40_000
         random_product_capacity = (
