@@ -442,7 +442,8 @@ class LPModel:
 
         for constrain in self.constrains:
             model += constrain
-        status = model.solve(solver=GLPK(msg=True))
+        # status = model.solve(solver=GLPK(msg=True))
+        status = model.solve(solver=CPLEX_PY(msg=True))
         if status == 1:
             return model.objective.value()
         return status
