@@ -384,56 +384,75 @@ class LPModel:
                 constrains.append(constrain)
 
         for s, supplier in enumerate(net.suppliers_echelon):
-            for t, capacity in enumerate(supplier.material_capacity):
-                """(5) constrain"""
-                constrain = (
-                    lpSum(X[s, i, t] for i, plant in enumerate(net.plants_echelon))
-                    <= capacity
+            # for t, capacity in enumerate(supplier.material_capacity):
+            """(5) constrain"""
+            constrain = (
+                lpSum(
+                    X[s, i, t]
+                    for i, plant in enumerate(net.plants_echelon)
+                    for t, capacity in enumerate(supplier.material_capacity)
                 )
-                constrains.append(constrain)
+                <= supplier.capacity.sum()
+            )
+            constrains.append(constrain)
 
         for i, plant in enumerate(net.plants_echelon):
-            for p, capacity in enumerate(plant.product_capacity):
-                """(6) constrain"""
-                wx_sum = lpSum(
-                    raw_material.products_yields[p] * X[s, i, t]
-                    for s, supplier in enumerate(net.suppliers_echelon)
-                    for t, raw_material in enumerate(supplier.raw_materials)
-                )
-                constrain = wx_sum <= capacity
-                constrains.append(constrain)
-                """(9) constrain"""
-                constrain = wx_sum == lpSum(
-                    Y[i, j, p] for j, warehouse in enumerate(net.warehouses_echelon)
-                )
-                constrains.append(constrain)
+            # for p, capacity in enumerate(plant.product_capacity):
+            """(6) constrain"""
+            wx_sum = lpSum(
+                raw_material.products_yields[p] * X[s, i, t]
+                for s, supplier in enumerate(net.suppliers_echelon)
+                for t, raw_material in enumerate(supplier.raw_materials)
+            )
+            constrain = wx_sum <= plant.capacity.sum()
+            constrains.append(constrain)
+            """(9) constrain"""
+            constrain = wx_sum == lpSum(
+                Y[i, j, p] for j, warehouse in enumerate(net.warehouses_echelon)
+            )
+            constrains.append(constrain)
 
         for j, warehouse in enumerate(net.warehouses_echelon):
-            for p, capacity in enumerate(warehouse.product_capacity):
-                """(7) constrain"""
-                y_sum = lpSum(Y[i, j, p] for i, plant in enumerate(net.plants_echelon))
-                constrain = y_sum <= capacity
-                constrains.append(constrain)
+            """(7) constrain"""
+            y_sum = lpSum(
+                Y[i, j, p]
+                for p, product_capacity in enumerate(plant.product_capacity)
+                for i, plant in enumerate(net.plants_echelon)
+            )
+            constrain = y_sum <= warehouse.capacity.sum()
+            constrains.append(constrain)
+
+        for k, dist_center in enumerate(net.distribution_centers_echelon):
+            """(8) constrain"""
+            z_sum = lpSum(
+                Z[j, k, p]
+                for p, product_capacity in enumerate(warehouse.product_capacity)
+                for j, warehouse in enumerate(net.warehouses_echelon)
+            )
+            constrain = z_sum <= dist_center.capacity.sum()
+            constrains.append(constrain)
+
+        for j, warehouse in enumerate(net.warehouses_echelon):
+            for p, product_capacity in enumerate(warehouse.product_capacity):
                 """(10) constrain"""
-                constrain = y_sum == lpSum(
+                y_sum = lpSum(Y[i, j, p] for i, plant in enumerate(net.plants_echelon))
+                z_sum = lpSum(
                     Z[j, k, p]
                     for k, dist_center in enumerate(net.distribution_centers_echelon)
                 )
+                constrain = y_sum == z_sum
                 constrains.append(constrain)
 
-        for k, dist_center in enumerate(net.distribution_centers_echelon):
-            for p, capacity in enumerate(dist_center.product_capacity):
-                """(8) constrain"""
+        for k, distribution_center in enumerate(net.distribution_centers_echelon):
+            for p, product_capacity in enumerate(distribution_center.product_capacity):
+                """(11) constrain"""
                 z_sum = lpSum(
                     Z[j, k, p] for j, warehouse in enumerate(net.warehouses_echelon)
                 )
-                constrain = z_sum <= capacity
-                constrains.append(constrain)
-
-                """(11) constrain"""
-                constrain = z_sum == lpSum(
+                q_sum = lpSum(
                     Q[k, m, p] for m, market in enumerate(net.markets_echelon)
                 )
+                constrain = z_sum == q_sum
                 constrains.append(constrain)
 
         return constrains
