@@ -61,3 +61,6 @@ class Solution:
 
     def __repr__(self) -> str:
         return str(self._list)
+
+    def __iter__(self):
+        return iter(self._list)
