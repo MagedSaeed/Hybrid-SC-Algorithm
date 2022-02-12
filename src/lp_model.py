@@ -9,7 +9,6 @@ class LPModel:
     def __init__(self, network):
         self.network = copy.deepcopy(network)
         self.network = exclude_closed_facilities(self.network)
-        print(self.network.facilities_statuses)
 
     @cached_property
     def Qkmp(self):
@@ -466,7 +465,7 @@ class LPModel:
         for constrain in self.constrains:
             model += constrain
         # status = model.solve(solver=GLPK(msg=True))
-        status = model.solve(solver=CPLEX_PY(msg=True))
+        status = model.solve(solver=CPLEX_PY(msg=False))
         if status == 1:
             return model.objective.value()
         return status

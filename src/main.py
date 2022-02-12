@@ -7,4 +7,4 @@ net.apply_initial_greedy_solution()
 model = LPModel(net)
 model.multi_objective_value
 hyb = HybridAlgorithm(net)
-new_net = hyb.optimize()
+hyb.optimize()
