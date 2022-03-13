@@ -1,12 +1,13 @@
-from hybrid_algorithm.supply_chain_network import SupplyChainNetwork
-from hybrid_algorithm.lp_model import LPModel
-from hybrid_algorithm import HybridAlgorithm
+from hybrid_algorithm import SupplyChainNetwork, LPModel, HybridAlgorithm
 
-from hybrid_algorithm.config import AppConfig
 
-AppConfig.configure(config_file_path="./experiments/config.py")
-
-net = SupplyChainNetwork()
+net = SupplyChainNetwork(
+    facilities_count=3,
+    raw_materials_count=4,
+    markets_count=6,
+    products_count=3,
+)
+net.initialize_random_network()
 net.apply_initial_greedy_solution()
 model = LPModel(net)
 hyb = HybridAlgorithm(net)
