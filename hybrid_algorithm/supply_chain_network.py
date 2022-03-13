@@ -29,10 +29,10 @@ class SupplyChainNetwork:
     def initialize_random_network(cls):
         # rest AppConfig with the new values first
         config = AppConfig.config
-        config["facilities"]["facilities_count"] = cls.facilities_count
-        config["facilities"]["raw_meterials_count"] = cls.raw_materials_count
-        config["facilities"]["markets_count"] = cls.markets_count
-        config["facilities"]["products_count"] = cls.products_count
+        config["facilities"]["facilities_count"] = str(cls.facilities_count)
+        config["facilities"]["raw_meterials_count"] = str(cls.raw_materials_count)
+        config["facilities"]["markets_count"] = str(cls.markets_count)
+        config["facilities"]["products_count"] = str(cls.products_count)
         AppConfig.set_config(config=config)
         # initialize echelons
         cls.suppliers_echelon = SupplierFacility.get_random_echelon()
