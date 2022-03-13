@@ -48,8 +48,8 @@ class VNS:
 
     def two_exchange_local_search(self):
         for echelon in self.echelons_to_apply:
-            # make sure one element at least is open
-            if sum(f.is_open for f in echelon) > 0:
+            # make sure one element at least is open and one element is at least closed
+            if 0 < sum(f.is_open for f in echelon) < len(echelon):
                 # select an open element randomly
                 first_element = random.choice(echelon)
                 while first_element.is_open == 0:

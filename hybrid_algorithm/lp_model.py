@@ -415,8 +415,8 @@ class LPModel:
             """(7) constrain"""
             y_sum = lpSum(
                 Y[i, j, p]
-                for p, product_capacity in enumerate(plant.product_capacity)
                 for i, plant in enumerate(net.plants_echelon)
+                for p, product_capacity in enumerate(plant.product_capacity)
             )
             constrain = y_sum <= warehouse.capacity.sum()
             constrains.append(constrain)
@@ -425,8 +425,8 @@ class LPModel:
             """(8) constrain"""
             z_sum = lpSum(
                 Z[j, k, p]
-                for p, product_capacity in enumerate(warehouse.product_capacity)
                 for j, warehouse in enumerate(net.warehouses_echelon)
+                for p, product_capacity in enumerate(warehouse.product_capacity)
             )
             constrain = z_sum <= dist_center.capacity.sum()
             constrains.append(constrain)
