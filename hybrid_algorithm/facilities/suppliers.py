@@ -2,12 +2,13 @@ from dataclasses import dataclass, field
 from typing import Dict, List
 
 import numpy as np
-from constants import *
-from raw_materials import RawMaterial
+
+from hybrid_algorithm.facilities.raw_materials import RawMaterial
+from hybrid_algorithm.facilities.base_facility import BaseFacility
 
 
 @dataclass
-class SupplierFacility:  # supplier object s
+class SupplierFacility(BaseFacility):  # supplier object s
     raw_materials: List[RawMaterial]
     material_purchase_cost: List  # CCst purchase cost of raw material t from supplier s; (15*rand+10)
     material_trans_cost: Dict  # CBsit transportation cost of raw material t per km between supplier s and plant i; (0.35rand+1.2)
@@ -34,8 +35,8 @@ class SupplierFacility:  # supplier object s
 
     @classmethod
     def get_random_echelon(cls):
-        howmany = NUMBER_OF_SUPPLIERS
-        number_of_plants = NUMBER_OF_PLANTS
+        howmany = cls.NUMBER_OF_SUPPLIERS
+        number_of_plants = cls.NUMBER_OF_PLANTS
         raw_materials = RawMaterial.get_random_materials()
         random_material_purchase_cost = (
             15 * np.random.rand(howmany, len(raw_materials)) + 10

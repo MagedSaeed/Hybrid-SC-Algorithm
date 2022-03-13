@@ -1,8 +1,7 @@
 import math
 
-from numpy import number
-from .vns import VNS
-from lp_model import LPModel
+from hybrid_algorithm.hybrid_algorithm.vns import VNS
+from hybrid_algorithm.lp_model import LPModel
 from .util import TabuList, Solution
 import copy
 

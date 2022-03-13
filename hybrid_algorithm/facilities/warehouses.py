@@ -2,11 +2,12 @@ from dataclasses import dataclass, field
 from typing import Dict, List
 
 import numpy as np
-from constants import *
+
+from hybrid_algorithm.facilities.base_facility import BaseFacility
 
 
 @dataclass
-class WarehouseFacility:  # warehouse j
+class WarehouseFacility(BaseFacility):  # warehouse j
     products_trans_cost: List  # CDjkp transportation cost of product p per km between warehouse j and distribution center k;
     fixed_cost: float  # Fj fixed cost for opening warehouse j;
     product_capacity: List  # Cjp capacity of warehouse j for product p;
@@ -29,9 +30,9 @@ class WarehouseFacility:  # warehouse j
 
     @classmethod
     def get_random_echelon(cls):
-        howmany = NUMBER_OF_WAREHOUSES
-        number_of_products = NUMBER_OF_PRODUCTS
-        number_of_dist_centers = NUMBER_OF_DISTRIBUTION_CENTERS
+        howmany = cls.NUMBER_OF_WAREHOUSES
+        number_of_products = cls.NUMBER_OF_PRODUCTS
+        number_of_dist_centers = cls.NUMBER_OF_DISTRIBUTION_CENTERS
         random_products_trans_cost = (
             0.18 * np.random.rand(howmany, number_of_dist_centers, number_of_products)
             + 1.1

@@ -2,17 +2,18 @@ from dataclasses import dataclass
 from typing import List
 
 import numpy as np
-from constants import *
+
+from hybrid_algorithm.facilities.base_facility import BaseFacility
 
 
 @dataclass
-class MarketFacility:  # Market M
+class MarketFacility(BaseFacility):  # Market M
     products_demand: List  # demand of customer m for product p
 
     @classmethod
     def get_random_echelon(cls):
-        howmany = NUMBER_OF_MARKETS
-        number_of_products = NUMBER_OF_PRODUCTS
+        howmany = cls.NUMBER_OF_MARKETS
+        number_of_products = cls.NUMBER_OF_PRODUCTS
         random_products_demand = (
             6000 * np.random.rand(howmany, number_of_products) + 8000
         )

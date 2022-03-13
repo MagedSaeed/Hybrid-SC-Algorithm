@@ -2,28 +2,46 @@ from dataclasses import dataclass, field
 from typing import List
 
 from beautifultable import BeautifulTable
+from hybrid_algorithm.config import AppConfig
 
-from facilities import (
+from hybrid_algorithm.facilities import (
     DistributionCenterFacility,
     MarketFacility,
     PlantFacility,
     SupplierFacility,
     WarehouseFacility,
 )
-from utils import get_open_facilities_in_echelon
+from hybrid_algorithm.utils import get_open_facilities_in_echelon
+
+FACILITIES_DEFAULT = AppConfig.config["facilities"]
 
 
 @dataclass
 class SupplyChainNetwork:
-    suppliers_echelon: List = field(default_factory=SupplierFacility.get_random_echelon)
-    plants_echelon: List = field(default_factory=PlantFacility.get_random_echelon)
-    warehouses_echelon: List = field(
-        default_factory=WarehouseFacility.get_random_echelon
+    facilities_count: int = field(default=int(FACILITIES_DEFAULT["facilities_count"]))
+    raw_materials_count: int = field(
+        default=int(FACILITIES_DEFAULT["raw_materials_count"])
     )
-    distribution_centers_echelon: List = field(
-        default_factory=DistributionCenterFacility.get_random_echelon
-    )
-    markets_echelon: List = field(default_factory=MarketFacility.get_random_echelon)
+    markets_count: int = field(default=int(FACILITIES_DEFAULT["markets_count"]))
+    products_count: int = field(default=int(FACILITIES_DEFAULT["products_count"]))
+
+    @classmethod
+    def initialize_random_network(cls):
+        # rest AppConfig with the new values first
+        config = AppConfig.config
+        config["facilities"]["facilities_count"] = cls.facilities_count
+        config["facilities"]["raw_meterials_count"] = cls.raw_materials_count
+        config["facilities"]["markets_count"] = cls.markets_count
+        config["facilities"]["products_count"] = cls.products_count
+        AppConfig.set_config(config=config)
+        # initialize echelons
+        cls.suppliers_echelon = SupplierFacility.get_random_echelon()
+        cls.plants_echelon = PlantFacility.get_random_echelon()
+        cls.warehouses_echelon = WarehouseFacility.get_random_echelon()
+        cls.distribution_centers_echelon = (
+            DistributionCenterFacility.get_random_echelon()
+        )
+        cls.markets_echelon = MarketFacility.get_random_echelon()
 
     @property
     def echelons(self):

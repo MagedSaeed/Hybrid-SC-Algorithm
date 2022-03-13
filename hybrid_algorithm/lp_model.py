@@ -1,6 +1,6 @@
 from functools import cached_property
 import copy
-from utils import exclude_closed_facilities
+from hybrid_algorithm.utils import exclude_closed_facilities
 
 from pulp import GLPK, LpMaximize, LpProblem, LpVariable, lpSum, CPLEX_PY
 
