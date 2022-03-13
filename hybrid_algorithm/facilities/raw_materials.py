@@ -12,6 +12,7 @@ class RawMaterial(BaseFacility):  # raw material t
 
     @classmethod
     def get_random_materials(cls):
+        cls._configure()
         howmany = cls.NUMBER_OF_RAW_MATERIALS
         number_of_products = cls.NUMBER_OF_PRODUCTS
         random_yields = np.ones((howmany, number_of_products))

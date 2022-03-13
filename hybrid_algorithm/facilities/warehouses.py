@@ -30,6 +30,7 @@ class WarehouseFacility(BaseFacility):  # warehouse j
 
     @classmethod
     def get_random_echelon(cls):
+        cls._configure()
         howmany = cls.NUMBER_OF_WAREHOUSES
         number_of_products = cls.NUMBER_OF_PRODUCTS
         number_of_dist_centers = cls.NUMBER_OF_DISTRIBUTION_CENTERS

@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import List
 
 import numpy as np
-
 from hybrid_algorithm.facilities.base_facility import BaseFacility
 
 
@@ -12,6 +11,7 @@ class MarketFacility(BaseFacility):  # Market M
 
     @classmethod
     def get_random_echelon(cls):
+        cls._configure()
         howmany = cls.NUMBER_OF_MARKETS
         number_of_products = cls.NUMBER_OF_PRODUCTS
         random_products_demand = (

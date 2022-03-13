@@ -34,6 +34,7 @@ class PlantFacility(BaseFacility):  # plant i
 
     @classmethod
     def get_random_echelon(cls):
+        cls._configure()
         howmany = cls.NUMBER_OF_PLANTS
         number_of_products = cls.NUMBER_OF_PRODUCTS
         number_of_warehouses = cls.NUMBER_OF_WAREHOUSES

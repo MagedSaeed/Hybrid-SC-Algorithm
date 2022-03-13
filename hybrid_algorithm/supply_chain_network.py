@@ -25,23 +25,22 @@ class SupplyChainNetwork:
     markets_count: int = field(default=int(FACILITIES_DEFAULT["markets_count"]))
     products_count: int = field(default=int(FACILITIES_DEFAULT["products_count"]))
 
-    @classmethod
-    def initialize_random_network(cls):
+    def initialize_random_network(self):
         # rest AppConfig with the new values first
         config = AppConfig.config
-        config["facilities"]["facilities_count"] = str(cls.facilities_count)
-        config["facilities"]["raw_meterials_count"] = str(cls.raw_materials_count)
-        config["facilities"]["markets_count"] = str(cls.markets_count)
-        config["facilities"]["products_count"] = str(cls.products_count)
+        config["facilities"]["facilities_count"] = str(self.facilities_count)
+        config["facilities"]["raw_meterials_count"] = str(self.raw_materials_count)
+        config["facilities"]["markets_count"] = str(self.markets_count)
+        config["facilities"]["products_count"] = str(self.products_count)
         AppConfig.set_config(config=config)
         # initialize echelons
-        cls.suppliers_echelon = SupplierFacility.get_random_echelon()
-        cls.plants_echelon = PlantFacility.get_random_echelon()
-        cls.warehouses_echelon = WarehouseFacility.get_random_echelon()
-        cls.distribution_centers_echelon = (
+        self.suppliers_echelon = SupplierFacility.get_random_echelon()
+        self.plants_echelon = PlantFacility.get_random_echelon()
+        self.warehouses_echelon = WarehouseFacility.get_random_echelon()
+        self.distribution_centers_echelon = (
             DistributionCenterFacility.get_random_echelon()
         )
-        cls.markets_echelon = MarketFacility.get_random_echelon()
+        self.markets_echelon = MarketFacility.get_random_echelon()
 
     @property
     def echelons(self):

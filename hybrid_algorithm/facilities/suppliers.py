@@ -35,6 +35,7 @@ class SupplierFacility(BaseFacility):  # supplier object s
 
     @classmethod
     def get_random_echelon(cls):
+        cls._configure()
         howmany = cls.NUMBER_OF_SUPPLIERS
         number_of_plants = cls.NUMBER_OF_PLANTS
         raw_materials = RawMaterial.get_random_materials()
