@@ -56,6 +56,12 @@ class Solution:
     def add_childs_solutions(self, solutions):
         self.childs.extend(solutions)
 
+    def __eq__(self, other):
+        return other._list == self._list
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def is_root(self):
         return self.parent is None
 
