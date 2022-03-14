@@ -4,6 +4,7 @@ from hybrid_algorithm.hybrid_algorithm.vns import VNS
 from hybrid_algorithm.lp_model import LPModel
 from .util import TabuList, Solution
 import copy
+import logging
 
 # Algorithm parameters:
 # T = 100
@@ -87,11 +88,9 @@ class HybridAlgorithm:
             # if it is not in the tabu list, add it
             if best_solution_candidate not in self.tabu_list:
                 self.tabu_list.append(best_solution_candidate)
-                print(
-                    "updating current solution to:",
-                    self.evaluate_solution(best_solution_candidate),
-                )
-                return best_solution_candidate
+                    logging.debug(
+                        f"updating current solution to: {self.evaluate_solution(best_solution_candidate)}",
+                    )
         return current_solution
 
     def optimize(self, current_solution=None):
@@ -106,11 +105,8 @@ class HybridAlgorithm:
         else:
             network.apply_solution(current_solution)
         vns = VNS(network)
-        print(
-            "initial solution",
-            current_solution,
-            "value",
-            self.evaluate_solution(current_solution),
+        logging.info(
+            f"initial solution: {current_solution}, value: {self.evaluate_solution(current_solution)}"
         )
         # add current solution to tabu list
         self.tabu_list.append(current_solution)
@@ -163,7 +159,7 @@ class HybridAlgorithm:
                     # if there is no selected solution,
                     if len(current_solution.childs) == 0:
                         # backtrack
-                        print("No shaking solutions found. Backtracking..")
+                        logging.debug("No shaking solutions found. Backtracking..")
                         backtracked_solution = self.get_backtracked_solution(
                             current_solution
                         )
@@ -171,16 +167,15 @@ class HybridAlgorithm:
 
                     # add best h solutions to the tabu list
                     self.tabu_list.extend(current_solution.childs[: self.h])
-                    print("tabu list size:", len(self.tabu_list))
+                    logging.debug(f"tabu list size: {len(self.tabu_list)}")
 
                     current_solution = self.check_dominant_solution(current_solution)
                     if self.evaluate_solution(
                         self.best_solution
                     ) > self.evaluate_solution(current_solution):
                         self.best_solution = copy.deepcopy(current_solution)
-                        print(
-                            "chaning best solution to ",
-                            self.evaluate_solution(self.best_solution),
+                        logging.debug(
+                            f"chaning best solution to {self.evaluate_solution(self.best_solution)}"
                         )
                     # -------------------------------
                     # Local Search
@@ -205,30 +200,24 @@ class HybridAlgorithm:
                                 current_solution.childs,
                             )
                         )
+
                     current_solution = self.check_dominant_solution(current_solution)
                 if self.evaluate_solution(self.best_solution) > self.evaluate_solution(
                     current_solution
                 ):
                     self.best_solution = copy.deepcopy(current_solution)
-                    print(
-                        "chaning best solution to ",
-                        self.evaluate_solution(self.best_solution),
+                    logging.debug(
+                        f"chaning best solution to {self.evaluate_solution(self.best_solution)}"
                     )
-                print(
-                    "current solution",
-                    current_solution,
-                    "value",
-                    self.evaluate_solution(current_solution),
+                logging.debug(
+                    "current solution: {current_solution}, value: {self.evaluate_solution(current_solution)}"
                 )
-                print(
-                    "best solution up to now",
-                    self.best_solution,
-                    "value",
-                    self.evaluate_solution(self.best_solution),
+                logging.info(
+                    f"best solution up to now: {self.best_solution} value: {self.evaluate_solution(self.best_solution)}"
                 )
-                print(f"updating k from {k} to {k+1}")
+                logging.debug(f"updating k from {k} to {k+1}")
                 k += 1
-            print("previous T".center(40, "-"), self.T)
+            logging.debug(f'{"previous T".center(40, "-")}{self.T}')
             self.T *= self.alpha
-            print("new T".center(40, "-"), self.T)
+            logging.info(f'{"new T".center(40, "-")}{self.T}')
         return self.best_solution
