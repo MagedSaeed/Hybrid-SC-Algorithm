@@ -27,11 +27,11 @@ class HybridAlgorithm:
         Tf=10,
         alpha=0.9,
         K=5,
-        tabu_size=100,
+        tabu_size=15,
         number_of_nighbors=5,
         x=0.2,
         lp_model_class=LPModel,
-        h=10,
+        h=3,
     ):
         self.net = network
         self.T = T
@@ -78,19 +78,22 @@ class HybridAlgorithm:
         return self.get_backtracked_solution(parent_solution)
 
     def check_dominant_solution(self, current_solution):
-        # the best solution is the first as they are sorted based on their objective value
-        best_solution_candidate = current_solution.childs[0]
-        if self.evaluate_solution(best_solution_candidate) < self.evaluate_solution(
-            current_solution
-        ) or self.x < self.transition_probability(
-            current_solution, best_solution_candidate
-        ):
-            # if it is not in the tabu list, add it
-            if best_solution_candidate not in self.tabu_list:
-                self.tabu_list.append(best_solution_candidate)
+        # only look check for dominant childs if they exists
+        if len(current_solution.childs) > 0:
+            # the best solution is the first as they are sorted based on their objective value
+            best_solution_candidate = current_solution.childs[0]
+            if self.evaluate_solution(best_solution_candidate) < self.evaluate_solution(
+                current_solution
+            ) or self.x < self.transition_probability(
+                current_solution, best_solution_candidate
+            ):
+                # if it is not in the tabu list, add it
+                if best_solution_candidate not in self.tabu_list:
+                    self.tabu_list.append(best_solution_candidate)
                     logging.debug(
                         f"updating current solution to: {self.evaluate_solution(best_solution_candidate)}",
                     )
+                    return best_solution_candidate
         return current_solution
 
     def optimize(self, current_solution=None):
