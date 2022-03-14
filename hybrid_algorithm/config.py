@@ -1,4 +1,11 @@
 from configparser import ConfigParser
+import logging
+
+import sys
+
+# increase recursion level
+# https://stackoverflow.com/questions/6809402/python-maximum-recursion-depth-exceeded-while-calling-a-python-object
+sys.setrecursionlimit(10_000)
 
 
 class AppConfigMeta(type):
@@ -17,6 +24,7 @@ class AppConfig(metaclass=AppConfigMeta):
     def _configure(cls):
         cls._config = ConfigParser()
         cls._config.read(cls.config_file_path)
+        logging.basicConfig(level=getattr(logging, cls.config["logging"]["level"]))
 
     @classmethod
     def configure(cls, config_file_path=None):
