@@ -138,84 +138,82 @@ class HybridAlgorithm:
                         current_solution.add_child_solution(
                             Solution(network.facilities_statuses)
                         )
-                    # exclude corrupted solutions
-                    current_solution.childs = list(
-                        filter(
-                            lambda solution: self.evaluate_solution(solution)
-                            != float("inf"),
-                            current_solution.childs,
-                        )
+                # exclude corrupted and tabu solutions
+                current_solution.childs = list(
+                    filter(
+                        lambda solution: self.evaluate_solution(solution)
+                        != float("inf")
+                        and solution not in self.tabu_list,
+                        current_solution.childs,
                     )
-                    # sort solutions based on their evaluation, i.e. objective value
-                    current_solution.childs.sort(key=self.evaluate_solution)
-                    # filter non tabu solutions
-                    current_solution.childs = list(
-                        filter(
-                            lambda solution: solution not in self.tabu_list,
-                            current_solution.childs,
-                        )
+                )
+                # sort solutions based on their evaluation, i.e. objective value
+                current_solution.childs.sort(key=self.evaluate_solution)
+
+                # -------------------------------
+                # backtracking if no selected solution found
+                # -------------------------------
+                # if there is no selected solution,
+                if len(current_solution.childs) == 0:
+                    # backtrack
+                    logging.debug("No shaking solutions found. Backtracking..")
+                    backtracked_solution = self.get_backtracked_solution(
+                        current_solution
                     )
+                    return self.optimize(current_solution=backtracked_solution)
 
-                    # -------------------------------
-                    # backtracking if no selected solution found
-                    # -------------------------------
-                    # if there is no selected solution,
-                    if len(current_solution.childs) == 0:
-                        # backtrack
-                        logging.debug("No shaking solutions found. Backtracking..")
-                        backtracked_solution = self.get_backtracked_solution(
-                            current_solution
-                        )
-                        return self.optimize(current_solution=backtracked_solution)
+                # add best h solutions to the tabu list
+                self.tabu_list.extend(current_solution.childs[: self.h])
+                logging.debug(f"tabu list size: {len(self.tabu_list)}")
 
-                    # add best h solutions to the tabu list
-                    self.tabu_list.extend(current_solution.childs[: self.h])
-                    logging.debug(f"tabu list size: {len(self.tabu_list)}")
-
-                    current_solution = self.check_dominant_solution(current_solution)
-                    if self.evaluate_solution(
-                        self.best_solution
-                    ) > self.evaluate_solution(current_solution):
-                        self.best_solution = copy.deepcopy(current_solution)
-                        logging.debug(
-                            f"chaning best solution to {self.evaluate_solution(self.best_solution)}"
-                        )
-                    # -------------------------------
-                    # Local Search
-                    # -------------------------------
-                    for local_search_method in (
-                        "two_exchange_local_search",
-                        "adjacent_swap_local_search",
-                    ):
-                        for _ in range(self.number_of_nighbors):
-                            # local_search
-                            getattr(vns, local_search_method)()
-                            # save the solution to the explored solutions
-                            current_solution.add_child_solution(
-                                Solution(network.facilities_statuses)
-                            )
-                        # sort solutions based on their evaluation, i.e. objective value
-                        current_solution.childs.sort(key=self.evaluate_solution)
-                        # filter non tabu solutions
-                        current_solution.childs = list(
-                            filter(
-                                lambda solution: solution not in self.tabu_list,
-                                current_solution.childs,
-                            )
-                        )
-
-                    current_solution = self.check_dominant_solution(current_solution)
+                current_solution = self.check_dominant_solution(current_solution)
                 if self.evaluate_solution(self.best_solution) > self.evaluate_solution(
                     current_solution
                 ):
                     self.best_solution = copy.deepcopy(current_solution)
-                    logging.debug(
+                    logging.info(
+                        f"chaning best solution to {self.evaluate_solution(self.best_solution)}"
+                    )
+                # -------------------------------
+                # Local Search
+                # -------------------------------
+                for local_search_method in (
+                    "two_exchange_local_search",
+                    "adjacent_swap_local_search",
+                ):
+                    for _ in range(self.number_of_nighbors):
+                        # local_search
+                        getattr(vns, local_search_method)()
+                        # save the solution to the explored solutions
+                        current_solution.add_child_solution(
+                            Solution(network.facilities_statuses)
+                        )
+                # exclude corrupted and tabu solutions
+                current_solution.childs = list(
+                    filter(
+                        lambda solution: self.evaluate_solution(solution)
+                        != float("inf")
+                        and solution not in self.tabu_list,
+                        current_solution.childs,
+                    )
+                )
+                # sort solutions based on their evaluation, i.e. objective value
+                current_solution.childs.sort(key=self.evaluate_solution)
+                # keep only the best h childs
+                current_solution.childs = current_solution.childs[: self.h]
+
+                current_solution = self.check_dominant_solution(current_solution)
+                if self.evaluate_solution(self.best_solution) > self.evaluate_solution(
+                    current_solution
+                ):
+                    self.best_solution = copy.deepcopy(current_solution)
+                    logging.info(
                         f"chaning best solution to {self.evaluate_solution(self.best_solution)}"
                     )
                 logging.debug(
                     "current solution: {current_solution}, value: {self.evaluate_solution(current_solution)}"
                 )
-                logging.info(
+                logging.debug(
                     f"best solution up to now: {self.best_solution} value: {self.evaluate_solution(self.best_solution)}"
                 )
                 logging.debug(f"updating k from {k} to {k+1}")
@@ -223,4 +221,7 @@ class HybridAlgorithm:
             logging.debug(f'{"previous T".center(40, "-")}{self.T}')
             self.T *= self.alpha
             logging.info(f'{"new T".center(40, "-")}{self.T}')
+            logging.info(
+                f"best solution up to now: {self.best_solution} value: {self.evaluate_solution(self.best_solution)}"
+            )
         return self.best_solution
