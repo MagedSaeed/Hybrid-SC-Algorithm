@@ -9,6 +9,8 @@ random.seed(seed)
 
 solutions_list = []
 
+N = 3 * 4 + 10
+
 for i in range(1, 1001):
     print("#" * 100)
     print(f"optimizing {i} network".center(100, "#"))
@@ -28,7 +30,8 @@ for i in range(1, 1001):
         T=50,
         Tf=1,
         alpha=0.9,
-        K=0.5 * (3 * 4 + 10),
+        K=0.5 * N,
+        number_of_nighbors=int(0.15 * N),
     )
     solutions_list.append(hyb.optimize())
 # hyb.optimize()
