@@ -7,9 +7,9 @@ seed = 0
 np.random.seed(seed)
 random.seed(seed)
 
-solutions_list = []
-
 N = 3 * 4 + 10
+
+solutions_list = []
 
 for i in range(1, 1001):
     print("#" * 100)
