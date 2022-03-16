@@ -1,22 +1,12 @@
+import copy
+import logging
 import math
+from functools import lru_cache
 
 from hybrid_algorithm.hybrid_algorithm.vns import VNS
 from hybrid_algorithm.lp_model import LPModel
-from .util import TabuList, Solution
-import copy
-import logging
 
-# Algorithm parameters:
-# T = 100
-# Tf = 10
-# alpha = 0.9
-# K = 5
-# tabu_size = 10
-# tabu_list = TabuList(tabu_size)
-# # h = 5
-# number_of_nighbors = 5
-# best_nighbors = []
-# x = 0.2
+from .util import Solution, TabuList
 
 
 class HybridAlgorithm:
@@ -47,7 +37,6 @@ class HybridAlgorithm:
         self.temp_net = copy.deepcopy(network)
         self.model = lp_model_class(self.net)
         self.best_solution = None
-        self.solutsion_values = dict()
 
     def transition_probability(self, current_solution, candidate_solution):
         Z = self.evaluate_solution(candidate_solution)
@@ -55,22 +44,20 @@ class HybridAlgorithm:
         E_delta = ((Z - Z_prime) / Z_prime) * 100
         return math.exp(-E_delta / self.T)
 
+    @lru_cache(maxsize=None)
     def evaluate_solution(self, solution):
-        if not self.solutsion_values.get(solution):
-            # assign the solution
-            self.temp_net.apply_solution(solution._list)
-            # evaluate it
-            temp_model = LPModel(self.temp_net)
-            solution_objective_value = temp_model.multi_objective_value
-            # clean stuff
-            del temp_model
-            # del temp_net
-            # handler the case where there is no solution
-            if solution_objective_value <= 0:
-                self.solutsion_values[solution] = float("inf")
-                return float("inf")
-            self.solutsion_values[solution] = solution_objective_value
-        return self.solutsion_values[solution]
+        # assign the solution
+        self.temp_net.apply_solution(solution._list)
+        # evaluate it
+        temp_model = LPModel(self.temp_net)
+        solution_objective_value = temp_model.multi_objective_value
+        # clean stuff
+        del temp_model
+        # del temp_net
+        # handler the case where there is no solution
+        if solution_objective_value <= 0:
+            return float("inf")
+        return solution_objective_value
 
     def get_backtracked_solution(self, current_solution):
         parent_solution = current_solution.parent
