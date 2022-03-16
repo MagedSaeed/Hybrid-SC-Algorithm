@@ -44,6 +44,7 @@ class HybridAlgorithm:
         self.x = x
         self.h = h
         self.original_net = copy.deepcopy(network)
+        self.temp_net = copy.deepcopy(network)
         self.model = lp_model_class(self.net)
         self.best_solution = None
 
@@ -54,17 +55,15 @@ class HybridAlgorithm:
         return math.exp(-E_delta / self.T)
 
     def evaluate_solution(self, solution):
-        # assign the solution
-        temp_net = copy.deepcopy(self.original_net)
-        temp_net.apply_solution(solution._list)
-        # evaluate it
-        temp_model = LPModel(temp_net)
-        solution_objective_value = temp_model.multi_objective_value
-        # clean stuff
-        del temp_model
-        del temp_net
-        # handler the case where there is no solution
-        if solution_objective_value <= 0:
+            # assign the solution
+            self.temp_net.apply_solution(solution._list)
+            # evaluate it
+            temp_model = LPModel(self.temp_net)
+            solution_objective_value = temp_model.multi_objective_value
+            # clean stuff
+            del temp_model
+            # del temp_net
+            # handler the case where there is no solution
             return float("inf")
         return solution_objective_value
 
