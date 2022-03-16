@@ -1,5 +1,6 @@
-import numpy as np
 import copy
+
+import numpy as np
 
 
 def get_open_facilities_in_echelon(echelon):
@@ -13,14 +14,16 @@ def reset_dict_entries(dict_obj):
     return new_dict
 
 
-def exclude_closed_facilities(network):
-    network = copy.deepcopy(network)
+def exclude_closed_facilities(network,inplace=False):
     """
     This method will remove the closed facilities from the network.
     This is not to include them in the lp calculation
     The closed facilities will be removed from all echelons and
     also any related properties will be deleted as well, like suppliers trans cost to closed plants, etc.
     """
+    if not inplace:
+        network = copy.deepcopy(network)
+        
     original_facilities_status = network.facilities_statuses
     """filter out closed facilities from echelons"""
     network.suppliers_echelon = get_open_facilities_in_echelon(

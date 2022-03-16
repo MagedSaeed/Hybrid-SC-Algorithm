@@ -7,8 +7,7 @@ from pulp import GLPK, LpMaximize, LpProblem, LpVariable, lpSum, CPLEX_PY
 
 class LPModel:
     def __init__(self, network):
-        self.network = copy.deepcopy(network)
-        self.network = exclude_closed_facilities(self.network)
+        self.network = exclude_closed_facilities(network,inplace=False)
 
     @cached_property
     def Qkmp(self):
