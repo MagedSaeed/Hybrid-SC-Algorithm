@@ -33,6 +33,7 @@ class HybridAlgorithm:
         self.number_of_nighbors = number_of_nighbors
         self.x = x
         self.h = h
+        self.lp_model_class = lp_model_class
         self.original_net = copy.deepcopy(network)
         self.best_solution = None
 
@@ -44,18 +45,22 @@ class HybridAlgorithm:
     
     @property
     @lru_cache
-    def temp_net(self):
+    def _private_network(self):
+        """
+        This network is used for internal calculations.
+        It is initiated from the original one
+        """
         return copy.deepcopy(self.net)
 
     @lru_cache(maxsize=None)
     def evaluate_solution(self, solution):
         # assign the solution
-        self.temp_net.apply_solution(solution._list)
+        self._private_network.apply_solution(solution._list)
         # evaluate it
-        temp_model = LPModel(self.temp_net)
+        temp_model = self.lp_model_class(self._private_network)
+        solution_objective_value = temp_model.multi_objective_value
         # clean stuff
         del temp_model
-        solution_objective_value = temp_model.multi_objective_value
         # handler the case where there is no solution
         if solution_objective_value <= 0:
             return float("inf")
