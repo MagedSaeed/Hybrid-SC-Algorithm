@@ -34,8 +34,6 @@ class HybridAlgorithm:
         self.x = x
         self.h = h
         self.original_net = copy.deepcopy(network)
-        self.temp_net = copy.deepcopy(network)
-        self.model = lp_model_class(self.net)
         self.best_solution = None
 
     def transition_probability(self, current_solution, candidate_solution):
@@ -43,6 +41,11 @@ class HybridAlgorithm:
         Z_prime = self.evaluate_solution(current_solution)
         E_delta = ((Z - Z_prime) / Z_prime) * 100
         return math.exp(-E_delta / self.T)
+    
+    @property
+    @lru_cache
+    def temp_net(self):
+        return copy.deepcopy(self.net)
 
     @lru_cache(maxsize=None)
     def evaluate_solution(self, solution):
@@ -50,10 +53,9 @@ class HybridAlgorithm:
         self.temp_net.apply_solution(solution._list)
         # evaluate it
         temp_model = LPModel(self.temp_net)
-        solution_objective_value = temp_model.multi_objective_value
         # clean stuff
         del temp_model
-        # del temp_net
+        solution_objective_value = temp_model.multi_objective_value
         # handler the case where there is no solution
         if solution_objective_value <= 0:
             return float("inf")
