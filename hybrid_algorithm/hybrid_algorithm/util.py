@@ -48,6 +48,9 @@ class Solution:
         if parent is not None:
             parent.add_child_solution(self)
 
+    def __hash__(self):
+        return hash(str(self._list))
+
     def add_child_solution(self, solution):
         if solution not in self.childs:
             solution.parent = self

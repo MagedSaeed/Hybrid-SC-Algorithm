@@ -47,6 +47,7 @@ class HybridAlgorithm:
         self.temp_net = copy.deepcopy(network)
         self.model = lp_model_class(self.net)
         self.best_solution = None
+        self.solutsion_values = dict()
 
     def transition_probability(self, current_solution, candidate_solution):
         Z = self.evaluate_solution(candidate_solution)
@@ -55,6 +56,7 @@ class HybridAlgorithm:
         return math.exp(-E_delta / self.T)
 
     def evaluate_solution(self, solution):
+        if not self.solutsion_values.get(solution):
             # assign the solution
             self.temp_net.apply_solution(solution._list)
             # evaluate it
@@ -64,8 +66,11 @@ class HybridAlgorithm:
             del temp_model
             # del temp_net
             # handler the case where there is no solution
-            return float("inf")
-        return solution_objective_value
+            if solution_objective_value <= 0:
+                self.solutsion_values[solution] = float("inf")
+                return float("inf")
+            self.solutsion_values[solution] = solution_objective_value
+        return self.solutsion_values[solution]
 
     def get_backtracked_solution(self, current_solution):
         parent_solution = current_solution.parent
