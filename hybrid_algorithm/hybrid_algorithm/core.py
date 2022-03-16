@@ -95,7 +95,7 @@ class HybridAlgorithm:
         return current_solution
 
     def optimize(self, current_solution=None):
-        network = copy.deepcopy(self.net)
+        network = self.net
         if current_solution is None:
             network.apply_initial_greedy_solution()
             current_solution = (
@@ -112,7 +112,7 @@ class HybridAlgorithm:
         # add current solution to tabu list
         self.tabu_list.append(current_solution)
         if self.best_solution is None:
-            self.best_solution = copy.deepcopy(current_solution)
+            self.best_solution = current_solution
         else:
             if self.evaluate_solution(self.best_solution) > self.evaluate_solution(
                 current_solution
@@ -168,7 +168,7 @@ class HybridAlgorithm:
                 if self.evaluate_solution(self.best_solution) > self.evaluate_solution(
                     current_solution
                 ):
-                    self.best_solution = copy.deepcopy(current_solution)
+                    self.best_solution = current_solution
                     logging.info(
                         f"chaning best solution to {self.evaluate_solution(self.best_solution)}"
                     )
@@ -204,12 +204,12 @@ class HybridAlgorithm:
                 if self.evaluate_solution(self.best_solution) > self.evaluate_solution(
                     current_solution
                 ):
-                    self.best_solution = copy.deepcopy(current_solution)
+                    self.best_solution = current_solution
                     logging.info(
                         f"chaning best solution to {self.evaluate_solution(self.best_solution)}"
                     )
                 logging.debug(
-                    "current solution: {current_solution}, value: {self.evaluate_solution(current_solution)}"
+                    f"current solution: {current_solution}, value: {self.evaluate_solution(current_solution)}"
                 )
                 logging.debug(
                     f"best solution up to now: {self.best_solution} value: {self.evaluate_solution(self.best_solution)}"
