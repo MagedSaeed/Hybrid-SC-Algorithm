@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import List
 
 from beautifultable import BeautifulTable
 from hybrid_algorithm.config import AppConfig
@@ -41,6 +40,33 @@ class SupplyChainNetwork:
             DistributionCenterFacility.get_random_echelon()
         )
         self.markets_echelon = MarketFacility.get_random_echelon()
+
+    @classmethod
+    def initialize_network_from_echelons(
+        cls,
+        suppliers,
+        plants,
+        warehouses,
+        dist_centers,
+        markets,
+    ):
+        network = cls()
+        network.suppliers_echelon = suppliers
+        network.plants_echelon = plants
+        network.warehouses_echelon = warehouses
+        network.distribution_centers_echelon = dist_centers
+        network.markets_echelon = markets
+        return network
+
+    @classmethod
+    def make_a_copy(cls, network):
+        return cls.initialize_network_from_echelons(
+            suppliers=network.suppliers_echelon,
+            plants=network.plants_echelon,
+            warehouses=network.warehouses_echelon,
+            dist_centers=network.distribution_centers_echelon,
+            markets=network.markets_echelon,
+        )
 
     @property
     def echelons(self):
