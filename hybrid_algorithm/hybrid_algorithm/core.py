@@ -43,8 +43,8 @@ class HybridAlgorithm:
         ), "number of neighbors should be greater than 0"
 
     def transition_probability(self, current_solution, candidate_solution):
-        Z = self.evaluate_solution(candidate_solution)
-        Z_prime = self.evaluate_solution(current_solution)
+        Z = self.evaluate_solution_optimal(candidate_solution)
+        Z_prime = self.evaluate_solution_optimal(current_solution)
         E_delta = ((Z - Z_prime) / Z_prime) * 100
         return math.exp(-E_delta / self.T)
 
@@ -56,31 +56,6 @@ class HybridAlgorithm:
         It is initiated from the original one
         """
         return copy.deepcopy(self.net)
-
-    @lru_cache(maxsize=None)
-    def evaluate_solution(self, solution):
-        # assign the solution
-        self._private_network.apply_solution(solution._list)
-        # evaluate it
-        temp_model = self.lp_model_class(self._private_network)
-        solution_objective_value = temp_model.multi_objective_value
-        # clean stuff
-        del temp_model
-        # handler the case where there is no solution
-        if solution_objective_value <= 0:
-            return float("inf")
-        return solution_objective_value
-
-    @lru_cache(maxsize=None)
-    def evaluate_solution_greedy(self, solution):
-        network = self._private_network
-        network.apply_solution(solution)
-        greedy_value = 0
-        for echelon in network.echelons:
-            for facility in echelon:
-                if facility.is_open:
-                    greedy_value += facility.greedy_rank()
-        return greedy_value
 
     def get_backtracked_solution(self, current_solution):
         parent_solution = current_solution.parent
@@ -96,7 +71,9 @@ class HybridAlgorithm:
         if len(current_solution.childs) > 0:
             # the best solution is the first as they are sorted based on their objective value
             best_solution_candidate = current_solution.childs[0]
-            if self.evaluate_solution(best_solution_candidate) < self.evaluate_solution(
+            if self.evaluate_solution_optimal(
+                best_solution_candidate
+            ) < self.evaluate_solution_optimal(
                 current_solution
             ) or self.x < self.transition_probability(
                 current_solution, best_solution_candidate
@@ -105,10 +82,24 @@ class HybridAlgorithm:
                 if best_solution_candidate not in self.tabu_list:
                     self.tabu_list.append(best_solution_candidate)
                     logging.debug(
-                        f"updating current solution to: {self.evaluate_solution(best_solution_candidate)}",
+                        f"updating current solution to: {self.evaluate_solution_optimal(best_solution_candidate)}",
                     )
                     return best_solution_candidate
         return current_solution
+
+    @lru_cache(maxsize=None)
+    def evaluate_solution_optimal(self, solution):
+        return Solution.evaluate_solution_optimal(
+            solution=solution,
+            network=self._private_network,
+        )
+
+    @lru_cache(maxsize=None)
+    def evaluate_solution_greedy(self, solution):
+        return Solution.evaluate_solution_greedy(
+            solution=solution,
+            network=self._private_network,
+        )
 
     def optimize(self, current_solution=None):
         network = self.net
@@ -116,16 +107,16 @@ class HybridAlgorithm:
             network.apply_initial_greedy_solution()
             current_solution = Solution(network.facilities_statuses)
         logging.info(
-            f"initial solution: {current_solution}, value: {self.evaluate_solution(current_solution)}"
+            f"initial solution: {current_solution}, value: {self.evaluate_solution_optimal(current_solution)}"
         )
         # add current solution to tabu list
         self.tabu_list.append(current_solution)
         if self.best_solution is None:
             self.best_solution = current_solution
         else:
-            if self.evaluate_solution(self.best_solution) > self.evaluate_solution(
-                current_solution
-            ):
+            if self.evaluate_solution_optimal(
+                self.best_solution
+            ) > self.evaluate_solution_optimal(current_solution):
                 self.best_solution = current_solution
 
         while self.T > self.Tf:
@@ -163,7 +154,7 @@ class HybridAlgorithm:
                 current_solution.add_childs_solutions(neighbors[: self.h])
 
                 # sort childs based on their lp_model evaluation
-                current_solution.childs.sort(key=self.evaluate_solution)
+                current_solution.childs.sort(key=self.evaluate_solution_optimal)
 
                 # see if one of the childs dominates the current solution. This
                 # also includes the transition anealing hea
@@ -171,12 +162,12 @@ class HybridAlgorithm:
 
                 # see if the new current solution is better than our best solution.
                 # if so, update our best solution
-                if self.evaluate_solution(self.best_solution) > self.evaluate_solution(
-                    current_solution
-                ):
+                if self.evaluate_solution_optimal(
+                    self.best_solution
+                ) > self.evaluate_solution_optimal(current_solution):
                     self.best_solution = current_solution
                     logging.info(
-                        f"chaning best solution to {self.evaluate_solution(self.best_solution)}"
+                        f"chaning best solution to {self.evaluate_solution_optimal(self.best_solution)}"
                     )
                 # -------------------------------
                 # Local Search
@@ -186,7 +177,7 @@ class HybridAlgorithm:
                 local_neighbors = local_vns.generate_sorted_non_tabu_solutions(
                     K=self.K,
                     tabu_list=self.tabu_list,
-                    sorting_function=self.evaluate_solution,
+                    sorting_function=self.evaluate_solution_optimal,
                     sorting_reversed=False,
                     generation_methods=VNS.SolutionGenerationMethods.LOCAL_SEARCH_METHODS,
                 )
@@ -195,23 +186,23 @@ class HybridAlgorithm:
                 current_solution.add_childs_solutions(local_neighbors)
 
                 # sort childs based on their lp_model evaluation
-                current_solution.childs.sort(key=self.evaluate_solution)
+                current_solution.childs.sort(key=self.evaluate_solution_optimal)
 
                 # see if the new current solution is better than our best solution.
                 # if so, update our best solution
                 current_solution = self.check_dominant_solution(current_solution)
-                if self.evaluate_solution(self.best_solution) > self.evaluate_solution(
-                    current_solution
-                ):
+                if self.evaluate_solution_optimal(
+                    self.best_solution
+                ) > self.evaluate_solution_optimal(current_solution):
                     self.best_solution = current_solution
                     logging.info(
-                        f"chaning best solution to {self.evaluate_solution(self.best_solution)}"
+                        f"chaning best solution to {self.evaluate_solution_optimal(self.best_solution)}"
                     )
                 logging.debug(
-                    f"current solution: {current_solution}, value: {self.evaluate_solution(current_solution)}"
+                    f"current solution: {current_solution}, value: {self.evaluate_solution_optimal(current_solution)}"
                 )
                 logging.debug(
-                    f"best solution up to now: {self.best_solution} value: {self.evaluate_solution(self.best_solution)}"
+                    f"best solution up to now: {self.best_solution} value: {self.evaluate_solution_optimal(self.best_solution)}"
                 )
                 logging.debug(f"updating k from {k} to {k+1}")
                 k += 1
@@ -219,6 +210,6 @@ class HybridAlgorithm:
             self.T *= self.alpha
             logging.info(f'{"new T".center(40, "-")}{self.T}')
             logging.info(
-                f"best solution up to now: {self.best_solution} value: {self.evaluate_solution(self.best_solution)}"
+                f"best solution up to now: {self.best_solution} value: {self.evaluate_solution_optimal(self.best_solution)}"
             )
         return self.best_solution

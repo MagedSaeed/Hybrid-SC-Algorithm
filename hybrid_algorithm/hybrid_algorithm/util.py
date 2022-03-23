@@ -1,3 +1,7 @@
+from functools import lru_cache
+from hybrid_algorithm.lp_model import LPModel
+
+
 class TabuList(list):
 
     # Read-only
@@ -51,6 +55,21 @@ class Solution:
     def __hash__(self):
         return hash(str(self._list))
 
+    def __eq__(self, other):
+        return other._list == self._list
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def is_root(self):
+        return self.parent is None
+
+    def __repr__(self) -> str:
+        return str(self._list)
+
+    def __iter__(self):
+        return iter(self._list)
+
     def add_child_solution(self, solution):
         if solution not in self.childs:
             solution.parent = self
@@ -70,17 +89,26 @@ class Solution:
             )
         )
 
-    def __eq__(self, other):
-        return other._list == self._list
+    @staticmethod
+    def evaluate_solution_greedy(solution, network):
+        network.apply_solution(solution)
+        greedy_value = 0
+        for echelon in network.echelons:
+            for facility in echelon:
+                if facility.is_open:
+                    greedy_value += facility.greedy_rank()
+        return greedy_value
 
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def is_root(self):
-        return self.parent is None
-
-    def __repr__(self) -> str:
-        return str(self._list)
-
-    def __iter__(self):
-        return iter(self._list)
+    @staticmethod
+    def evaluate_solution_optimal(solution, network, lp_model_class=LPModel):
+        # assign the solution
+        network.apply_solution(solution._list)
+        # evaluate it
+        temp_model = lp_model_class(network)
+        solution_objective_value = temp_model.multi_objective_value
+        # clean stuff
+        del temp_model
+        # handler the case where there is no solution
+        if solution_objective_value <= 0:
+            return float("inf")
+        return solution_objective_value
