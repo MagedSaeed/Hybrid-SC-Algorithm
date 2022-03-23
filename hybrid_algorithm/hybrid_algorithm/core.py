@@ -19,6 +19,7 @@ class HybridAlgorithm:
         K=5,
         tabu_size=15,
         number_of_nighbors=5,
+        neighbors_percentage=0.15,
         x=0.2,
         lp_model_class=LPModel,
         h=3,
@@ -31,18 +32,22 @@ class HybridAlgorithm:
         self.tabu_size = tabu_size
         self.tabu_list = TabuList(self.tabu_size)
         self.number_of_nighbors = number_of_nighbors
+        self.neighbors_percentage = neighbors_percentage
         self.x = x
         self.h = h
         self.lp_model_class = lp_model_class
         self.original_net = copy.deepcopy(network)
         self.best_solution = None
+        assert (
+            self.number_of_nighbors > 0
+        ), "number of neighbors should be greater than 0"
 
     def transition_probability(self, current_solution, candidate_solution):
         Z = self.evaluate_solution(candidate_solution)
         Z_prime = self.evaluate_solution(current_solution)
         E_delta = ((Z - Z_prime) / Z_prime) * 100
         return math.exp(-E_delta / self.T)
-    
+
     @property
     @lru_cache
     def _private_network(self):
@@ -65,6 +70,17 @@ class HybridAlgorithm:
         if solution_objective_value <= 0:
             return float("inf")
         return solution_objective_value
+
+    @lru_cache(maxsize=None)
+    def evaluate_solution_greedy(self, solution):
+        network = self._private_network
+        network.apply_solution(solution)
+        greedy_value = 0
+        for echelon in network.echelons:
+            for facility in echelon:
+                if facility.is_open:
+                    greedy_value += facility.greedy_rank()
+        return greedy_value
 
     def get_backtracked_solution(self, current_solution):
         parent_solution = current_solution.parent
