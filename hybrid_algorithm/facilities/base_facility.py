@@ -16,3 +16,10 @@ class BaseFacility:
         cls.NUMBER_OF_RAW_MATERIALS = int(config["facilities"]["raw_materials_count"])
         cls.NUMBER_OF_MARKETS = int(config["facilities"]["markets_count"])
         cls.NUMBER_OF_PRODUCTS = int(config["facilities"]["products_count"])
+
+    def greedy_rank(self):
+        """
+        This function will return the echelon facilities sorted
+        based on the greedy formula proposed in the greedy initial solution,
+        """
+        return (self.fixed_cost / self.capacity.sum()) + self.transportation_cost
