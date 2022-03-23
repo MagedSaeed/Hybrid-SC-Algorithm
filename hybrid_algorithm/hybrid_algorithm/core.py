@@ -131,6 +131,8 @@ class HybridAlgorithm:
         while self.T > self.Tf:
             k = 0
             while k < self.K:
+                network.apply_solution(current_solution)
+                vns = VNS(network)
                 # -------------------------------
                 # find neighbors
                 # -------------------------------
@@ -179,8 +181,9 @@ class HybridAlgorithm:
                 # -------------------------------
                 # Local Search
                 # -------------------------------
-                # vns.network.apply_solution(current_solution)
-                local_neighbors = vns.generate_sorted_non_tabu_solutions(
+                network.apply_solution(current_solution)
+                local_vns = VNS(network)
+                local_neighbors = local_vns.generate_sorted_non_tabu_solutions(
                     K=self.K,
                     tabu_list=self.tabu_list,
                     sorting_function=self.evaluate_solution,
