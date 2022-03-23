@@ -57,7 +57,18 @@ class Solution:
             self.childs.append(solution)
 
     def add_childs_solutions(self, solutions):
-        self.childs.extend(solutions)
+        new_solutions = set(set(solutions) - set(self.childs))
+        for solution in new_solutions:
+            solution.parent = self
+            self.childs.append(solution)
+
+    def filter_solutions(self, filtering_function=None):
+        self.childs = list(
+            filter(
+                filtering_function,
+                self.childs,
+            )
+        )
 
     def __eq__(self, other):
         return other._list == self._list
