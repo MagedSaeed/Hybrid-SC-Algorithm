@@ -10,7 +10,10 @@ from hybrid_algorithm.facilities import (
     SupplierFacility,
     WarehouseFacility,
 )
-from hybrid_algorithm.utils import get_open_facilities_in_echelon
+from hybrid_algorithm.utils import (
+    facilities_greedy_sort,
+    get_open_facilities_in_echelon,
+)
 
 FACILITIES_DEFAULT = AppConfig.config["facilities"]
 
@@ -77,18 +80,6 @@ class SupplyChainNetwork:
             self.distribution_centers_echelon,
         ]
 
-    @staticmethod
-    def echelon_greedy_sort(echelon):
-        """
-        This function will return the echelon facilities sorted based on the greedy formula proposed in the greedy initial solution,
-        """
-        sorted_facilities = sorted(
-            echelon,
-            key=lambda facility: (facility.fixed_cost / facility.capacity.sum())
-            + facility.transportation_cost,
-        )
-        return sorted_facilities
-
     def apply_initial_greedy_solution(self):
         market_demand = sum(
             market.products_demand.sum() for market in self.markets_echelon
@@ -102,7 +93,7 @@ class SupplyChainNetwork:
         for k in range(len(echelons)):
             echelon = echelons[k]
             echelon_open_facilities_capacity = 0
-            sorted_echelon = SupplyChainNetwork.echelon_greedy_sort(echelon)
+            sorted_echelon = facilities_greedy_sort(echelon)
             for facility in sorted_echelon:
                 if echelon_open_facilities_capacity < previous_echelon_demand:
                     facility.is_open = 1

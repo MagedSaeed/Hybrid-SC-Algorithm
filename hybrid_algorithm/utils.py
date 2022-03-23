@@ -14,7 +14,14 @@ def reset_dict_entries(dict_obj):
     return new_dict
 
 
-def exclude_closed_facilities(network,inplace=False):
+def facilities_greedy_sort(facilities):
+    return sorted(
+        facilities,
+        key=lambda facility: facility.greedy_rank(),
+    )
+
+
+def exclude_closed_facilities(network, inplace=False):
     """
     This method will remove the closed facilities from the network.
     This is not to include them in the lp calculation
@@ -23,7 +30,7 @@ def exclude_closed_facilities(network,inplace=False):
     """
     if not inplace:
         network = copy.deepcopy(network)
-        
+
     original_facilities_status = network.facilities_statuses
     """filter out closed facilities from echelons"""
     network.suppliers_echelon = get_open_facilities_in_echelon(
