@@ -28,7 +28,7 @@ class HybridAlgorithm:
         self.T = T
         self.Tf = Tf
         self.alpha = alpha
-        self.K = K
+        self.K = int(K)
         self.tabu_size = tabu_size
         self.tabu_list = TabuList(self.tabu_size)
         self.number_of_nighbors = number_of_nighbors
@@ -138,37 +138,21 @@ class HybridAlgorithm:
         while self.T > self.Tf:
             k = 0
             while k < self.K:
-                for shaking_method in (
-                    "move_inversion_shaking",
-                    "multiple_swaps_shaking",
-                ):
-                    # -------------------------------
-                    # find neighbors
-                    # -------------------------------
-                    for _ in range(self.number_of_nighbors):
-                        # shake
-                        getattr(vns, shaking_method)()
-                        # save the solution to the explored solutions
-                        current_solution.add_child_solution(
-                            Solution(network.facilities_statuses)
-                        )
-                # exclude corrupted and tabu solutions
-                current_solution.childs = list(
-                    filter(
-                        lambda solution: self.evaluate_solution(solution)
-                        != float("inf")
-                        and solution not in self.tabu_list,
-                        current_solution.childs,
-                    )
+                # -------------------------------
+                # find neighbors
+                # -------------------------------
+                neighbors = vns.generate_sorted_non_tabu_solutions(
+                    K=self.number_of_nighbors,
+                    tabu_list=self.tabu_list,
+                    sorting_function=self.evaluate_solution_greedy,
+                    sorting_reversed=True,
+                    generation_methods=VNS.SolutionGenerationMethods.SHAKING_METHODS,
                 )
-                # sort solutions based on their evaluation, i.e. objective value
-                current_solution.childs.sort(key=self.evaluate_solution)
-
                 # -------------------------------
                 # backtracking if no selected solution found
                 # -------------------------------
                 # if there is no selected solution,
-                if len(current_solution.childs) == 0:
+                if len(neighbors) == 0:
                     # backtrack
                     logging.debug("No shaking solutions found. Backtracking..")
                     backtracked_solution = self.get_backtracked_solution(
@@ -177,10 +161,21 @@ class HybridAlgorithm:
                     return self.optimize(current_solution=backtracked_solution)
 
                 # add best h solutions to the tabu list
-                self.tabu_list.extend(current_solution.childs[: self.h])
+                self.tabu_list.extend(neighbors[: self.h])
                 logging.debug(f"tabu list size: {len(self.tabu_list)}")
 
+                # make best h solutions as childs to the current solutions
+                current_solution.add_childs_solutions(neighbors[: self.h])
+
+                # sort childs based on their lp_model evaluation
+                current_solution.childs.sort(key=self.evaluate_solution)
+
+                # see if one of the childs dominates the current solution. This
+                # also includes the transition anealing hea
                 current_solution = self.check_dominant_solution(current_solution)
+
+                # see if the new current solution is better than our best solution.
+                # if so, update our best solution
                 if self.evaluate_solution(self.best_solution) > self.evaluate_solution(
                     current_solution
                 ):
@@ -191,31 +186,23 @@ class HybridAlgorithm:
                 # -------------------------------
                 # Local Search
                 # -------------------------------
-                for local_search_method in (
-                    "two_exchange_local_search",
-                    "adjacent_swap_local_search",
-                ):
-                    for _ in range(self.number_of_nighbors):
-                        # local_search
-                        getattr(vns, local_search_method)()
-                        # save the solution to the explored solutions
-                        current_solution.add_child_solution(
-                            Solution(network.facilities_statuses)
-                        )
-                # exclude corrupted and tabu solutions
-                current_solution.childs = list(
-                    filter(
-                        lambda solution: self.evaluate_solution(solution)
-                        != float("inf")
-                        and solution not in self.tabu_list,
-                        current_solution.childs,
-                    )
+                # vns.network.apply_solution(current_solution)
+                local_neighbors = vns.generate_sorted_non_tabu_solutions(
+                    K=self.K,
+                    tabu_list=self.tabu_list,
+                    sorting_function=self.evaluate_solution,
+                    sorting_reversed=False,
+                    generation_methods=VNS.SolutionGenerationMethods.LOCAL_SEARCH_METHODS,
                 )
-                # sort solutions based on their evaluation, i.e. objective value
-                current_solution.childs.sort(key=self.evaluate_solution)
-                # keep only the best h childs
-                current_solution.childs = current_solution.childs[: self.h]
 
+                # keep all local neighbors
+                current_solution.add_childs_solutions(local_neighbors)
+
+                # sort childs based on their lp_model evaluation
+                current_solution.childs.sort(key=self.evaluate_solution)
+
+                # see if the new current solution is better than our best solution.
+                # if so, update our best solution
                 current_solution = self.check_dominant_solution(current_solution)
                 if self.evaluate_solution(self.best_solution) > self.evaluate_solution(
                     current_solution

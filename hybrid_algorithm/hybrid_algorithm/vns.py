@@ -1,7 +1,18 @@
 import random
+from .util import Solution
 
 
 class VNS:
+    class SolutionGenerationMethods:
+        SHAKING_METHODS = [
+            "move_inversion_shaking",
+            "multiple_swaps_shaking",
+        ]
+        LOCAL_SEARCH_METHODS = [
+            "two_exchange_local_search",
+            "adjacent_swap_local_search",
+        ]
+
     def __init__(self, network):
         self.net = network
         self.echelons_to_apply = random.sample(
@@ -76,3 +87,26 @@ class VNS:
                 echelon[nearest_element_index],
                 echelon[random_element_index],
             )
+
+    def generate_sorted_non_tabu_solutions(
+        self,
+        K,
+        tabu_list,
+        sorting_function,
+        sorting_reversed=False,
+        generation_methods=SolutionGenerationMethods.SHAKING_METHODS,
+    ):
+        solutions = set()
+        for method in generation_methods:
+            # -------------------------------
+            # find solutions with the provided
+            # solution generation methods
+            # -------------------------------
+            for _ in range(K):
+                getattr(self, method)()
+                solutions.add(Solution(self.net.facilities_statuses))
+        # exclude tabu solutions
+        solutions -= set(tabu_list)
+        # sort solutions based on their evaluation, i.e. objective value
+        solutions = sorted(solutions, key=sorting_function, reverse=sorting_reversed)
+        return solutions
