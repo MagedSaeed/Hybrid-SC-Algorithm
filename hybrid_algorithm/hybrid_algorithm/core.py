@@ -114,14 +114,7 @@ class HybridAlgorithm:
         network = self.net
         if current_solution is None:
             network.apply_initial_greedy_solution()
-            current_solution = (
-                Solution(network.facilities_statuses)
-                if current_solution is None
-                else current_solution
-            )
-        else:
-            network.apply_solution(current_solution)
-        vns = VNS(network)
+            current_solution = Solution(network.facilities_statuses)
         logging.info(
             f"initial solution: {current_solution}, value: {self.evaluate_solution(current_solution)}"
         )
