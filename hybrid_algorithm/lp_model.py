@@ -7,7 +7,7 @@ from pulp import GLPK, LpMaximize, LpProblem, LpVariable, lpSum, CPLEX_PY
 
 class LPModel:
     def __init__(self, network):
-        self.network = exclude_closed_facilities(network,inplace=False)
+        self.network = exclude_closed_facilities(network, inplace=False)
 
     @cached_property
     def Qkmp(self):
@@ -72,7 +72,7 @@ class LPModel:
         return Zjkp
 
     @property
-    def Z1(self):
+    def Z1_objective_function(self):
         net = self.network
         EX = sum(facility.fixed_cost for facility in self.network.plants_echelon)
         FY = sum(facility.fixed_cost for facility in self.network.warehouses_echelon)
@@ -178,7 +178,7 @@ class LPModel:
         return Qkmp_sum - (EX + FY + GZ + Xsit_sum + Yijp_sum + Zjkp_sum)
 
     @property
-    def Z2(self):
+    def Z2_objective_function(self):
         net = self.network
         U_coeffs = [
             sum(
@@ -260,7 +260,7 @@ class LPModel:
         return U + X + Y + Z
 
     @property
-    def Z3(self):
+    def Z3_objective_function(self):
         net = self.network
         EFX = sum(X.opening_env_impact * X.is_open for X in net.plants_echelon)
         EWY = sum(Y.opening_env_impact * Y.is_open for Y in net.warehouses_echelon)
@@ -455,12 +455,9 @@ class LPModel:
 
         return constrains
 
-    @property
-    def multi_objective_value(self):
+    def _get_objective_value(self, objective_function):
         model = LpProblem(name="Supply-Chain-Network", sense=LpMaximize)
-        # model += self.Z1 - self.Z2 - self.Z3
-        model += self.Z1
-
+        model += objective_function
         for constrain in self.constrains:
             model += constrain
         # status = model.solve(solver=GLPK(msg=True))
@@ -468,3 +465,23 @@ class LPModel:
         if status == 1:
             return model.objective.value()
         return status
+
+    @cached_property
+    def Z1_objective_value(self):
+        return self._get_objective_value(objective_function=self.Z1_objective_function)
+
+    @cached_property
+    def Z2_objective_value(self):
+        return self._get_objective_value(objective_function=self.Z2_objective_function)
+
+    @cached_property
+    def Z3_objective_value(self):
+        return self._get_objective_value(objective_function=self.Z3_objective_function)
+
+    @cached_property
+    def multi_objective_value(self):
+        return self._get_objective_value(
+            objective_function=self.Z1_objective_function
+            - self.Z2_objective_function
+            - self.Z3_objective_function
+        )
