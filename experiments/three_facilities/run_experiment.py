@@ -141,3 +141,4 @@ for tabu_size in tabu_sizes:
                     )
                     print("#" * 80)
                     print("#" * 80)
+results_file.close()
