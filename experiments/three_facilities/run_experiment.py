@@ -44,14 +44,18 @@ headers = [
     "Tf",
     "alpha",
     "K",
-    "Z1",
-    "normalized Z1",
-    "Z2",
-    "normalized Z2",
-    "Z3",
-    "normalized Z3",
-    "multi objective value",
-    "normalized multi objective value",
+    "initial Z1",
+    "optimized Z1",
+    "normalized optimized Z1",
+    "initila Z2",
+    "optimized Z2",
+    "normalized optimized Z2",
+    "initila Z3",
+    "optimized Z3",
+    "normalized optimized Z3",
+    "initila multi objective value",
+    "optimized multi objective value",
+    "normalized optimized multi objective value",
 ]
 results_writer.writerow(headers)
 
@@ -68,6 +72,11 @@ for tabu_size in tabu_sizes:
                     )
                     net.initialize_random_network()
                     net.apply_initial_greedy_solution()
+                    model = LPModel(net)
+                    initial_z1 = model.Z1_objective_value
+                    initial_z2 = model.Z2_objective_value
+                    initial_z3 = model.Z3_objective_value
+                    initial_multi_objective_value = model.multi_objective_value
                     optimizer = HybridAlgorithm(
                         network=net,
                         T=T,
@@ -78,14 +87,14 @@ for tabu_size in tabu_sizes:
                     solution = optimizer.optimize()
                     net.apply_solution(solution)
                     model = LPModel(net)
-                    z1 = model.Z1_objective_value
-                    normalized_z1 = model.Z1_normalized_objective_value
-                    z2 = model.Z2_objective_value
-                    normalized_z2 = model.Z2_normalized_objective_value
-                    z3 = model.Z3_objective_value
-                    normalized_z3 = model.Z3_normalized_objective_value
-                    multi_objective_value = model.multi_objective_value
-                    normalized_multi_objective_value = (
+                    optimized_z1 = model.Z1_objective_value
+                    normalized_optimized_z1 = model.Z1_normalized_objective_value
+                    optimized_z2 = model.Z2_objective_value
+                    normalized_optimized_z2 = model.Z2_normalized_objective_value
+                    optimized_z3 = model.Z3_objective_value
+                    normalized_optimized_z3 = model.Z3_normalized_objective_value
+                    optimized_multi_objective_value = model.multi_objective_value
+                    normalized_optimized_multi_objective_value = (
                         model.normalized_multi_objective_value
                     )
                     results_writer.writerow(
@@ -95,14 +104,18 @@ for tabu_size in tabu_sizes:
                             Tf,
                             alpha,
                             K,
-                            z1,
-                            normalized_z1,
-                            z2,
-                            normalized_z2,
-                            z3,
-                            normalized_z3,
-                            multi_objective_value,
-                            normalized_multi_objective_value,
+                            initial_z1,
+                            optimized_z1,
+                            normalized_optimized_z1,
+                            initial_z2,
+                            optimized_z2,
+                            normalized_optimized_z2,
+                            initial_z3,
+                            optimized_z3,
+                            normalized_optimized_z3,
+                            initial_multi_objective_value,
+                            optimized_multi_objective_value,
+                            normalized_optimized_multi_objective_value,
                         ]
                     )
 results_writer.close()
