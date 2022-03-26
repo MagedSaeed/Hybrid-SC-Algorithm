@@ -1,3 +1,4 @@
+import time
 from hybrid_algorithm import SupplyChainNetwork, HybridAlgorithm, LPModel
 import random
 import numpy as np
@@ -56,6 +57,7 @@ headers = [
     "initila multi objective value",
     "optimized multi objective value",
     "normalized optimized multi objective value",
+    "optimization running time",
 ]
 results_writer.writerow(headers)
 
@@ -77,6 +79,7 @@ for tabu_size in tabu_sizes:
                     initial_z2 = model.Z2_objective_value
                     initial_z3 = model.Z3_objective_value
                     initial_multi_objective_value = model.multi_objective_value
+                    start_time = time.time()
                     optimizer = HybridAlgorithm(
                         network=net,
                         T=T,
@@ -85,6 +88,7 @@ for tabu_size in tabu_sizes:
                         K=K,
                     )
                     solution = optimizer.optimize()
+                    end_time = time.time()
                     net.apply_solution(solution)
                     model = LPModel(net)
                     optimized_z1 = model.Z1_objective_value
@@ -97,6 +101,7 @@ for tabu_size in tabu_sizes:
                     normalized_optimized_multi_objective_value = (
                         model.normalized_multi_objective_value
                     )
+                    running_time = round(end_time - start_time, 2)
                     results_writer.writerow(
                         [
                             tabu_size,
@@ -116,6 +121,23 @@ for tabu_size in tabu_sizes:
                             initial_multi_objective_value,
                             optimized_multi_objective_value,
                             normalized_optimized_multi_objective_value,
+                            running_time,
                         ]
                     )
-results_writer.close()
+                    print("#" * 80)
+                    print("#" * 80)
+                    print(
+                        "done with tabu size:",
+                        tabu_size,
+                        "T:",
+                        T,
+                        "Tf:",
+                        Tf,
+                        "alpha",
+                        alpha,
+                        "K",
+                        K,
+                        f"in {running_time} seconds",
+                    )
+                    print("#" * 80)
+                    print("#" * 80)
