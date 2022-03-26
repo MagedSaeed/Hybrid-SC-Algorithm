@@ -1,8 +1,8 @@
 from functools import cached_property
-import copy
 from hybrid_algorithm.utils import exclude_closed_facilities
 
-from pulp import GLPK, LpMaximize, LpProblem, LpVariable, lpSum, CPLEX_PY
+from pulp import GLPK, LpMaximize, LpMinimize, LpProblem, LpVariable, lpSum, CPLEX_PY
+from hybrid_algorithm.config import AppConfig
 
 
 class LPModel:
@@ -178,7 +178,7 @@ class LPModel:
         return Qkmp_sum - (EX + FY + GZ + Xsit_sum + Yijp_sum + Zjkp_sum)
 
     @property
-    def Z2_objective_function(self):
+    def Z2_objective_value(self):
         net = self.network
         U_coeffs = [
             sum(
@@ -466,13 +466,23 @@ class LPModel:
             return model.objective.value()
         return status
 
+    def _get_normalized_objective_value(
+        self,
+        objective_value,
+        max_value,
+        min_value,
+        sense=LpMaximize,
+    ):
+        if sense == LpMaximize:
+            numerator = max_value - objective_value
+        elif sense == LpMinimize:
+            numerator = objective_value - max_value
+        denumerator = min_value
+        return numerator / denumerator
+
     @cached_property
     def Z1_objective_value(self):
         return self._get_objective_value(objective_function=self.Z1_objective_function)
-
-    @cached_property
-    def Z2_objective_value(self):
-        return self._get_objective_value(objective_function=self.Z2_objective_function)
 
     @cached_property
     def Z3_objective_value(self):
@@ -482,6 +492,46 @@ class LPModel:
     def multi_objective_value(self):
         return self._get_objective_value(
             objective_function=self.Z1_objective_function
-            - self.Z2_objective_function
+            - self.Z2_objective_value
             - self.Z3_objective_function
+        )
+
+    @cached_property
+    def Z1_normalized_objective_value(self):
+        max_value = int(AppConfig.config["lp_model"]["z1_max"])
+        min_value = int(AppConfig.config["lp_model"]["z1_min"])
+        return self._get_normalized_objective_value(
+            objective_value=self.Z1_objective_value,
+            max_value=max_value,
+            min_value=min_value,
+        )
+
+    @cached_property
+    def Z2_normalized_objective_value(self):
+        max_value = int(AppConfig.config["lp_model"]["z2_max"])
+        min_value = int(AppConfig.config["lp_model"]["z2_min"])
+        return self._get_normalized_objective_value(
+            objective_value=self.Z2_objective_value,
+            max_value=max_value,
+            min_value=min_value,
+        )
+
+    @cached_property
+    def Z3_normalized_objective_value(self):
+        max_value = int(AppConfig.config["lp_model"]["z3_max"])
+        min_value = int(AppConfig.config["lp_model"]["z3_min"])
+        return self._get_normalized_objective_value(
+            objective_value=self.Z3_objective_value,
+            max_value=max_value,
+            min_value=min_value,
+        )
+
+    @cached_property
+    def normalized_multi_objective_value(self):
+        max_value = int(AppConfig.config["lp_model"]["multi_max"])
+        min_value = int(AppConfig.config["lp_model"]["multi_min"])
+        return self._get_normalized_objective_value(
+            objective_value=self.multi_objective_value,
+            max_value=max_value,
+            min_value=min_value,
         )
