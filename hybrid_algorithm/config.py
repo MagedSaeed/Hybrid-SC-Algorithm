@@ -1,5 +1,6 @@
 from configparser import ConfigParser
 import logging
+import os
 
 import sys
 
@@ -18,13 +19,18 @@ class AppConfigMeta(type):
 
 class AppConfig(metaclass=AppConfigMeta):
     _config = None
-    config_file_path = "hybrid_algorithm/default_config.ini"
+    default_config_file_path = "hybrid_algorithm/default_config.ini"
+    config_file_path = None
 
     @classmethod
     def _configure(cls):
         cls._config = ConfigParser()
-        cls._config.read(cls.config_file_path)
-        logging.basicConfig(level=getattr(logging, cls.config["logging"]["level"]))
+        cls._config.read(cls.default_config_file_path)
+        if cls.config_file_path is not None:
+            if not os.path.isfile(cls.config_file_path):
+                raise ValueError(f"{cls.config_file_path} if not a valid file path")
+            cls._config.read(cls.config_file_path)
+            logging.basicConfig(level=getattr(logging, cls.config["logging"]["level"]))
 
     @classmethod
     def configure(cls, config_file_path=None):
