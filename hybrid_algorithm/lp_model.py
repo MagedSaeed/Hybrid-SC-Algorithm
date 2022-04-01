@@ -456,7 +456,7 @@ class LPModel:
         return constrains
 
     def _get_objective_value(self, objective_function):
-        model = LpProblem(name="Supply-Chain-Network", sense=LpMaximize)
+        model = LpProblem(name="Supply-Chain-Network", sense=LpMinimize)
         model += objective_function
         for constrain in self.constrains:
             model += constrain
@@ -482,7 +482,7 @@ class LPModel:
 
     @cached_property
     def Z1_objective_value(self):
-        return self._get_objective_value(objective_function=self.Z1_objective_function)
+        return self._get_objective_value(objective_function=-self.Z1_objective_function)
 
     @cached_property
     def Z3_objective_value(self):
@@ -491,9 +491,9 @@ class LPModel:
     @cached_property
     def multi_objective_value(self):
         return self._get_objective_value(
-            objective_function=self.Z1_objective_function
-            - self.Z2_objective_value
-            - self.Z3_objective_function
+            objective_function=-self.Z1_objective_function
+            + self.Z2_objective_value
+            + self.Z3_objective_function
         )
 
     @cached_property
