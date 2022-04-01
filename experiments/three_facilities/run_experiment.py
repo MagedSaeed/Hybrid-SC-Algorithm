@@ -93,6 +93,7 @@ for tabu_size in tabu_sizes:
                     )
                     best_solution, intermediate_solutions = optimizer.optimize()
                     end_time = time.time()
+                    running_time = round(end_time - start_time, 2)
                     if best_solution in intermediate_solutions:
                         intermediate_solutions.remove(best_solution)
                     intermediate_solutions = sorted(
@@ -124,7 +125,6 @@ for tabu_size in tabu_sizes:
                         weighted_multi_objective_value = (
                             model.weighted_multi_objective_value
                         )
-                        running_time = round(end_time - start_time, 2)
                         results_writer.writerow(
                             [
                                 solution_index,
