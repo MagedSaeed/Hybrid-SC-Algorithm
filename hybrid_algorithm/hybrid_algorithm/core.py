@@ -157,6 +157,15 @@ class HybridAlgorithm:
                 # make best h solutions as childs to the current solutions
                 current_solution.add_childs_solutions(neighbors[: self.h])
 
+                # filter out corrupted solutions
+                current_solution.childs = list(
+                    filter(
+                        lambda solution: self.evaluate_solution_optimal(solution)
+                        != float("inf"),
+                        current_solution.childs,
+                    )
+                )
+
                 # sort childs based on their lp_model evaluation
                 current_solution.childs.sort(key=self.evaluate_solution_optimal)
 
@@ -188,6 +197,15 @@ class HybridAlgorithm:
 
                 # keep all local neighbors
                 current_solution.add_childs_solutions(local_neighbors)
+
+                # filter out corrupted solutions
+                current_solution.childs = list(
+                    filter(
+                        lambda solution: self.evaluate_solution_optimal(solution)
+                        != float("inf"),
+                        current_solution.childs,
+                    )
+                )
 
                 # sort childs based on their lp_model evaluation
                 current_solution.childs.sort(key=self.evaluate_solution_optimal)
