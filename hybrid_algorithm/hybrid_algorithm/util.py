@@ -1,5 +1,6 @@
 from functools import lru_cache
 from hybrid_algorithm.lp_model import LPModel
+import random
 
 
 class TabuList(list):
@@ -53,13 +54,10 @@ class Solution:
             parent.add_child_solution(self)
 
     def __hash__(self):
-        return hash(str(self._list))
+        return hash(frozenset(tuple(map(tuple, self._list))))
 
     def __eq__(self, other):
         return other._list == self._list
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
 
     def is_root(self):
         return self.parent is None
@@ -69,6 +67,9 @@ class Solution:
 
     def __iter__(self):
         return iter(self._list)
+
+    def __len__(self):
+        return len(self._list)
 
     def add_child_solution(self, solution):
         if solution not in self.childs:
@@ -112,3 +113,11 @@ class Solution:
         if solution_objective_value is None:
             return float("inf")
         return solution_objective_value
+
+
+def random_four_digits_binary_string():
+    binary_string = ""
+    for _ in range(4):
+        digit = random.randint(0, 1)
+        binary_string += str(digit)
+    return binary_string

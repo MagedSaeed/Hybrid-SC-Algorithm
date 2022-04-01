@@ -5,6 +5,7 @@ from functools import lru_cache
 
 from hybrid_algorithm.hybrid_algorithm.vns import VNS
 from hybrid_algorithm.lp_model import LPModel
+from hybrid_algorithm.supply_chain_network import SupplyChainNetwork
 
 from .util import Solution, TabuList
 
@@ -57,7 +58,7 @@ class HybridAlgorithm:
         This network is used for internal calculations.
         It is initiated from the original one
         """
-        return copy.deepcopy(self.net)
+        return SupplyChainNetwork.make_a_copy(self.net)
 
     def get_backtracked_solution(self, current_solution):
         parent_solution = current_solution.parent
@@ -129,12 +130,11 @@ class HybridAlgorithm:
         while self.T > self.Tf:
             k = 0
             while k < self.K:
-                network.apply_solution(current_solution)
-                vns = VNS(network)
                 # -------------------------------
                 # find neighbors
                 # -------------------------------
-                neighbors = vns.generate_sorted_non_tabu_solutions(
+                neighbors = VNS.generate_sorted_non_tabu_solutions(
+                    solution=current_solution,
                     K=self.number_of_nighbors,
                     tabu_list=self.tabu_list,
                     sorting_function=self.evaluate_solution_greedy,
@@ -198,9 +198,8 @@ class HybridAlgorithm:
                 # -------------------------------
                 # Local Search
                 # -------------------------------
-                network.apply_solution(current_solution)
-                local_vns = VNS(network)
-                local_neighbors = local_vns.generate_sorted_non_tabu_solutions(
+                local_neighbors = VNS.generate_sorted_non_tabu_solutions(
+                    solution=current_solution,
                     K=self.K,
                     tabu_list=self.tabu_list,
                     sorting_function=self.evaluate_solution_optimal,
