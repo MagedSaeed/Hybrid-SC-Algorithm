@@ -23,6 +23,7 @@ class HybridAlgorithm:
         x=0.2,
         lp_model_class=LPModel,
         h=3,
+        return_intermediate_solutions=True,
     ):
         self.net = network
         self.T = T
@@ -38,6 +39,7 @@ class HybridAlgorithm:
         self.lp_model_class = lp_model_class
         self.original_net = copy.deepcopy(network)
         self.best_solution = None
+        self._intermediate_solutions = set()
         assert (
             self.number_of_nighbors > 0
         ), "number of neighbors should be greater than 0"
@@ -76,7 +78,8 @@ class HybridAlgorithm:
             ) < self.evaluate_solution_optimal(
                 current_solution
             ) or self.x < self.transition_probability(
-                current_solution, best_solution_candidate
+                current_solution,
+                best_solution_candidate,
             ):
                 # if it is not in the tabu list, add it
                 if best_solution_candidate not in self.tabu_list:
@@ -84,6 +87,7 @@ class HybridAlgorithm:
                     logging.debug(
                         f"updating current solution to: {self.evaluate_solution_optimal(best_solution_candidate)}",
                     )
+                    self._intermediate_solutions.add(best_solution_candidate)
                     return best_solution_candidate
         return current_solution
 
@@ -101,7 +105,7 @@ class HybridAlgorithm:
             network=self._private_network,
         )
 
-    def optimize(self, current_solution=None):
+    def optimize(self, current_solution=None, return_intermediate_solutions=True):
         network = self.net
         if current_solution is None:
             network.apply_initial_greedy_solution()
@@ -212,4 +216,6 @@ class HybridAlgorithm:
             logging.info(
                 f"best solution up to now: {self.best_solution} value: {self.evaluate_solution_optimal(self.best_solution)}"
             )
+        if return_intermediate_solutions:
+            return self.best_solution, self._intermediate_solutions
         return self.best_solution
