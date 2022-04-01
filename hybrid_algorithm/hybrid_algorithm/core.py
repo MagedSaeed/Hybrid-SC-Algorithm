@@ -122,6 +122,9 @@ class HybridAlgorithm:
                 self.best_solution
             ) > self.evaluate_solution_optimal(current_solution):
                 self.best_solution = current_solution
+                logging.info(
+                    f"chaning best solution to {self.evaluate_solution_optimal(self.best_solution)}"
+                )
 
         while self.T > self.Tf:
             k = 0
@@ -148,6 +151,16 @@ class HybridAlgorithm:
                     backtracked_solution = self.get_backtracked_solution(
                         current_solution
                     )
+                    # if the backtracked solution is None, restart the algorithm
+                    if backtracked_solution is None:
+                        return self.optimize()
+                    if self.evaluate_solution_optimal(
+                        self.best_solution
+                    ) > self.evaluate_solution_optimal(backtracked_solution):
+                        self.best_solution = backtracked_solution
+                        logging.info(
+                            f"chaning best solution to {self.evaluate_solution_optimal(self.best_solution)}"
+                        )
                     return self.optimize(current_solution=backtracked_solution)
 
                 # add best h solutions to the tabu list
@@ -228,6 +241,13 @@ class HybridAlgorithm:
                 )
                 logging.debug(f"updating k from {k} to {k+1}")
                 k += 1
+            if self.evaluate_solution_optimal(
+                self.best_solution
+            ) > self.evaluate_solution_optimal(current_solution):
+                self.best_solution = current_solution
+                logging.info(
+                    f"chaning best solution to {self.evaluate_solution_optimal(self.best_solution)}"
+                )
             logging.debug(f'{"previous T".center(40, "-")}{self.T}')
             self.T *= self.alpha
             logging.info(f'{"new T".center(40, "-")}{self.T}')
