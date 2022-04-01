@@ -1,3 +1,4 @@
+import itertools
 import time
 from hybrid_algorithm import SupplyChainNetwork, HybridAlgorithm, LPModel
 import random
@@ -5,6 +6,7 @@ import numpy as np
 import csv
 
 from hybrid_algorithm.config import AppConfig
+from hybrid_algorithm.hybrid_algorithm.util import Solution
 
 AppConfig.configure(config_file_path="experiments/three_facilities/config.ini")
 
@@ -40,23 +42,24 @@ results_writer = csv.writer(results_file)
 
 # write the headers of the results csv file
 headers = [
+    "solution index",
     "tabu size",
     "T",
     "Tf",
     "alpha",
     "K",
-    "initial Z1",
-    "optimized Z1",
-    "normalized optimized Z1",
-    "initila Z2",
-    "optimized Z2",
-    "normalized optimized Z2",
-    "initila Z3",
-    "optimized Z3",
-    "normalized optimized Z3",
-    "initila multi objective value",
-    "optimized multi objective value",
-    "normalized optimized multi objective value",
+    "greedy Z1",
+    "hybrid Z1",
+    "normalized hybrid Z1",
+    "greedy Z2",
+    "hybrid Z2",
+    "normalized hybrid Z2",
+    "greedy Z3",
+    "hybrid Z3",
+    "normalized hybrid Z3",
+    "greedy multi objective value",
+    "hybrid multi objective value",
+    "normalized hybrid multi objective value",
     "optimization running time",
 ]
 results_writer.writerow(headers)
@@ -75,10 +78,10 @@ for tabu_size in tabu_sizes:
                     net.initialize_random_network()
                     net.apply_initial_greedy_solution()
                     model = LPModel(net)
-                    initial_z1 = model.Z1_objective_value
-                    initial_z2 = model.Z2_objective_value
-                    initial_z3 = model.Z3_objective_value
-                    initial_multi_objective_value = model.multi_objective_value
+                    greedy_z1 = model.Z1_objective_value
+                    greedy_z2 = model.Z2_objective_value
+                    greedy_z3 = model.Z3_objective_value
+                    greedy_multi_objective_value = model.multi_objective_value
                     start_time = time.time()
                     optimizer = HybridAlgorithm(
                         network=net,
@@ -87,43 +90,60 @@ for tabu_size in tabu_sizes:
                         alpha=alpha,
                         K=K,
                     )
-                    solution = optimizer.optimize()
+                    best_solution, intermediate_solutions = optimizer.optimize()
                     end_time = time.time()
-                    net.apply_solution(solution)
-                    model = LPModel(net)
-                    optimized_z1 = model.Z1_objective_value
-                    normalized_optimized_z1 = model.Z1_normalized_objective_value
-                    optimized_z2 = model.Z2_objective_value
-                    normalized_optimized_z2 = model.Z2_normalized_objective_value
-                    optimized_z3 = model.Z3_objective_value
-                    normalized_optimized_z3 = model.Z3_normalized_objective_value
-                    optimized_multi_objective_value = model.multi_objective_value
-                    normalized_optimized_multi_objective_value = (
-                        model.normalized_multi_objective_value
+                    if best_solution in intermediate_solutions:
+                        intermediate_solutions.remove(best_solution)
+                    intermediate_solutions = sorted(
+                        intermediate_solutions,
+                        key=lambda solution: Solution.evaluate_solution_optimal(
+                            solution,
+                            net,
+                        ),
                     )
-                    running_time = round(end_time - start_time, 2)
-                    results_writer.writerow(
-                        [
-                            tabu_size,
-                            T,
-                            Tf,
-                            alpha,
-                            K,
-                            initial_z1,
-                            optimized_z1,
-                            normalized_optimized_z1,
-                            initial_z2,
-                            optimized_z2,
-                            normalized_optimized_z2,
-                            initial_z3,
-                            optimized_z3,
-                            normalized_optimized_z3,
-                            initial_multi_objective_value,
-                            optimized_multi_objective_value,
-                            normalized_optimized_multi_objective_value,
-                            running_time,
-                        ]
-                    )
+                    for solution_index, solution in enumerate(
+                        itertools.chain(
+                            [best_solution],
+                            intermediate_solutions,
+                        ),
+                        start=1,
+                    ):
+                        net.apply_solution(solution)
+                        model = LPModel(net)
+                        hybrid_z1 = model.Z1_objective_value
+                        normalized_hybrid_z1 = model.Z1_normalized_objective_value
+                        hybrid_z2 = model.Z2_objective_value
+                        normalized_hybrid_z2 = model.Z2_normalized_objective_value
+                        hybrid_z3 = model.Z3_objective_value
+                        normalized_hybrid_z3 = model.Z3_normalized_objective_value
+                        hybrid_multi_objective_value = model.multi_objective_value
+                        normalized_hybrid_multi_objective_value = (
+                            model.normalized_multi_objective_value
+                        )
+                        running_time = round(end_time - start_time, 2)
+                        results_writer.writerow(
+                            [
+                                solution_index,
+                                tabu_size,
+                                T,
+                                Tf,
+                                alpha,
+                                K,
+                                greedy_z1,
+                                hybrid_z1,
+                                normalized_hybrid_z1,
+                                greedy_z2,
+                                hybrid_z2,
+                                normalized_hybrid_z2,
+                                greedy_z3,
+                                hybrid_z3,
+                                normalized_hybrid_z3,
+                                greedy_multi_objective_value,
+                                hybrid_multi_objective_value,
+                                normalized_hybrid_multi_objective_value,
+                                running_time,
+                            ]
+                        )
                     print("#" * 80)
                     print("#" * 80)
                     print(
