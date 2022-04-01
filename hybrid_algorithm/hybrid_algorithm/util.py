@@ -109,6 +109,6 @@ class Solution:
         # clean stuff
         del temp_model
         # handler the case where there is no solution
-        if solution_objective_value <= 0:
+        if solution_objective_value is None:
             return float("inf")
         return solution_objective_value

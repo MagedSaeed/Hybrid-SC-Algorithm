@@ -464,7 +464,7 @@ class LPModel:
         status = model.solve(solver=CPLEX_PY(msg=False))
         if status == 1:
             return model.objective.value()
-        return status
+        return None
 
     def _get_normalized_objective_value(
         self,
