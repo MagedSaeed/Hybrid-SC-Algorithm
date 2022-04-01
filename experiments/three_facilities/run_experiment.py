@@ -60,6 +60,7 @@ headers = [
     "greedy multi objective value",
     "hybrid multi objective value",
     "normalized hybrid multi objective value",
+    "weighted multi objective value",
     "optimization running time",
 ]
 results_writer.writerow(headers)
@@ -120,6 +121,9 @@ for tabu_size in tabu_sizes:
                         normalized_hybrid_multi_objective_value = (
                             model.normalized_multi_objective_value
                         )
+                        weighted_multi_objective_value = (
+                            model.weighted_multi_objective_value
+                        )
                         running_time = round(end_time - start_time, 2)
                         results_writer.writerow(
                             [
@@ -141,6 +145,7 @@ for tabu_size in tabu_sizes:
                                 greedy_multi_objective_value,
                                 hybrid_multi_objective_value,
                                 normalized_hybrid_multi_objective_value,
+                                weighted_multi_objective_value,
                                 running_time,
                             ]
                         )

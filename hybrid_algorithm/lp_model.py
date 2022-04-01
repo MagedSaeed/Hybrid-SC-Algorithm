@@ -1,4 +1,5 @@
 from functools import cached_property
+import random
 from hybrid_algorithm.utils import exclude_closed_facilities
 
 from pulp import GLPK, LpMaximize, LpMinimize, LpProblem, LpVariable, lpSum, CPLEX_PY
@@ -534,4 +535,18 @@ class LPModel:
             objective_value=self.multi_objective_value,
             max_value=max_value,
             min_value=min_value,
+        )
+
+    def _get_random_weights(self):
+        w1, w2 = [round(value / 100, 2) for value in random.sample(range(1, 101), 2)]
+        w3 = 1 - (w1 + w2)
+        return w1, w2, w3
+
+    @cached_property
+    def weighted_multi_objective_value(self):
+        w1, w2, w3 = self._get_random_weights()
+        return self._get_objective_value(
+            objective_function=-w1 * self.Z1_objective_function
+            + w2 * self.Z2_objective_value
+            + w3 * self.Z3_objective_function
         )
