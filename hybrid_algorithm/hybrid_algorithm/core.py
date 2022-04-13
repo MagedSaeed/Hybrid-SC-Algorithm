@@ -24,7 +24,6 @@ class HybridAlgorithm:
         x=0.2,
         lp_model_class=LPModel,
         h=3,
-        return_intermediate_solutions=True,
     ):
         self.net = network
         self.T = T

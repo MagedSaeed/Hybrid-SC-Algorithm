@@ -109,7 +109,9 @@ class VNS:
             # -------------------------------
             for _ in range(K):
                 new_solution_list = getattr(VNS, method)(solution_list)
-                solutions.add(Solution(new_solution_list))
+                # check that, in the new_solution_list, at least one facility is open in all echelons
+                if all(any(echelon) for echelon in new_solution_list):
+                    solutions.add(Solution(new_solution_list))
         # exclude tabu solutions
         solutions -= set(tabu_list)
         # sort solutions based on their evaluation, i.e. objective value
