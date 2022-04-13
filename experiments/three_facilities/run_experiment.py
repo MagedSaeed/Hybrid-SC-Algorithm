@@ -7,6 +7,7 @@ import csv
 
 from hybrid_algorithm.config import AppConfig
 from hybrid_algorithm.hybrid_algorithm.util import Solution
+from hybrid_algorithm.utils import get_three_random_weights
 
 AppConfig.configure(config_file_path="experiments/three_facilities/config.ini")
 
@@ -60,6 +61,9 @@ headers = [
     "greedy multi objective value",
     "hybrid multi objective value",
     "normalized hybrid multi objective value",
+    "w1",
+    "w2",
+    "w3",
     "weighted multi objective value",
     "optimization running time",
 ]
@@ -78,6 +82,10 @@ for tabu_size in tabu_sizes:
                     )
                     net.initialize_random_network()
                     net.apply_initial_greedy_solution()
+                    w1, w2, w3 = get_three_random_weights()
+                    AppConfig.config["lp_model"]["z1_weight"] = str(w1)
+                    AppConfig.config["lp_model"]["z2_weight"] = str(w2)
+                    AppConfig.config["lp_model"]["z3_weight"] = str(w3)
                     model = LPModel(net)
                     greedy_z1 = model.Z1_objective_value
                     greedy_z2 = model.Z2_objective_value
@@ -145,6 +153,9 @@ for tabu_size in tabu_sizes:
                                 greedy_multi_objective_value,
                                 hybrid_multi_objective_value,
                                 normalized_hybrid_multi_objective_value,
+                                w1,
+                                w2,
+                                w3,
                                 weighted_multi_objective_value,
                                 running_time,
                             ]

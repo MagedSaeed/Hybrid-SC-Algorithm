@@ -1,6 +1,7 @@
 import copy
 
 import numpy as np
+import random
 
 
 def get_open_facilities_in_echelon(echelon):
@@ -104,3 +105,9 @@ def exclude_closed_facilities(network, inplace=False):
             warehouse.products_trans_env_impact
         )
     return network
+
+
+def get_three_random_weights():
+    w1, w2 = [round(value / 100, 2) for value in random.sample(range(1, 50), 2)]
+    w3 = 1 - (w1 + w2)
+    return w1, w2, w3

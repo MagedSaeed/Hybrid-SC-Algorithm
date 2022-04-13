@@ -101,12 +101,17 @@ class Solution:
         return greedy_value
 
     @staticmethod
-    def evaluate_solution_optimal(solution, network, lp_model_class=LPModel):
+    def evaluate_solution_optimal(
+        solution,
+        network,
+        lp_model_class=LPModel,
+        evaluation_function="weighted_multi_objective_value",
+    ):
         # assign the solution
         network.apply_solution(solution._list)
         # evaluate it
         temp_model = lp_model_class(network)
-        solution_objective_value = temp_model.multi_objective_value
+        solution_objective_value = getattr(temp_model, evaluation_function)
         # clean stuff
         del temp_model
         # handler the case where there is no solution
