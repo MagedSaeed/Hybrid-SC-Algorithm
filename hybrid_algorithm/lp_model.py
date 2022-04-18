@@ -1,8 +1,12 @@
 from functools import cached_property
 from hybrid_algorithm.utils import exclude_closed_facilities, get_three_random_weights
 
-from pulp import GLPK, LpMaximize, LpMinimize, LpProblem, LpVariable, lpSum, CPLEX_PY
+from pulp import (CPLEX_PY, GLPK, LpMaximize, LpMinimize, LpProblem,
+                  LpVariable, lpSum)
+
 from hybrid_algorithm.config import AppConfig
+from hybrid_algorithm.utils import (exclude_closed_facilities,
+                                    get_three_random_weights)
 
 
 class LPModel:
@@ -471,13 +475,13 @@ class LPModel:
         objective_value,
         max_value,
         min_value,
-        sense=LpMaximize,
+        sense=LpMinimize,
     ):
         if sense == LpMaximize:
             numerator = max_value - objective_value
         elif sense == LpMinimize:
-            numerator = objective_value - max_value
-        denumerator = min_value
+            numerator = objective_value - min_value
+        denumerator = max_value-min_value
         return numerator / denumerator
 
     @cached_property
@@ -504,6 +508,7 @@ class LPModel:
             objective_value=self.Z1_objective_value,
             max_value=max_value,
             min_value=min_value,
+            sense=LpMaximize,
         )
 
     @cached_property
