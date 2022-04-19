@@ -1,6 +1,9 @@
 from functools import lru_cache
+from hybrid_algorithm.config import AppConfig
 from hybrid_algorithm.lp_model import LPModel
 import random
+
+from hybrid_algorithm.utils import get_three_random_weights
 
 
 class TabuList(list):
@@ -50,6 +53,7 @@ class Solution:
         self._list = solution_list
         self.childs = list()
         self.parent = parent
+        self.meta_data = {}
         if parent is not None:
             parent.add_child_solution(self)
 
@@ -107,6 +111,14 @@ class Solution:
         lp_model_class=LPModel,
         evaluation_function="weighted_multi_objective_value",
     ):
+        # assign random weights
+        w1, w2, w3 = get_three_random_weights()
+        AppConfig.config["lp_model"]["z1_weight"] = str(w1)
+        AppConfig.config["lp_model"]["z2_weight"] = str(w2)
+        AppConfig.config["lp_model"]["z3_weight"] = str(w3)
+        solution.meta_data["z1_weight"] = w1
+        solution.meta_data["z2_weight"] = w2
+        solution.meta_data["z3_weight"] = w3
         # assign the solution
         network.apply_solution(solution._list)
         # evaluate it
