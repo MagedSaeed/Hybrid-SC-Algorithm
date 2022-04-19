@@ -1,12 +1,10 @@
 from functools import cached_property
 from hybrid_algorithm.utils import exclude_closed_facilities, get_three_random_weights
 
-from pulp import (CPLEX_PY, GLPK, LpMaximize, LpMinimize, LpProblem,
-                  LpVariable, lpSum)
+from pulp import CPLEX_PY, GLPK, LpMaximize, LpMinimize, LpProblem, LpVariable, lpSum
 
 from hybrid_algorithm.config import AppConfig
-from hybrid_algorithm.utils import (exclude_closed_facilities,
-                                    get_three_random_weights)
+from hybrid_algorithm.utils import exclude_closed_facilities, get_three_random_weights
 
 
 class LPModel:
@@ -477,11 +475,13 @@ class LPModel:
         min_value,
         sense=LpMinimize,
     ):
+        if objective_value is None:
+            return None
         if sense == LpMaximize:
-            numerator = max_value - objective_value
+            numerator = max_value - abs(objective_value)
         elif sense == LpMinimize:
-            numerator = objective_value - min_value
-        denumerator = max_value-min_value
+            numerator = abs(objective_value) - min_value
+        denumerator = max_value - min_value
         return numerator / denumerator
 
     @cached_property
@@ -548,9 +548,18 @@ class LPModel:
             float(AppConfig.config["lp_model"]["z2_weight"]),
             float(AppConfig.config["lp_model"]["z3_weight"]),
         )
-        weighted_objective_value = self._get_objective_value(
-            objective_function=-w1 * self.Z1_objective_function
-            + w2 * self.Z2_objective_value
-            + w3 * self.Z3_objective_function
+        if not all(
+            [
+                self.Z1_normalized_objective_value,
+                self.Z2_normalized_objective_value,
+                self.Z3_normalized_objective_value,
+            ]
+        ):
+            return None
+        weighted_objective_value = (
+            w1 * self.Z1_normalized_objective_value
+            + w2 * self.Z2_normalized_objective_value
+            + w3 * self.Z3_normalized_objective_value
         )
+
         return weighted_objective_value
