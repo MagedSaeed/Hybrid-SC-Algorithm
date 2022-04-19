@@ -102,8 +102,6 @@ for tabu_size in tabu_sizes:
                     best_solution, intermediate_solutions = optimizer.optimize()
                     end_time = time.time()
                     running_time = round(end_time - start_time, 2)
-                    if best_solution in intermediate_solutions:
-                        intermediate_solutions.remove(best_solution)
                     intermediate_solutions = sorted(
                         intermediate_solutions,
                         key=lambda solution: Solution.evaluate_solution_optimal(
@@ -111,11 +109,10 @@ for tabu_size in tabu_sizes:
                             net,
                         ),
                     )
+                    if best_solution not in intermediate_solutions:
+                        intermediate_solutions.insert(0, best_solution)
                     for solution_index, solution in enumerate(
-                        itertools.chain(
-                            [best_solution],
-                            intermediate_solutions,
-                        ),
+                        intermediate_solutions,
                         start=1,
                     ):
                         net.apply_solution(solution)
@@ -133,6 +130,9 @@ for tabu_size in tabu_sizes:
                         weighted_multi_objective_value = (
                             model.weighted_multi_objective_value
                         )
+                        w1 = solution.meta_data["z1_weight"]
+                        w2 = solution.meta_data["z2_weight"]
+                        w3 = solution.meta_data["z3_weight"]
                         results_writer.writerow(
                             [
                                 solution_index,
