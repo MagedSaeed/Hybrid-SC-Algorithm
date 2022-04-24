@@ -108,6 +108,9 @@ def exclude_closed_facilities(network, inplace=False):
 
 
 def get_three_random_weights():
-    w1, w2 = [round(value / 100, 2) for value in random.sample(range(1, 50), 2)]
-    w3 = 1 - (w1 + w2)
+    w1, w2, w3 = random.sample(range(1, 1000), 3)
+    denumerator = w1 + w2 + w3
+    w1 = round(w1 / denumerator, 3)
+    w2 = round(w2 / denumerator, 3)
+    w3 = round(w3 / denumerator, 3)
     return w1, w2, w3
