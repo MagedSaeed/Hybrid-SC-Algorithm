@@ -11,7 +11,7 @@ from hybrid_algorithm.utils import get_three_random_weights
 
 AppConfig.configure(config_file_path="experiments/three_facilities/config.ini")
 
-seed = 0
+seed = 50
 
 np.random.seed(seed)
 random.seed(seed)
@@ -69,18 +69,19 @@ headers = [
 ]
 results_writer.writerow(headers)
 
+net = SupplyChainNetwork(
+    facilities_count=facilities_count,
+    raw_materials_count=raw_materials_count,
+    markets_count=markets_count,
+    products_count=products_count,
+)
+net.initialize_random_network()
+
 for tabu_size in tabu_sizes:
     for T in T_values:
         for Tf in Tf_values:
             for alpha in alpha_values:
                 for K in K_values:
-                    net = SupplyChainNetwork(
-                        facilities_count=facilities_count,
-                        raw_materials_count=raw_materials_count,
-                        markets_count=markets_count,
-                        products_count=products_count,
-                    )
-                    net.initialize_random_network()
                     net.apply_initial_greedy_solution()
                     w1, w2, w3 = get_three_random_weights()
                     AppConfig.config["lp_model"]["z1_weight"] = str(w1)
