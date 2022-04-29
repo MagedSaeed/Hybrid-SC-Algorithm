@@ -303,7 +303,7 @@ class LPModel:
                     plant.warehouses_distances
                 )
             ]
-            for plant in net.plants_echelon
+            for plant in self.network.plants_echelon
         ]
 
         Yijp_sum = lpSum(
