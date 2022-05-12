@@ -1,4 +1,5 @@
 from functools import cached_property
+import itertools
 from hybrid_algorithm.utils import exclude_closed_facilities, get_three_random_weights
 
 from pulp import CPLEX_PY, GLPK, LpMaximize, LpMinimize, LpProblem, LpVariable, lpSum
@@ -9,7 +10,8 @@ from hybrid_algorithm.utils import exclude_closed_facilities, get_three_random_w
 
 class LPModel:
     def __init__(self, network):
-        self.network = exclude_closed_facilities(network, inplace=False)
+        # self.network = exclude_closed_facilities(network, inplace=False)
+        self.network = network
 
     @cached_property
     def Qkmp(self):
@@ -76,106 +78,222 @@ class LPModel:
     @property
     def Z1_objective_function(self):
         net = self.network
-        EX = sum(facility.fixed_cost for facility in self.network.plants_echelon)
-        FY = sum(facility.fixed_cost for facility in self.network.warehouses_echelon)
+        EX = sum(
+            facility.fixed_cost
+            for facility in self.network.plants_echelon
+            if facility.is_open == 1
+        )
+        FY = sum(
+            facility.fixed_cost
+            for facility in self.network.warehouses_echelon
+            if facility.is_open == 1
+        )
         GZ = sum(
             facility.fixed_cost
             for facility in self.network.distribution_centers_echelon
+            if facility.is_open == 1
         )
 
-        Xsit_coeffs = [
-            [
-                [
-                    (
-                        material_cost
-                        + supplier.plants_distances[plant_index] * material_trans_cost
+        # Xsit_coeffs = [
+        #     [
+        #         [
+        #             (
+        #                 material_cost
+        #                 + supplier.plants_distances[plant_index] * material_trans_cost
+        #             )
+        #             for material_trans_cost in supplier.material_trans_cost[plant_index]
+        #         ]
+        #         for plant_index, material_cost in zip(
+        #             supplier.material_trans_cost.keys(),
+        #             supplier.material_purchase_cost,
+        #         )
+        #     ]
+        #     for supplier in net.suppliers_echelon
+        # ]
+
+        # Xsit_sum = lpSum(
+        #     coeff * self.Xsit[(s, i, t)]
+        #     for s, supplier in enumerate(Xsit_coeffs)
+        #     for i, plant in enumerate(Xsit_coeffs[s])
+        #     for t, coeff in enumerate(Xsit_coeffs[s][i])
+        # )
+
+        Xsit_coeffs = list()
+        for supplier in net.suppliers_echelon:
+            for (
+                plant_index,
+                material_trans_costs,
+            ) in supplier.material_trans_cost.items():
+                for material_index, material_purchase_cost in enumerate(
+                    supplier.material_purchase_cost
+                ):
+                    coeff = (
+                        material_purchase_cost
+                        + material_trans_costs[material_index]
+                        * supplier.plants_distances[plant_index]
                     )
-                    for material_trans_cost in supplier.material_trans_cost[plant_index]
-                ]
-                for plant_index, material_cost in zip(
-                    supplier.material_trans_cost.keys(),
-                    supplier.material_purchase_cost,
-                )
-            ]
-            for supplier in net.suppliers_echelon
-        ]
+                    Xsit_coeffs.append(coeff)
+        number_of_materials = len(net.suppliers_echelon[0].material_purchase_cost)
         Xsit_sum = lpSum(
             coeff * self.Xsit[(s, i, t)]
-            for s, supplier in enumerate(Xsit_coeffs)
-            for i, plant in enumerate(Xsit_coeffs[s])
-            for t, coeff in enumerate(Xsit_coeffs[s][i])
+            for coeff, (s, i, t) in zip(
+                Xsit_coeffs,
+                itertools.product(
+                    range(len(net.suppliers_echelon)),
+                    range(len(net.plants_echelon)),
+                    range(number_of_materials),
+                ),
+            )
         )
 
-        Yijp_coeffs = [
-            [
-                [
-                    (
-                        production_cost
-                        + plant.warehouses_distances[warehouse_index]
-                        * product_trans_cost
-                    )
-                    for product_trans_cost in plant.products_trans_cost[warehouse_index]
-                ]
-                for warehouse_index, production_cost in zip(
-                    plant.products_trans_cost.keys(),
-                    plant.products_prod_cost,
-                )
-            ]
-            for plant in net.plants_echelon
-        ]
+        # Yijp_coeffs = [
+        #     [
+        #         [
+        #             (
+        #                 production_cost
+        #                 + plant.warehouses_distances[warehouse_index]
+        #                 * product_trans_cost
+        #             )
+        #             for product_trans_cost in plant.products_trans_cost[warehouse_index]
+        #         ]
+        #         for warehouse_index, production_cost in zip(
+        #             plant.products_trans_cost.keys(),
+        #             plant.products_prod_cost,
+        #         )
+        #     ]
+        #     for plant in net.plants_echelon
+        # ]
 
+        # Yijp_sum = lpSum(
+        #     coeff * self.Yijp[(i, j, p)]
+        #     for i, plant in enumerate(Yijp_coeffs)
+        #     for j, warehouse in enumerate(Yijp_coeffs[i])
+        #     for p, coeff in enumerate(Yijp_coeffs[i][j])
+        # )
+
+        Yijp_coeffs = list()
+        for plant in net.plants_echelon:
+            for product_index, product_production_cost in enumerate(
+                plant.products_prod_cost
+            ):
+                for (
+                    warehouse_index,
+                    products_trans_costs,
+                ) in plant.products_trans_cost.items():
+                    coeff = (
+                        product_production_cost
+                        + products_trans_costs[product_index]
+                        * plant.warehouses_distances[warehouse_index]
+                    )
+                    Yijp_coeffs.append(coeff)
+        number_of_products = len(net.plants_echelon[0].products_prod_cost)
         Yijp_sum = lpSum(
             coeff * self.Yijp[(i, j, p)]
-            for i, plant in enumerate(Yijp_coeffs)
-            for j, warehouse in enumerate(Yijp_coeffs[i])
-            for p, coeff in enumerate(Yijp_coeffs[i][j])
+            for coeff, (i, j, p) in zip(
+                Yijp_coeffs,
+                itertools.product(
+                    range(len(net.plants_echelon)),
+                    range(len(net.warehouses_echelon)),
+                    range(number_of_products),
+                ),
+            )
         )
-
-        Zjkp_coeffs = [
-            [
-                [
-                    warehouse.dist_centers_distances[dist_center_index]
-                    * product_trans_cost
-                    for product_trans_cost in warehouse.products_trans_cost[
-                        dist_center_index
-                    ]
-                ]
-                for dist_center_index in warehouse.products_trans_cost.keys()
-            ]
-            for warehouse in net.warehouses_echelon
-        ]
-
+        Zjkp_coeffs = list()
+        for warehouse in net.warehouses_echelon:
+            for (
+                dist_center_index,
+                products_trans_costs,
+            ) in warehouse.products_trans_cost.items():
+                for product_t_cost in products_trans_costs:
+                    coeff = (
+                        product_t_cost
+                        * warehouse.dist_centers_distances[dist_center_index]
+                    )
+                    Zjkp_coeffs.append(coeff)
         Zjkp_sum = lpSum(
             coeff * self.Zjkp[(j, k, p)]
-            for j, warehouse in enumerate(Zjkp_coeffs)
-            for k, dist_center in enumerate(Zjkp_coeffs[j])
-            for p, coeff in enumerate(Zjkp_coeffs[j][k])
+            for coeff, (j, k, p) in zip(
+                Zjkp_coeffs,
+                itertools.product(
+                    range(len(net.warehouses_echelon)),
+                    range(len(net.distribution_centers_echelon)),
+                    range(number_of_products),
+                ),
+            )
         )
 
-        Qkmp_coeffs = [
-            [
-                [
-                    (
+        # Zjkp_coeffs = [
+        #     [
+        #         [
+        #             warehouse.dist_centers_distances[dist_center_index]
+        #             * product_trans_cost
+        #             for product_trans_cost in warehouse.products_trans_cost[
+        #                 dist_center_index
+        #             ]
+        #         ]
+        #         for dist_center_index in warehouse.products_trans_cost.keys()
+        #     ]
+        #     for warehouse in net.warehouses_echelon
+        # ]
+
+        # Zjkp_sum = lpSum(
+        #     coeff * self.Zjkp[(j, k, p)]
+        #     for j, warehouse in enumerate(Zjkp_coeffs)
+        #     for k, dist_center in enumerate(Zjkp_coeffs[j])
+        #     for p, coeff in enumerate(Zjkp_coeffs[j][k])
+        # )
+        Qkmp_coeffs = list()
+        for dist_center in net.distribution_centers_echelon:
+            for (
+                market_index,
+                products_trans_costs,
+            ) in dist_center.products_trans_cost.items():
+                for product_index, product_price in enumerate(
+                    dist_center.selling_prices[market_index]
+                ):
+                    coeff = (
                         product_price
                         - dist_center.market_distances[market_index]
-                        * product_trans_cost
+                        * products_trans_costs[product_index]
                     )
-                    for product_trans_cost, product_price in zip(
-                        dist_center.products_trans_cost[market_index],
-                        dist_center.selling_prices[market_index],
-                    )
-                ]
-                for market_index in dist_center.products_trans_cost.keys()
-            ]
-            for dist_center in net.distribution_centers_echelon
-        ]
+                    Qkmp_coeffs.append(coeff)
 
         Qkmp_sum = lpSum(
             coeff * self.Qkmp[(k, m, p)]
-            for k, dist_center in enumerate(Qkmp_coeffs)
-            for m, market in enumerate(Qkmp_coeffs[k])
-            for p, coeff in enumerate(Qkmp_coeffs[k][m])
+            for coeff, (k, m, p) in zip(
+                Qkmp_coeffs,
+                itertools.product(
+                    range(len(net.distribution_centers_echelon)),
+                    range(len(net.markets_echelon)),
+                    range(number_of_products),
+                ),
+            )
         )
+
+        # Qkmp_coeffs = [
+        #     [
+        #         [
+        #             (
+        #                 product_price
+        #                 - dist_center.market_distances[market_index]
+        #                 * product_trans_cost
+        #             )
+        #             for product_trans_cost, product_price in zip(
+        #                 dist_center.products_trans_cost[market_index],
+        #                 dist_center.selling_prices[market_index],
+        #             )
+        #         ]
+        #         for market_index in dist_center.products_trans_cost.keys()
+        #     ]
+        #     for dist_center in net.distribution_centers_echelon
+        # ]
+
+        # Qkmp_sum = lpSum(
+        #     coeff * self.Qkmp[(k, m, p)]
+        #     for k, dist_center in enumerate(Qkmp_coeffs)
+        #     for m, market in enumerate(Qkmp_coeffs[k])
+        #     for p, coeff in enumerate(Qkmp_coeffs[k][m])
+        # )
 
         return Qkmp_sum - (EX + FY + GZ + Xsit_sum + Yijp_sum + Zjkp_sum)
 
@@ -200,6 +318,7 @@ class LPModel:
             )
             for supplier in net.suppliers_echelon
         ]
+        assert len(U_coeffs), len(net.suppliers_echelon)
         U = sum(
             Us.is_open * U_coeff for U_coeff, Us in zip(U_coeffs, net.suppliers_echelon)
         )
@@ -222,6 +341,7 @@ class LPModel:
             )
             for plant in net.plants_echelon
         ]
+        assert len(X_coeffs) == len(net.plants_echelon)
         X = sum(
             Xi.is_open * X_coeff for X_coeff, Xi in zip(X_coeffs, net.plants_echelon)
         )
@@ -238,6 +358,7 @@ class LPModel:
             )
             for warehouse in net.warehouses_echelon
         ]
+        assert len(Y_coeffs) == len(net.warehouses_echelon)
         Y = sum(
             Yj.is_open * Y_coeff
             for Y_coeff, Yj in zip(Y_coeffs, net.warehouses_echelon)
@@ -255,6 +376,7 @@ class LPModel:
             )
             for dist_center in net.distribution_centers_echelon
         ]
+        assert len(Z_coeffs) == len(net.distribution_centers_echelon)
         Z = sum(
             Zk.is_open * Z_coeff
             for Z_coeff, Zk in zip(Z_coeffs, net.distribution_centers_echelon)
@@ -269,11 +391,12 @@ class LPModel:
         EDZ = sum(
             Z.opening_env_impact * Z.is_open for Z in net.distribution_centers_echelon
         )
+        EPY = sum(Y.products_env_impact.sum() * Y.is_open for Y in net.plants_echelon)
 
         Xsit_coeffs = [
             [
                 [
-                    material_impact * plant_distance
+                    supplier.is_open * material_impact * plant_distance
                     for material_impact in supplier.material_trans_env_impact[
                         plant_index
                     ]
@@ -290,33 +413,62 @@ class LPModel:
             for t, coeff in enumerate(Xsit_coeffs[s][i])
         )
 
-        Yijp_coeffs = [
-            [
-                [
-                    product_env_impact + product_trans_impact * warehouse_distance
-                    for product_trans_impact, product_env_impact in zip(
-                        plant.products_trans_env_impact[warehouse_index],
-                        plant.products_env_impact,
+        Yijp_coeffs = list()
+        for plant in self.network.plants_echelon:
+            for warehouse_index, warehouse_distance in enumerate(
+                plant.warehouses_distances
+            ):
+                for product_index, product_env_impact in enumerate(
+                    plant.products_env_impact
+                ):
+                    coeff = plant.is_open * (
+                        product_env_impact
+                        + plant.products_trans_env_impact[warehouse_index][
+                            product_index
+                        ]
+                        * warehouse_distance
                     )
-                ]
-                for warehouse_index, warehouse_distance in enumerate(
-                    plant.warehouses_distances
-                )
-            ]
-            for plant in self.network.plants_echelon
-        ]
-
+                    Yijp_coeffs.append(coeff)
+        number_of_products = len(net.plants_echelon[0].products_prod_cost)
         Yijp_sum = lpSum(
             coeff * self.Yijp[(i, j, p)]
-            for i, plant in enumerate(Yijp_coeffs)
-            for j, warehouse in enumerate(Yijp_coeffs[i])
-            for p, coeff in enumerate(Yijp_coeffs[i][j])
+            for coeff, (i, j, p) in zip(
+                Yijp_coeffs,
+                itertools.product(
+                    range(len(net.plants_echelon)),
+                    range(len(net.warehouses_echelon)),
+                    range(number_of_products),
+                ),
+            )
         )
+
+        # Yijp_coeffs = [
+        #     [
+        #         [
+        #             product_env_impact + product_trans_impact * warehouse_distance
+        #             for product_trans_impact, product_env_impact in zip(
+        #                 plant.products_trans_env_impact[warehouse_index],
+        #                 plant.products_env_impact,
+        #             )
+        #         ]
+        #         for warehouse_index, warehouse_distance in enumerate(
+        #             plant.warehouses_distances
+        #         )
+        #     ]
+        #     for plant in self.network.plants_echelon
+        # ]
+
+        # Yijp_sum = lpSum(
+        #     coeff * self.Yijp[(i, j, p)]
+        #     for i, plant in enumerate(Yijp_coeffs)
+        #     for j, warehouse in enumerate(Yijp_coeffs[i])
+        #     for p, coeff in enumerate(Yijp_coeffs[i][j])
+        # )
 
         Zjkp_coeffs = [
             [
                 [
-                    product_impact * dist_center_distance
+                    warehouse.is_open * product_impact * dist_center_distance
                     for product_impact in warehouse.products_trans_env_impact[
                         dist_center_index
                     ]
@@ -338,7 +490,7 @@ class LPModel:
         Qkmp_coeffs = [
             [
                 [
-                    product_impact * market_distance
+                    dist_center.is_open * product_impact * market_distance
                     for product_impact in dist_center.products_trans_env_impact[
                         market_index
                     ]
@@ -356,8 +508,7 @@ class LPModel:
             for m, market in enumerate(Qkmp_coeffs[k])
             for p, coeff in enumerate(Qkmp_coeffs[k][m])
         )
-
-        return EFX + EWY + EDZ + Yijp_sum + Xsit_sum + Zjkp_sum + Qkmp_sum
+        return EFX + EWY + EDZ + EPY + Yijp_sum + Xsit_sum + Zjkp_sum + Qkmp_sum
 
     @cached_property
     def constrains(self):
@@ -379,7 +530,7 @@ class LPModel:
                             net.distribution_centers_echelon
                         )
                     )
-                    >= demand
+                    == demand
                 )
                 constrains.append(constrain)
 
@@ -408,7 +559,9 @@ class LPModel:
             constrains.append(constrain)
             """(9) constrain"""
             constrain = wx_sum == lpSum(
-                Y[i, j, p] for j, warehouse in enumerate(net.warehouses_echelon)
+                Y[i, j, p]
+                for j, warehouse in enumerate(net.warehouses_echelon)
+                for p, capacity in enumerate(plant.product_capacity)
             )
             constrains.append(constrain)
 
