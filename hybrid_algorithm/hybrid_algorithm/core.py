@@ -48,7 +48,9 @@ class HybridAlgorithm:
         Z = self.evaluate_solution_optimal(candidate_solution)
         Z_prime = self.evaluate_solution_optimal(current_solution)
         E_delta = ((Z - Z_prime) / Z_prime) * 100
-        return math.exp(-E_delta / self.T)
+        # this is to bypass a math range error (an overflow error)
+        exponent = min(-E_delta / self.T, 700)
+        return math.exp(exponent)
 
     @property
     @lru_cache
