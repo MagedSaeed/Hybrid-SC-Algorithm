@@ -11,7 +11,7 @@ from hybrid_algorithm.utils import get_three_random_weights
 
 AppConfig.configure(config_file_path="experiments/three_facilities/config.ini")
 
-seed = 50
+seed = 1
 
 np.random.seed(seed)
 random.seed(seed)
