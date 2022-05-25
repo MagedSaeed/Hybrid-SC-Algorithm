@@ -1,11 +1,10 @@
-from audioop import add
-import itertools
-import time
-from hybrid_algorithm import SupplyChainNetwork, HybridAlgorithm, LPModel
-import random
-import numpy as np
 import csv
+import random
+import sys
 
+sys.path.append(".")
+import numpy as np
+from hybrid_algorithm import HybridAlgorithm, LPModel, SupplyChainNetwork
 from hybrid_algorithm.config import AppConfig
 from hybrid_algorithm.facilities import warehouses
 from hybrid_algorithm.hybrid_algorithm.util import Solution
@@ -68,14 +67,22 @@ export(
 
 # export distance between dist centers and warehouses
 """NOTE: these distances seems to be not consistent with the excel file"""
+# export(
+#     filename="distdcw",
+#     rows=[warehouse.dist_centers_distances for warehouse in net.warehouses_echelon],
+# )
 export(
-    filename="distdcw",
+    filename="distwdc",
     rows=[warehouse.dist_centers_distances for warehouse in net.warehouses_echelon],
 )
 
 # export distance between factory/plant to warehouses
+# export(
+#     filename="distfdc",
+#     rows=[plant.warehouses_distances for plant in net.plants_echelon],
+# )
 export(
-    filename="distfdc",
+    filename="distfw",
     rows=[plant.warehouses_distances for plant in net.plants_echelon],
 )
 
@@ -88,8 +95,14 @@ export(
 )
 
 # export distance between dist centers and customers
+# export(
+#     filename="distws",
+#     rows=[
+#         dist_center.market_distances for dist_center in net.distribution_centers_echelon
+#     ],
+# )
 export(
-    filename="distws",
+    filename="distdcs",
     rows=[
         dist_center.market_distances for dist_center in net.distribution_centers_echelon
     ],
@@ -126,17 +139,18 @@ export(
 # HOW??
 # numbers are very different!!
 export(
-    filename="ETD",
+    filename="ETW",
     rows=[
         [
-            sum(
-                [
-                    product_impact * dist_center_distance
-                    for product_impact in warehouse.products_trans_env_impact[
-                        dist_center_index
-                    ]
-                ]
-            )
+            # sum(
+            #     [
+            #         product_impact
+            #         for product_impact in warehouse.products_trans_env_impact[
+            #             dist_center_index
+            #         ]
+            #     ]
+            # )
+            warehouse.products_trans_env_impact[dist_center_index][0]
             for dist_center_index, dist_center_distance in enumerate(
                 warehouse.dist_centers_distances,
             )
@@ -150,14 +164,15 @@ export(
     filename="ETF",
     rows=[
         [
-            sum(
-                [
-                    product_trans_impact * warehouse_distance
-                    for product_trans_impact in plant.products_trans_env_impact[
-                        warehouse_index
-                    ]
-                ]
-            )
+            # sum(
+            #     [
+            #         product_trans_impact
+            #         for product_trans_impact in plant.products_trans_env_impact[
+            #             warehouse_index
+            #         ]
+            #     ]
+            # )
+            plant.products_trans_env_impact[warehouse_index][0]
             for warehouse_index, warehouse_distance in enumerate(
                 plant.warehouses_distances
             )
@@ -170,14 +185,15 @@ export(
     filename="ETS",
     rows=[
         [
-            sum(
-                [
-                    material_impact * plant_distance
-                    for material_impact in supplier.material_trans_env_impact[
-                        plant_index
-                    ]
-                ]
-            )
+            # sum(
+            #     [
+            #         material_impact
+            #         for material_impact in supplier.material_trans_env_impact[
+            #             plant_index
+            #         ]
+            #     ]
+            # )
+            supplier.material_trans_env_impact[plant_index][0]
             for plant_index, plant_distance in enumerate(supplier.plants_distances)
         ]
         for supplier in net.suppliers_echelon
@@ -186,17 +202,18 @@ export(
 
 # export trans env impact from dist to markets
 export(
-    filename="ETW",
+    filename="ETD",
     rows=[
         [
-            sum(
-                [
-                    product_impact * market_distance
-                    for product_impact in dist_center.products_trans_env_impact[
-                        market_index
-                    ]
-                ]
-            )
+            # sum(
+            #     [
+            #         product_impact
+            #         for product_impact in dist_center.products_trans_env_impact[
+            #             market_index
+            #         ]
+            #     ]
+            # )
+            dist_center.products_trans_env_impact[market_index][0]
             for market_index, market_distance in enumerate(dist_center.market_distances)
         ]
         for dist_center in net.distribution_centers_echelon
@@ -245,11 +262,21 @@ export(
 )
 
 # export selling prices
+# export(
+#     filename="Pricews",
+#     rows=[
+#         [
+#             products_prices[0]  # all products have the same price
+#             for products_prices in dist_center.selling_prices.values()
+#         ]
+#         for dist_center in net.distribution_centers_echelon
+#     ],
+# )
 export(
-    filename="Pricews",
+    filename="Pricedcs",
     rows=[
         [
-            sum(products_prices)
+            products_prices[0]  # all products have the same price
             for products_prices in dist_center.selling_prices.values()
         ]
         for dist_center in net.distribution_centers_echelon
@@ -266,47 +293,84 @@ export(
 export(filename="spcap", rows=[supplier.capacity for supplier in net.suppliers_echelon])
 
 
-def sum_trans_costs(echelon, cost_attr="products_trans_cost"):
-    costs = []
-    for product_index in range(len(getattr(echelon[0], cost_attr)[0])):
-        product_cost = 0
-        for facility in echelon:
-            for target_facility_key in getattr(facility, cost_attr).keys():
-                product_cost += getattr(facility, cost_attr)[target_facility_key][
-                    product_index
-                ]
-        costs.append([product_cost])
-    return costs
+# def sum_trans_costs(echelon, cost_attr="products_trans_cost"):
+#     costs = []
+#     for product_index in range(len(getattr(echelon[0], cost_attr)[0])):
+#         product_cost = 0
+#         for facility in echelon:
+#             for target_facility_key in getattr(facility, cost_attr).keys():
+#                 product_cost += getattr(facility, cost_attr)[target_facility_key][
+#                     product_index
+#                 ]
+#         costs.append([product_cost])
+#     return costs
 
 
 # export transportation cost between warehouses and dist centers
+# export(
+#     filename="tcostdcw",
+#     rows=[
+#         [prod_trans_cost]
+#         for prod_trans_cost in net.warehouses_echelon[0].products_trans_cost[0]
+#     ],  # it is the same for all dist_centers
+#     add_header=False,
+# )
 export(
-    filename="tcostdcw",
-    rows=sum_trans_costs(echelon=net.warehouses_echelon),
+    filename="tcostwdc",
+    rows=[
+        [prod_trans_cost]
+        for prod_trans_cost in net.warehouses_echelon[0].products_trans_cost[0]
+    ],  # it is the same for all dist_centers
     add_header=False,
 )
 
 # export transportation cost between plants and warehouses
+# export(
+#     filename="tcostfdc",
+#     rows=[
+#         [prod_trans_cost]
+#         for prod_trans_cost in net.plants_echelon[0].products_trans_cost[0]
+#     ],
+#     add_header=False,
+# )
 export(
-    filename="tcostfdc",
-    rows=sum_trans_costs(echelon=net.plants_echelon),
+    filename="tcostfw",
+    rows=[
+        [prod_trans_cost]
+        for prod_trans_cost in net.plants_echelon[0].products_trans_cost[0]
+    ],
     add_header=False,
 )
 
 # export transportation cost between suppliers and plants
 export(
     filename="tcostspf",
-    rows=sum_trans_costs(
-        echelon=net.suppliers_echelon,
-        cost_attr="material_trans_cost",
-    ),
+    rows=[
+        [prod_trans_cost]
+        for prod_trans_cost in net.suppliers_echelon[0].material_trans_cost[0]
+    ],
     add_header=False,
 )
 
 # export transportation cost between dist centers and customers
+# export(
+#     filename="tcostws",
+#     rows=[
+#         [prod_trans_cost]
+#         for prod_trans_cost in net.distribution_centers_echelon[0].products_trans_cost[
+#             0
+#         ]
+#     ],
+#     add_header=False,
+# )
 export(
-    filename="tcostws",
-    rows=sum_trans_costs(echelon=net.distribution_centers_echelon),
+    filename="tcostdcs",
+    rows=[
+        [prod_trans_cost]
+        for prod_trans_cost in net.distribution_centers_echelon[0].products_trans_cost[
+            0
+        ]
+    ],
     add_header=False,
 )
 
