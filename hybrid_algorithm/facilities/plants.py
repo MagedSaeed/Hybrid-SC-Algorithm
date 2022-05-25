@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 from typing import Dict, List
 
 import numpy as np
-
 from hybrid_algorithm.facilities.base_facility import BaseFacility
 
 
@@ -41,21 +40,48 @@ class PlantFacility(BaseFacility):  # plant i
         random_products_prod_cost = (
             25 * np.random.rand(howmany, number_of_products) + 20
         )
+        # random_products_trans_cost = (
+        #     0.18 * np.random.rand(howmany, number_of_warehouses, number_of_products)
+        #     + 1.1
+        # )
         random_products_trans_cost = (
-            0.18 * np.random.rand(howmany, number_of_warehouses, number_of_products)
+            0.18
+            * np.tile(
+                np.tile(
+                    np.random.rand(number_of_products).reshape(1, number_of_products),
+                    (number_of_warehouses, 1),
+                ),
+                (howmany, 1, 1),
+            )
             + 1.1
         )
         random_fixed_cost = 700_000 * np.random.rand(howmany) + 400_000
         random_product_capacity = (
             20_000 * np.random.rand(howmany, number_of_products) + 75_000
         )
-        random_warehouses_distances = 3.38 * (
-            np.random.rand(howmany, number_of_warehouses) + 0.18
+        # random_warehouses_distances = 3.38 * (
+        #     np.random.rand(howmany, number_of_warehouses) + 0.18
+        # )
+        random_warehouses_distances = (
+            5 * np.random.rand(howmany, number_of_warehouses) + 15
         )
         random_opening_env_impact = 100_000_000_000 * (1 / random_fixed_cost) + 20000
         random_products_env_impact = 7 * np.random.rand(howmany, number_of_products) + 2
-        random_products_trans_env_impact = (
-            0.75 * np.random.rand(howmany, number_of_warehouses, number_of_products) + 2
+        # random_products_trans_env_impact = (
+        #     0.75 * np.random.rand(howmany, number_of_warehouses, number_of_products) + 2
+        # )
+        random_products_trans_env_impact = np.array(
+            [
+                np.tile(
+                    0.75
+                    * np.random.rand(number_of_warehouses).reshape(
+                        number_of_warehouses, 1
+                    )
+                    + 2,
+                    (1, number_of_products),
+                )
+                for _ in range(howmany)
+            ]
         )
         random_prop_delivery_risk = (
             0.6 * np.random.rand(howmany, number_of_products) + 0.1

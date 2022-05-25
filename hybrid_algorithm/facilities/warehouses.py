@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 from typing import Dict, List
 
 import numpy as np
-
 from hybrid_algorithm.facilities.base_facility import BaseFacility
 
 
@@ -34,22 +33,57 @@ class WarehouseFacility(BaseFacility):  # warehouse j
         howmany = cls.NUMBER_OF_WAREHOUSES
         number_of_products = cls.NUMBER_OF_PRODUCTS
         number_of_dist_centers = cls.NUMBER_OF_DISTRIBUTION_CENTERS
+        # random_products_trans_cost = (
+        #     0.18 * np.random.rand(howmany, number_of_dist_centers, number_of_products)
+        #     + 1.1
+        # )
+
+        # random_products_trans_cost = (
+        #     0.18 * np.tile(np.random.rand(4).reshape(1, 4), (3, 1)) + 1.1
+        # )
+
         random_products_trans_cost = (
-            0.18 * np.random.rand(howmany, number_of_dist_centers, number_of_products)
+            0.18
+            * np.tile(
+                np.tile(
+                    np.random.rand(number_of_products).reshape(1, number_of_products),
+                    (number_of_dist_centers, 1),
+                ),
+                (howmany, 1, 1),
+            )
             + 1.1
         )
+
         random_fixed_cost = 30_000 * np.random.rand(howmany) + 40_000
         random_product_capacity = (
             15_000 * np.random.rand(howmany, number_of_products) + 75_000
         )
+        # random_dist_centers_distances = (
+        #     3.38 * np.random.rand(howmany, number_of_dist_centers) + 0.18
+        # )
         random_dist_centers_distances = (
-            3.38 * np.random.rand(howmany, number_of_dist_centers) + 0.18
+            5 * np.random.rand(howmany, number_of_dist_centers) + 15
         )
-        random_opening_env_impact = 100_000_000_000 * (1 / random_fixed_cost) + 20000
-        random_products_trans_env_impact = (
-            0.5 * np.random.rand(howmany, number_of_dist_centers, number_of_products)
-            + 2
+        random_opening_env_impact = 100_000_000 * (1 / random_fixed_cost) + 20000
+        # random_products_trans_env_impact = (
+        #     0.5 * np.random.rand(howmany, number_of_dist_centers, number_of_products)
+        #     + 2
+        # )
+
+        random_products_trans_env_impact = np.array(
+            [
+                np.tile(
+                    0.8
+                    * np.random.rand(number_of_dist_centers).reshape(
+                        number_of_dist_centers, 1
+                    )
+                    + 2,
+                    (1, number_of_products),
+                )
+                for _ in range(howmany)
+            ]
         )
+
         random_prop_delivery_risk = (
             0.4 * np.random.rand(howmany, number_of_products) + 0.1
         )

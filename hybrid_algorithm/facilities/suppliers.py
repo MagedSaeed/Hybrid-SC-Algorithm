@@ -2,9 +2,8 @@ from dataclasses import dataclass, field
 from typing import Dict, List
 
 import numpy as np
-
-from hybrid_algorithm.facilities.raw_materials import RawMaterial
 from hybrid_algorithm.facilities.base_facility import BaseFacility
+from hybrid_algorithm.facilities.raw_materials import RawMaterial
 
 
 @dataclass
@@ -45,19 +44,42 @@ class SupplierFacility(BaseFacility):  # supplier object s
         random_material_trans_cost = (
             0.35 * np.random.rand(howmany, number_of_plants, len(raw_materials)) + 1.2
         )
+        random_material_trans_cost = (
+            0.18
+            * np.tile(
+                np.tile(
+                    np.random.rand(len(raw_materials)).reshape(1, len(raw_materials)),
+                    (number_of_plants, 1),
+                ),
+                (howmany, 1, 1),
+            )
+            + 1.1
+        )
         random_material_capacity = (
             1 * np.random.rand(howmany, len(raw_materials)) + 100_000
         )
         random_plants_distances = 3 * np.random.rand(howmany, number_of_plants) + 35.35
-        random_material_trans_env_impact = (
-            0.75
-            * np.random.rand(
-                howmany,
-                number_of_plants,
-                len(raw_materials),
-            )
-            + 2
+        # random_material_trans_env_impact = (
+        #     0.75
+        #     * np.random.rand(
+        #         howmany,
+        #         number_of_plants,
+        #         len(raw_materials),
+        #     )
+        #     + 2
+        # )
+
+        random_material_trans_env_impact = np.array(
+            [
+                np.tile(
+                    0.75 * np.random.rand(number_of_plants).reshape(number_of_plants, 1)
+                    + 2,
+                    (1, len(raw_materials)),
+                )
+                for _ in range(howmany)
+            ]
         )
+
         random_prop_delivery_risk = np.random.rand(howmany, len(raw_materials))
         random_prop_quality_risk = (
             0.6 * np.random.rand(howmany, len(raw_materials)) + 0.1
@@ -66,7 +88,7 @@ class SupplierFacility(BaseFacility):  # supplier object s
             210000 * np.random.rand(howmany, len(raw_materials)) + 50000
         )
         random_quality_risk_impact = (
-            2000000 * np.random.rand(howmany, len(raw_materials)) + 2200000
+            200_000 * np.random.rand(howmany, len(raw_materials)) + 220_000
         )
         random_fixed_costs = 70_000 * np.random.rand(howmany) + 50_000
         facilities = list()
