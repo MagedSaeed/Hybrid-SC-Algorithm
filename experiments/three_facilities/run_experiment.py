@@ -1,10 +1,14 @@
-import itertools
-import time
-from hybrid_algorithm import SupplyChainNetwork, HybridAlgorithm, LPModel
-import random
-import numpy as np
 import csv
+import itertools
+import random
+import sys
+import time
 
+import numpy as np
+
+if "." not in sys.path:
+    sys.path.append(".")
+from hybrid_algorithm import HybridAlgorithm, LPModel, SupplyChainNetwork
 from hybrid_algorithm.config import AppConfig
 from hybrid_algorithm.hybrid_algorithm.util import Solution
 from hybrid_algorithm.utils import get_three_random_weights
