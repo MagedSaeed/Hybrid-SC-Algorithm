@@ -3,12 +3,16 @@ import random
 import sys
 
 sys.path.append(".")
+import glob
+import os
+
 import numpy as np
 from hybrid_algorithm import HybridAlgorithm, LPModel, SupplyChainNetwork
 from hybrid_algorithm.config import AppConfig
 from hybrid_algorithm.facilities import warehouses
 from hybrid_algorithm.hybrid_algorithm.util import Solution
 from hybrid_algorithm.utils import get_three_random_weights
+from xlsxwriter.workbook import Workbook
 
 AppConfig.configure(config_file_path="experiments/three_facilities/config.ini")
 
@@ -151,6 +155,7 @@ export(
             #     ]
             # )
             warehouse.products_trans_env_impact[dist_center_index][0]
+            * dist_center_distance
             for dist_center_index, dist_center_distance in enumerate(
                 warehouse.dist_centers_distances,
             )
@@ -172,7 +177,7 @@ export(
             #         ]
             #     ]
             # )
-            plant.products_trans_env_impact[warehouse_index][0]
+            plant.products_trans_env_impact[warehouse_index][0] * warehouse_distance
             for warehouse_index, warehouse_distance in enumerate(
                 plant.warehouses_distances
             )
@@ -193,7 +198,7 @@ export(
             #         ]
             #     ]
             # )
-            supplier.material_trans_env_impact[plant_index][0]
+            supplier.material_trans_env_impact[plant_index][0] * plant_distance
             for plant_index, plant_distance in enumerate(supplier.plants_distances)
         ]
         for supplier in net.suppliers_echelon
@@ -213,7 +218,7 @@ export(
             #         ]
             #     ]
             # )
-            dist_center.products_trans_env_impact[market_index][0]
+            dist_center.products_trans_env_impact[market_index][0] * market_distance
             for market_index, market_distance in enumerate(dist_center.market_distances)
         ]
         for dist_center in net.distribution_centers_echelon
@@ -450,3 +455,21 @@ export(
 export(
     filename="wcap", rows=[warehouse.capacity for warehouse in net.warehouses_echelon]
 )
+
+
+""" export the csv to excel """
+
+for csvfile in glob.glob(os.path.join("scripts/net_to_csv/", "*.csv")):
+    filename = csvfile.split("/")[-1]
+    workbook = Workbook(
+        f"scripts/net_to_excel/{''.join(filename.split('.')[:-1])}.xlsx",
+        {"strings_to_numbers": True},
+    )
+    worksheet = workbook.add_worksheet()
+    worksheet.name = "sheet1"
+    with open(csvfile, "rt", encoding="utf8") as f:
+        reader = csv.reader(f)
+        for r, row in enumerate(reader):
+            for c, col in enumerate(row):
+                worksheet.write(r, c, col)
+    workbook.close()
