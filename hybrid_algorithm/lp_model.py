@@ -10,8 +10,8 @@ from hybrid_algorithm.utils import exclude_closed_facilities, get_three_random_w
 
 class LPModel:
     def __init__(self, network):
-        # self.network = exclude_closed_facilities(network, inplace=False)
-        self.network = network
+        self.network = exclude_closed_facilities(network, inplace=False)
+        # self.network = network
 
     @cached_property
     def Qkmp(self):
@@ -79,19 +79,16 @@ class LPModel:
     def Z1_objective_function(self):
         net = self.network
         EX = sum(
-            facility.fixed_cost
+            facility.fixed_cost * facility.is_open
             for facility in self.network.plants_echelon
-            if facility.is_open == 1
         )
         FY = sum(
-            facility.fixed_cost
+            facility.fixed_cost * facility.is_open
             for facility in self.network.warehouses_echelon
-            if facility.is_open == 1
         )
         GZ = sum(
-            facility.fixed_cost
+            facility.fixed_cost * facility.is_open
             for facility in self.network.distribution_centers_echelon
-            if facility.is_open == 1
         )
 
         # Xsit_coeffs = [
@@ -535,7 +532,6 @@ class LPModel:
                 constrains.append(constrain)
 
         for s, supplier in enumerate(net.suppliers_echelon):
-            # for t, capacity in enumerate(supplier.material_capacity):
             """(5) constrain"""
             constrain = (
                 lpSum(
@@ -543,7 +539,7 @@ class LPModel:
                     for i, plant in enumerate(net.plants_echelon)
                     for t, capacity in enumerate(supplier.material_capacity)
                 )
-                <= supplier.capacity.sum()
+                <= supplier.capacity.sum() * supplier.is_open
             )
             constrains.append(constrain)
 
@@ -555,8 +551,9 @@ class LPModel:
                 for s, supplier in enumerate(net.suppliers_echelon)
                 for t, raw_material in enumerate(supplier.raw_materials)
             )
-            constrain = wx_sum <= plant.capacity.sum()
+            constrain = wx_sum <= plant.capacity.sum() * plant.is_open
             constrains.append(constrain)
+            # for p, capacity in enumerate(plant.product_capacity):
             """(9) constrain"""
             constrain = wx_sum == lpSum(
                 Y[i, j, p]
@@ -572,7 +569,7 @@ class LPModel:
                 for i, plant in enumerate(net.plants_echelon)
                 for p, product_capacity in enumerate(plant.product_capacity)
             )
-            constrain = y_sum <= warehouse.capacity.sum()
+            constrain = y_sum <= warehouse.capacity.sum() * warehouse.is_open
             constrains.append(constrain)
 
         for k, dist_center in enumerate(net.distribution_centers_echelon):
@@ -582,7 +579,7 @@ class LPModel:
                 for j, warehouse in enumerate(net.warehouses_echelon)
                 for p, product_capacity in enumerate(warehouse.product_capacity)
             )
-            constrain = z_sum <= dist_center.capacity.sum()
+            constrain = z_sum <= dist_center.capacity.sum() * dist_center.is_open
             constrains.append(constrain)
 
         for j, warehouse in enumerate(net.warehouses_echelon):
