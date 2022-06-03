@@ -89,21 +89,21 @@ class SupplyChainNetwork:
         for echelon in echelons:
             for facility in echelon:
                 facility.is_open = 0
-        previous_echelon_demand = market_demand
+        # previous_echelon_demand = market_demand
         for k in range(len(echelons)):
             echelon = echelons[k]
             echelon_open_facilities_capacity = 0
             sorted_echelon = facilities_greedy_sort(echelon)
             for facility in sorted_echelon:
-                if echelon_open_facilities_capacity < previous_echelon_demand:
+                if echelon_open_facilities_capacity < market_demand:
                     facility.is_open = 1
                     echelon_open_facilities_capacity += facility.capacity.sum()
                 else:
                     break
-            previous_echelon_demand = sum(
-                facility.capacity.sum()
-                for facility in get_open_facilities_in_echelon(echelon)
-            )
+            # previous_echelon_demand = sum(
+            #     facility.capacity.sum()
+            #     for facility in get_open_facilities_in_echelon(echelon)
+            # )
 
     def describe(self):
         table = BeautifulTable()
