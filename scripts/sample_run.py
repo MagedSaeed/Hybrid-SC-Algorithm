@@ -1,10 +1,12 @@
-import itertools
-import time
-from hybrid_algorithm import SupplyChainNetwork, HybridAlgorithm, LPModel
-import random
-import numpy as np
 import csv
+import itertools
+import random
+import sys
+import time
 
+sys.path.append('.')
+import numpy as np
+from hybrid_algorithm import HybridAlgorithm, LPModel, SupplyChainNetwork
 from hybrid_algorithm.config import AppConfig
 from hybrid_algorithm.hybrid_algorithm.util import Solution
 from hybrid_algorithm.utils import get_three_random_weights
@@ -16,8 +18,8 @@ seed = 1
 np.random.seed(seed)
 random.seed(seed)
 
-facilities_count = 3
-markets_count = 10
+facilities_count = 5
+markets_count = 20
 products_count = 4
 raw_materials_count = 4
 
@@ -90,6 +92,10 @@ for solution_index, solution in enumerate(
     normalized_hybrid_multi_objective_value = model.normalized_multi_objective_value
     weighted_multi_objective_value = model.weighted_multi_objective_value
     print("-" * 100)
+    print("greedy z1", greedy_z1)
+    print("hybrid z1", hybrid_z1)
+    print("greedy z2", greedy_z2)
+    print("hybrid z2", hybrid_z2)
     print("greedy z3", greedy_z3)
     print("hybrid z3", hybrid_z3)
     print("greedy multi", greedy_multi_objective_value)
