@@ -50,14 +50,12 @@ net.apply_initial_greedy_solution()
 
 
 def export(filename, rows, add_header=True):
+    os.system("mkdir -p scripts/net_to_csv/")
     with open(f"scripts/net_to_csv/{filename}.csv", "w") as file:
         writer = csv.writer(file)
         if add_header:
             writer.writerow(["", *range(1, len(rows[0]) + 1)])
-        [
-            writer.writerow([index, *map(lambda demand: round(demand, 3), row)])
-            for index, row in enumerate(rows, start=1)
-        ]
+        [writer.writerow([index, *row]) for index, row in enumerate(rows, start=1)]
 
 
 # export demand
@@ -458,7 +456,7 @@ export(
 
 
 """ export the csv to excel """
-
+os.system("mkdir -p scripts/net_to_excel/")
 for csvfile in glob.glob(os.path.join("scripts/net_to_csv/", "*.csv")):
     filename = csvfile.split("/")[-1]
     workbook = Workbook(
