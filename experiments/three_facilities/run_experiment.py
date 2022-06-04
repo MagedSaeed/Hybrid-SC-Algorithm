@@ -70,6 +70,7 @@ headers = [
     "w3",
     "weighted multi objective value",
     "optimization running time",
+    "open/close status of facilities",
 ]
 results_writer.writerow(headers)
 
@@ -163,6 +164,7 @@ for tabu_size in tabu_sizes:
                                 w3,
                                 weighted_multi_objective_value,
                                 running_time,
+                                solution,
                             ]
                         )
                     print("#" * 80)
