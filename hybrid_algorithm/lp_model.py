@@ -10,8 +10,8 @@ from hybrid_algorithm.utils import exclude_closed_facilities, get_three_random_w
 
 class LPModel:
     def __init__(self, network):
-        self.network = exclude_closed_facilities(network, inplace=False)
-        # self.network = network
+        # self.network = exclude_closed_facilities(network, inplace=False)
+        self.network = network
 
     @cached_property
     def Qkmp(self):
@@ -131,6 +131,7 @@ class LPModel:
                     )
                     Xsit_coeffs.append(coeff)
         number_of_materials = len(net.suppliers_echelon[0].material_purchase_cost)
+        assert len(self.Xsit) == len(Xsit_coeffs)
         Xsit_sum = lpSum(
             coeff * self.Xsit[(s, i, t)]
             for coeff, (s, i, t) in zip(
@@ -170,13 +171,13 @@ class LPModel:
 
         Yijp_coeffs = list()
         for plant in net.plants_echelon:
-            for product_index, product_production_cost in enumerate(
-                plant.products_prod_cost
-            ):
-                for (
-                    warehouse_index,
-                    products_trans_costs,
-                ) in plant.products_trans_cost.items():
+            for (
+                warehouse_index,
+                products_trans_costs,
+            ) in plant.products_trans_cost.items():
+                for product_index, product_production_cost in enumerate(
+                    plant.products_prod_cost
+                ):
                     coeff = (
                         product_production_cost
                         + products_trans_costs[product_index]
@@ -184,6 +185,7 @@ class LPModel:
                     )
                     Yijp_coeffs.append(coeff)
         number_of_products = len(net.plants_echelon[0].products_prod_cost)
+        assert len(Yijp_coeffs) == len(self.Yijp)
         Yijp_sum = lpSum(
             coeff * self.Yijp[(i, j, p)]
             for coeff, (i, j, p) in zip(
@@ -207,6 +209,7 @@ class LPModel:
                         * warehouse.dist_centers_distances[dist_center_index]
                     )
                     Zjkp_coeffs.append(coeff)
+        assert len(self.Zjkp) == len(Zjkp_coeffs)
         Zjkp_sum = lpSum(
             coeff * self.Zjkp[(j, k, p)]
             for coeff, (j, k, p) in zip(
@@ -239,6 +242,7 @@ class LPModel:
         #     for k, dist_center in enumerate(Zjkp_coeffs[j])
         #     for p, coeff in enumerate(Zjkp_coeffs[j][k])
         # )
+
         Qkmp_coeffs = list()
         for dist_center in net.distribution_centers_echelon:
             for (
@@ -248,13 +252,14 @@ class LPModel:
                 for product_index, product_price in enumerate(
                     dist_center.selling_prices[market_index]
                 ):
+                    # print(product_price)
                     coeff = (
                         product_price
                         - dist_center.market_distances[market_index]
                         * products_trans_costs[product_index]
                     )
                     Qkmp_coeffs.append(coeff)
-
+        assert len(self.Qkmp) == len(Qkmp_coeffs)
         Qkmp_sum = lpSum(
             coeff * self.Qkmp[(k, m, p)]
             for coeff, (k, m, p) in zip(
@@ -533,6 +538,7 @@ class LPModel:
 
         for s, supplier in enumerate(net.suppliers_echelon):
             """(5) constrain"""
+            # for t, capacity in enumerate(supplier.material_capacity):
             constrain = (
                 lpSum(
                     X[s, i, t]
@@ -544,22 +550,15 @@ class LPModel:
             constrains.append(constrain)
 
         for i, plant in enumerate(net.plants_echelon):
-            # for p, capacity in enumerate(plant.product_capacity):
             """(6) constrain"""
+            # for p, capacity in enumerate(plant.product_capacity):
             wx_sum = lpSum(
                 raw_material.products_yields[p] * X[s, i, t]
                 for s, supplier in enumerate(net.suppliers_echelon)
                 for t, raw_material in enumerate(supplier.raw_materials)
-            )
-            constrain = wx_sum <= plant.capacity.sum() * plant.is_open
-            constrains.append(constrain)
-            # for p, capacity in enumerate(plant.product_capacity):
-            """(9) constrain"""
-            constrain = wx_sum == lpSum(
-                Y[i, j, p]
-                for j, warehouse in enumerate(net.warehouses_echelon)
                 for p, capacity in enumerate(plant.product_capacity)
             )
+            constrain = wx_sum <= plant.capacity.sum() * plant.is_open
             constrains.append(constrain)
 
         for j, warehouse in enumerate(net.warehouses_echelon):
@@ -580,6 +579,22 @@ class LPModel:
                 for p, product_capacity in enumerate(warehouse.product_capacity)
             )
             constrain = z_sum <= dist_center.capacity.sum() * dist_center.is_open
+            constrains.append(constrain)
+
+        for i, plant in enumerate(net.plants_echelon):
+            """(9) constrain"""
+            # for p, capacity in enumerate(plant.product_capacity):
+            wx_sum = lpSum(
+                raw_material.products_yields[p] * X[s, i, t]
+                for s, supplier in enumerate(net.suppliers_echelon)
+                for t, raw_material in enumerate(supplier.raw_materials)
+                for p, capacity in enumerate(plant.product_capacity)
+            )
+            constrain = wx_sum == lpSum(
+                Y[i, j, p]
+                for j, warehouse in enumerate(net.warehouses_echelon)
+                for p, capacity in enumerate(plant.product_capacity)
+            )
             constrains.append(constrain)
 
         for j, warehouse in enumerate(net.warehouses_echelon):
@@ -604,7 +619,6 @@ class LPModel:
                 )
                 constrain = z_sum == q_sum
                 constrains.append(constrain)
-
         return constrains
 
     def _get_objective_value(self, objective_function):
@@ -612,7 +626,7 @@ class LPModel:
         model += objective_function
         for constrain in self.constrains:
             model += constrain
-        # status = model.solve(solver=GLPK(msg=True))
+        # status = model.solve(solver=GLPK(msg=False))
         status = model.solve(solver=CPLEX_PY(msg=False))
         if status == 1:
             return model.objective.value()
