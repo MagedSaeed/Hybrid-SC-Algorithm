@@ -10,8 +10,8 @@ from hybrid_algorithm.utils import exclude_closed_facilities, get_three_random_w
 
 class LPModel:
     def __init__(self, network):
-        # self.network = exclude_closed_facilities(network, inplace=False)
-        self.network = network
+        self.network = exclude_closed_facilities(network, inplace=False)
+        # self.network = network
 
     @cached_property
     def Qkmp(self):
@@ -91,30 +91,6 @@ class LPModel:
             for facility in self.network.distribution_centers_echelon
         )
 
-        # Xsit_coeffs = [
-        #     [
-        #         [
-        #             (
-        #                 material_cost
-        #                 + supplier.plants_distances[plant_index] * material_trans_cost
-        #             )
-        #             for material_trans_cost in supplier.material_trans_cost[plant_index]
-        #         ]
-        #         for plant_index, material_cost in zip(
-        #             supplier.material_trans_cost.keys(),
-        #             supplier.material_purchase_cost,
-        #         )
-        #     ]
-        #     for supplier in net.suppliers_echelon
-        # ]
-
-        # Xsit_sum = lpSum(
-        #     coeff * self.Xsit[(s, i, t)]
-        #     for s, supplier in enumerate(Xsit_coeffs)
-        #     for i, plant in enumerate(Xsit_coeffs[s])
-        #     for t, coeff in enumerate(Xsit_coeffs[s][i])
-        # )
-
         Xsit_coeffs = list()
         for supplier in net.suppliers_echelon:
             for (
@@ -130,6 +106,7 @@ class LPModel:
                         * supplier.plants_distances[plant_index]
                     )
                     Xsit_coeffs.append(coeff)
+
         number_of_materials = len(net.suppliers_echelon[0].material_purchase_cost)
         assert len(self.Xsit) == len(Xsit_coeffs)
         Xsit_sum = lpSum(
@@ -143,31 +120,6 @@ class LPModel:
                 ),
             )
         )
-
-        # Yijp_coeffs = [
-        #     [
-        #         [
-        #             (
-        #                 production_cost
-        #                 + plant.warehouses_distances[warehouse_index]
-        #                 * product_trans_cost
-        #             )
-        #             for product_trans_cost in plant.products_trans_cost[warehouse_index]
-        #         ]
-        #         for warehouse_index, production_cost in zip(
-        #             plant.products_trans_cost.keys(),
-        #             plant.products_prod_cost,
-        #         )
-        #     ]
-        #     for plant in net.plants_echelon
-        # ]
-
-        # Yijp_sum = lpSum(
-        #     coeff * self.Yijp[(i, j, p)]
-        #     for i, plant in enumerate(Yijp_coeffs)
-        #     for j, warehouse in enumerate(Yijp_coeffs[i])
-        #     for p, coeff in enumerate(Yijp_coeffs[i][j])
-        # )
 
         Yijp_coeffs = list()
         for plant in net.plants_echelon:
@@ -221,28 +173,6 @@ class LPModel:
                 ),
             )
         )
-
-        # Zjkp_coeffs = [
-        #     [
-        #         [
-        #             warehouse.dist_centers_distances[dist_center_index]
-        #             * product_trans_cost
-        #             for product_trans_cost in warehouse.products_trans_cost[
-        #                 dist_center_index
-        #             ]
-        #         ]
-        #         for dist_center_index in warehouse.products_trans_cost.keys()
-        #     ]
-        #     for warehouse in net.warehouses_echelon
-        # ]
-
-        # Zjkp_sum = lpSum(
-        #     coeff * self.Zjkp[(j, k, p)]
-        #     for j, warehouse in enumerate(Zjkp_coeffs)
-        #     for k, dist_center in enumerate(Zjkp_coeffs[j])
-        #     for p, coeff in enumerate(Zjkp_coeffs[j][k])
-        # )
-
         Qkmp_coeffs = list()
         for dist_center in net.distribution_centers_echelon:
             for (
@@ -252,7 +182,6 @@ class LPModel:
                 for product_index, product_price in enumerate(
                     dist_center.selling_prices[market_index]
                 ):
-                    # print(product_price)
                     coeff = (
                         product_price
                         - dist_center.market_distances[market_index]
@@ -271,32 +200,6 @@ class LPModel:
                 ),
             )
         )
-
-        # Qkmp_coeffs = [
-        #     [
-        #         [
-        #             (
-        #                 product_price
-        #                 - dist_center.market_distances[market_index]
-        #                 * product_trans_cost
-        #             )
-        #             for product_trans_cost, product_price in zip(
-        #                 dist_center.products_trans_cost[market_index],
-        #                 dist_center.selling_prices[market_index],
-        #             )
-        #         ]
-        #         for market_index in dist_center.products_trans_cost.keys()
-        #     ]
-        #     for dist_center in net.distribution_centers_echelon
-        # ]
-
-        # Qkmp_sum = lpSum(
-        #     coeff * self.Qkmp[(k, m, p)]
-        #     for k, dist_center in enumerate(Qkmp_coeffs)
-        #     for m, market in enumerate(Qkmp_coeffs[k])
-        #     for p, coeff in enumerate(Qkmp_coeffs[k][m])
-        # )
-
         return Qkmp_sum - (EX + FY + GZ + Xsit_sum + Yijp_sum + Zjkp_sum)
 
     @property
@@ -443,30 +346,6 @@ class LPModel:
                 ),
             )
         )
-
-        # Yijp_coeffs = [
-        #     [
-        #         [
-        #             product_env_impact + product_trans_impact * warehouse_distance
-        #             for product_trans_impact, product_env_impact in zip(
-        #                 plant.products_trans_env_impact[warehouse_index],
-        #                 plant.products_env_impact,
-        #             )
-        #         ]
-        #         for warehouse_index, warehouse_distance in enumerate(
-        #             plant.warehouses_distances
-        #         )
-        #     ]
-        #     for plant in self.network.plants_echelon
-        # ]
-
-        # Yijp_sum = lpSum(
-        #     coeff * self.Yijp[(i, j, p)]
-        #     for i, plant in enumerate(Yijp_coeffs)
-        #     for j, warehouse in enumerate(Yijp_coeffs[i])
-        #     for p, coeff in enumerate(Yijp_coeffs[i][j])
-        # )
-
         Zjkp_coeffs = [
             [
                 [
@@ -513,9 +392,9 @@ class LPModel:
         return EFX + EWY + EDZ + EPY + Yijp_sum + Xsit_sum + Zjkp_sum + Qkmp_sum
 
     @cached_property
-    def constrains(self):
+    def constraints(self):
         net = self.network
-        constrains = list()
+        constraints = list()
 
         Q = self.Qkmp
         X = self.Xsit
@@ -525,7 +404,7 @@ class LPModel:
         for m, market in enumerate(net.markets_echelon):
             for p, demand in enumerate(market.products_demand):
                 """(4) constrain"""
-                constrain = (
+                constraint = (
                     lpSum(
                         Q[k, m, p]
                         for k, dist_center in enumerate(
@@ -534,12 +413,11 @@ class LPModel:
                     )
                     == demand
                 )
-                constrains.append(constrain)
+                constraints.append(constraint)
 
         for s, supplier in enumerate(net.suppliers_echelon):
             """(5) constrain"""
-            # for t, capacity in enumerate(supplier.material_capacity):
-            constrain = (
+            constraint = (
                 lpSum(
                     X[s, i, t]
                     for i, plant in enumerate(net.plants_echelon)
@@ -547,19 +425,23 @@ class LPModel:
                 )
                 <= supplier.capacity.sum() * supplier.is_open
             )
-            constrains.append(constrain)
+            constraints.append(constraint)
 
         for i, plant in enumerate(net.plants_echelon):
             """(6) constrain"""
-            # for p, capacity in enumerate(plant.product_capacity):
+            """
+                The implementation should include the products yields. 
+                However, the yields is assumed to be 1 for each material to each project. So, we neglect them.
+                For real case scenario, it should be added to this constraint
+            """
             wx_sum = lpSum(
-                raw_material.products_yields[p] * X[s, i, t]
+                X[s, i, t]
                 for s, supplier in enumerate(net.suppliers_echelon)
-                for t, raw_material in enumerate(supplier.raw_materials)
-                for p, capacity in enumerate(plant.product_capacity)
+                # t here is the same as the p. Look to the note above
+                for t, capacity in enumerate(plant.product_capacity)
             )
-            constrain = wx_sum <= plant.capacity.sum() * plant.is_open
-            constrains.append(constrain)
+            constraint = wx_sum <= plant.capacity.sum() * plant.is_open
+            constraints.append(constraint)
 
         for j, warehouse in enumerate(net.warehouses_echelon):
             """(7) constrain"""
@@ -568,8 +450,8 @@ class LPModel:
                 for i, plant in enumerate(net.plants_echelon)
                 for p, product_capacity in enumerate(plant.product_capacity)
             )
-            constrain = y_sum <= warehouse.capacity.sum() * warehouse.is_open
-            constrains.append(constrain)
+            constraint = y_sum <= warehouse.capacity.sum() * warehouse.is_open
+            constraints.append(constraint)
 
         for k, dist_center in enumerate(net.distribution_centers_echelon):
             """(8) constrain"""
@@ -578,24 +460,24 @@ class LPModel:
                 for j, warehouse in enumerate(net.warehouses_echelon)
                 for p, product_capacity in enumerate(warehouse.product_capacity)
             )
-            constrain = z_sum <= dist_center.capacity.sum() * dist_center.is_open
-            constrains.append(constrain)
+            constraint = z_sum <= dist_center.capacity.sum() * dist_center.is_open
+            constraints.append(constraint)
 
         for i, plant in enumerate(net.plants_echelon):
             """(9) constrain"""
-            # for p, capacity in enumerate(plant.product_capacity):
-            wx_sum = lpSum(
-                raw_material.products_yields[p] * X[s, i, t]
-                for s, supplier in enumerate(net.suppliers_echelon)
-                for t, raw_material in enumerate(supplier.raw_materials)
-                for p, capacity in enumerate(plant.product_capacity)
-            )
-            constrain = wx_sum == lpSum(
-                Y[i, j, p]
-                for j, warehouse in enumerate(net.warehouses_echelon)
-                for p, capacity in enumerate(plant.product_capacity)
-            )
-            constrains.append(constrain)
+            for p, capacity in enumerate(plant.product_capacity):
+                """
+                The implementation should include the products yields.
+                However, the yields is assumed to be 1 for each material to each project. So, we neglect them.
+                For real case scenario, it should be added to this constraint
+                """
+                wx_sum = lpSum(
+                    X[s, i, p] for s, supplier in enumerate(net.suppliers_echelon)
+                )
+                constraint = wx_sum == lpSum(
+                    Y[i, j, p] for j, warehouse in enumerate(net.warehouses_echelon)
+                )
+                constraints.append(constraint)
 
         for j, warehouse in enumerate(net.warehouses_echelon):
             for p, product_capacity in enumerate(warehouse.product_capacity):
@@ -605,8 +487,8 @@ class LPModel:
                     Z[j, k, p]
                     for k, dist_center in enumerate(net.distribution_centers_echelon)
                 )
-                constrain = y_sum == z_sum
-                constrains.append(constrain)
+                constraint = y_sum == z_sum
+                constraints.append(constraint)
 
         for k, distribution_center in enumerate(net.distribution_centers_echelon):
             for p, product_capacity in enumerate(distribution_center.product_capacity):
@@ -617,15 +499,15 @@ class LPModel:
                 q_sum = lpSum(
                     Q[k, m, p] for m, market in enumerate(net.markets_echelon)
                 )
-                constrain = z_sum == q_sum
-                constrains.append(constrain)
-        return constrains
+                constraint = z_sum == q_sum
+                constraints.append(constraint)
+        return constraints
 
     def _get_objective_value(self, objective_function):
         model = LpProblem(name="Supply-Chain-Network", sense=LpMinimize)
         model += objective_function
-        for constrain in self.constrains:
-            model += constrain
+        for constraint in self.constraints:
+            model += constraint
         # status = model.solve(solver=GLPK(msg=False))
         status = model.solve(solver=CPLEX_PY(msg=False))
         if status == 1:
