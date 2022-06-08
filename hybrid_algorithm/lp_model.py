@@ -429,15 +429,11 @@ class LPModel:
 
         for i, plant in enumerate(net.plants_echelon):
             """(6) constrain"""
-            """
-                The implementation should include the products yields. 
-                However, the yields is assumed to be 1 for each material to each project. So, we neglect them.
-                For real case scenario, it should be added to this constraint
-            """
             wx_sum = lpSum(
-                X[s, i, t]
+                supplier.get_product_yield_from_raw_materials(t) * X[s, i, t]
                 for s, supplier in enumerate(net.suppliers_echelon)
-                # t here is the same as the p. Look to the note above
+                # t here is the same as the p as the number of raw material
+                # is the same as the number of products
                 for t, capacity in enumerate(plant.product_capacity)
             )
             constraint = wx_sum <= plant.capacity.sum() * plant.is_open
@@ -466,13 +462,11 @@ class LPModel:
         for i, plant in enumerate(net.plants_echelon):
             """(9) constrain"""
             for p, capacity in enumerate(plant.product_capacity):
-                """
-                The implementation should include the products yields.
-                However, the yields is assumed to be 1 for each material to each project. So, we neglect them.
-                For real case scenario, it should be added to this constraint
-                """
                 wx_sum = lpSum(
-                    X[s, i, p] for s, supplier in enumerate(net.suppliers_echelon)
+                    # t here is the same as the p as the number of raw material
+                    # is the same as the number of products
+                    supplier.get_product_yield_from_raw_materials(p) * X[s, i, p]
+                    for s, supplier in enumerate(net.suppliers_echelon)
                 )
                 constraint = wx_sum == lpSum(
                     Y[i, j, p] for j, warehouse in enumerate(net.warehouses_echelon)

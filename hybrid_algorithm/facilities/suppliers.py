@@ -118,3 +118,9 @@ class SupplierFacility(BaseFacility):  # supplier object s
             )
             facilities.append(facility)
         return facilities
+
+    def get_product_yield_from_raw_materials(self, product_index):
+        return sum(
+            raw_material.products_yields[product_index]
+            for raw_material in self.raw_materials
+        )
