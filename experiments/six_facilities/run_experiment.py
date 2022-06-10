@@ -29,7 +29,7 @@ markets_count = int(config["facilities"]["markets_count"])
 products_count = int(config["facilities"]["products_count"])
 raw_materials_count = int(config["facilities"]["raw_materials_count"])
 
-N = facilities_count * 4 + markets_count
+N = facilities_count * products_count + markets_count
 
 
 tabu_sizes = [5, 7, 15]
