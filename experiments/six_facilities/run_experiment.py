@@ -42,7 +42,7 @@ alpha_values = [0.9, 0.95, 0.99]
 K_values = [int(0.5 * N), int(0.75 * N), N]
 
 results_file = open(
-    "experiments/three_facilities/results.csv",
+    f"{current_directory}/results.csv",
     "w",
     encoding="UTF8",
 )
