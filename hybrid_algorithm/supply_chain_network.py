@@ -80,10 +80,11 @@ class SupplyChainNetwork:
             self.distribution_centers_echelon,
         ]
 
+    @property
+    def market_demand(self):
+        return sum(market.products_demand.sum() for market in self.markets_echelon)
+
     def apply_initial_greedy_solution(self):
-        market_demand = sum(
-            market.products_demand.sum() for market in self.markets_echelon
-        )
         echelons = self.echelons[::-1]
         # close all facilities
         for echelon in echelons:
@@ -95,7 +96,7 @@ class SupplyChainNetwork:
             echelon_open_facilities_capacity = 0
             sorted_echelon = facilities_greedy_sort(echelon)
             for facility in sorted_echelon:
-                if echelon_open_facilities_capacity < market_demand:
+                if echelon_open_facilities_capacity < self.market_demand:
                     facility.is_open = 1
                     echelon_open_facilities_capacity += facility.capacity.sum()
                 else:

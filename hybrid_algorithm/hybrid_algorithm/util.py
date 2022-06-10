@@ -121,7 +121,15 @@ class Solution:
         solution.meta_data["z3_weight"] = w3
         # assign the solution
         network.apply_solution(solution._list)
-        # evaluate it
+        # check if the open facilities capacity does not serve the demand
+        # if so, return not feasible
+        for echelon in network.echelons:
+            echelon_capacity = [
+                facility.capacity.sum() for facility in echelon if facility.is_open
+            ]
+            if sum(echelon_capacity) < network.market_demand:
+                return float("inf")
+        # evaluate it using lp
         temp_model = lp_model_class(network)
         solution_objective_value = getattr(temp_model, evaluation_function)
         # clean stuff
