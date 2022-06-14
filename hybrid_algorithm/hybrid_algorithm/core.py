@@ -1,7 +1,7 @@
 import copy
 import logging
 import math
-from functools import lru_cache
+from functools import cached_property, lru_cache
 
 from hybrid_algorithm.hybrid_algorithm.vns import VNS
 from hybrid_algorithm.lp_model import LPModel
@@ -52,8 +52,7 @@ class HybridAlgorithm:
         exponent = min(-E_delta / self.T, 700)
         return math.exp(exponent)
 
-    @property
-    @lru_cache
+    @cached_property
     def _private_network(self):
         """
         This network is used for internal calculations.
@@ -93,14 +92,14 @@ class HybridAlgorithm:
                     return best_solution_candidate
         return current_solution
 
-    @lru_cache(maxsize=None)
+    @lru_cache(maxsize=128)
     def evaluate_solution_optimal(self, solution):
         return Solution.evaluate_solution_optimal(
             solution=solution,
             network=self._private_network,
         )
 
-    @lru_cache(maxsize=None)
+    @lru_cache(maxsize=128)
     def evaluate_solution_greedy(self, solution):
         return Solution.evaluate_solution_greedy(
             solution=solution,
@@ -203,7 +202,7 @@ class HybridAlgorithm:
                     solution=current_solution,
                     K=self.K,
                     tabu_list=self.tabu_list,
-                    sorting_function=self.evaluate_solution_optimal,
+                    sorting_function=self.evaluate_solution_greedy,
                     sorting_reversed=False,
                     generation_methods=VNS.SolutionGenerationMethods.LOCAL_SEARCH_METHODS,
                 )
