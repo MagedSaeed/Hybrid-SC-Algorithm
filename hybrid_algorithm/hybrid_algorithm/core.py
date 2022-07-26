@@ -1,3 +1,4 @@
+import sys
 import copy
 import logging
 import math
@@ -25,6 +26,7 @@ class HybridAlgorithm:
         x=0.2,
         lp_model_class=LPModel,
         h=3,
+        max_recursion_limit=5000,
     ):
         self.net = network
         self.T = T
@@ -42,6 +44,9 @@ class HybridAlgorithm:
         self.original_net = copy.deepcopy(network)
         self.best_solution = None
         self._intermediate_solutions = set()
+        self.max_recursion_limit = max_recursion_limit
+        sys.setrecursionlimit(self.max_recursion_limit)
+
         assert (
             self.number_of_neighbors > 0
         ), "number of neighbors should be greater than 0"
@@ -157,15 +162,31 @@ class HybridAlgorithm:
                     )
                     # if the backtracked solution is None, restart the algorithm
                     if backtracked_solution is None:
-                        return self.optimize()
+                        try:
+                            return self.optimize()
+                        except RecursionError as e:
+                            logging.warning(
+                                f"The algorithm reached to its max depth recursion. No further backtracking is possible with the given maximum recursion limit ({self.max_recursion_limit}) The latest solution will be returned"
+                            )
+                            if return_intermediate_solutions:
+                                return self.best_solution, self._intermediate_solutions
+                            return self.best_solution
                     if self.evaluate_solution_optimal(
                         self.best_solution
                     ) > self.evaluate_solution_optimal(backtracked_solution):
                         self.best_solution = backtracked_solution
                         logging.info(
-                            f"chaning best solution to {self.evaluate_solution_optimal(self.best_solution)}"
+                            f"changing best solution to {self.evaluate_solution_optimal(self.best_solution)}"
                         )
-                    return self.optimize(current_solution=backtracked_solution)
+                    try:
+                        return self.optimize()
+                    except RecursionError as e:
+                        logging.warning(
+                            f"The algorithm reached to its max depth recursion. No further backtracking is possible with the given maximum recursion limit ({self.max_recursion_limit}) The latest solution will be returned"
+                        )
+                        if return_intermediate_solutions:
+                            return self.best_solution, self._intermediate_solutions
+                        return self.best_solution
 
                 # add best h solutions to the tabu list
                 self.tabu_list.extend(neighbors[: self.h])
