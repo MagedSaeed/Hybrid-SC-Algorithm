@@ -7,7 +7,6 @@ from functools import cached_property, lru_cache
 from hybrid_algorithm.hybrid_algorithm.vns import VNS
 from hybrid_algorithm.lp_model import LPModel
 from hybrid_algorithm.supply_chain_network import SupplyChainNetwork
-
 from .util import Solution, TabuList
 
 
@@ -131,7 +130,7 @@ class HybridAlgorithm:
             ) > self.evaluate_solution_optimal(current_solution):
                 self.best_solution = current_solution
                 logging.info(
-                    f"chaning best solution to {self.evaluate_solution_optimal(self.best_solution)}"
+                    f"changing best solution to {self.evaluate_solution_optimal(self.best_solution)}"
                 )
 
         while self.T > self.Tf:
@@ -257,7 +256,7 @@ class HybridAlgorithm:
                 ) > self.evaluate_solution_optimal(current_solution):
                     self.best_solution = current_solution
                     logging.info(
-                        f"chaning best solution to {self.evaluate_solution_optimal(self.best_solution)}"
+                        f"changing best solution to {self.evaluate_solution_optimal(self.best_solution)}"
                     )
                 logging.debug(
                     f"current solution: {current_solution}, value: {self.evaluate_solution_optimal(current_solution)}"
