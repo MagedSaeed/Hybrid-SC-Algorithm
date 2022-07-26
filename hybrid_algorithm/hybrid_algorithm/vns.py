@@ -94,10 +94,12 @@ class VNS:
     def generate_sorted_non_tabu_solutions(
         self,
         solution,
-        K,
+        number_of_neighbors,
         tabu_list,
         sorting_function,
+        neighbors_percentage=0.1,
         sorting_reversed=False,
+        min_neighbors_per_generation_method=5,
         generation_methods=SolutionGenerationMethods.SHAKING_METHODS,
     ):
         solutions = set()
@@ -107,13 +109,22 @@ class VNS:
             # find solutions with the provided
             # solution generation methods
             # -------------------------------
-            for _ in range(K):
+            for _ in range(number_of_neighbors):
                 new_solution_list = getattr(VNS, method)(solution_list)
                 # check that, in the new_solution_list, at least one facility is open in all echelons
                 if all(any(echelon) for echelon in new_solution_list):
                     solutions.add(Solution(new_solution_list))
         # exclude tabu solutions
         solutions -= set(tabu_list)
+        # get only the solutions based on the specified percentage
+        assert (
+            0 < neighbors_percentage <= 1
+        ), "neighbors percentage should be between 0 and 1"
+        solutions_threshold = max(
+            int(len(solutions) * neighbors_percentage),
+            len(generation_methods) * min_neighbors_per_generation_method,
+        )
+        solutions = list(solutions)[:solutions_threshold]
         # sort solutions based on their evaluation, i.e. objective value
         solutions = sorted(solutions, key=sorting_function, reverse=sorting_reversed)
         return solutions

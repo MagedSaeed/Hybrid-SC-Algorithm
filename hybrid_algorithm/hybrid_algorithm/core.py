@@ -19,7 +19,8 @@ class HybridAlgorithm:
         alpha=0.9,
         K=5,
         tabu_size=15,
-        number_of_nighbors=5,
+        number_of_neighbors=5,
+        minimum_number_of_neighbors=5,
         neighbors_percentage=0.15,
         x=0.2,
         lp_model_class=LPModel,
@@ -32,8 +33,9 @@ class HybridAlgorithm:
         self.K = int(K)
         self.tabu_size = tabu_size
         self.tabu_list = TabuList(self.tabu_size)
-        self.number_of_nighbors = number_of_nighbors
+        self.number_of_neighbors = number_of_neighbors
         self.neighbors_percentage = neighbors_percentage
+        self.minimum_number_of_neighbors = minimum_number_of_neighbors
         self.x = x
         self.h = h
         self.lp_model_class = lp_model_class
@@ -41,7 +43,7 @@ class HybridAlgorithm:
         self.best_solution = None
         self._intermediate_solutions = set()
         assert (
-            self.number_of_nighbors > 0
+            self.number_of_neighbors > 0
         ), "number of neighbors should be greater than 0"
 
     def transition_probability(self, current_solution, candidate_solution):
@@ -135,9 +137,11 @@ class HybridAlgorithm:
                 # -------------------------------
                 neighbors = VNS.generate_sorted_non_tabu_solutions(
                     solution=current_solution,
-                    K=self.number_of_nighbors,
+                    number_of_neighbors=int(self.number_of_neighbors),
+                    neighbors_percentage=self.neighbors_percentage,
+                    min_neighbors_per_generation_method=self.minimum_number_of_neighbors,
                     tabu_list=self.tabu_list,
-                    sorting_function=self.evaluate_solution_greedy,
+                    sorting_function=self.evaluate_solution_optimal,
                     sorting_reversed=True,
                     generation_methods=VNS.SolutionGenerationMethods.SHAKING_METHODS,
                 )
@@ -200,15 +204,17 @@ class HybridAlgorithm:
                 # -------------------------------
                 local_neighbors = VNS.generate_sorted_non_tabu_solutions(
                     solution=current_solution,
-                    K=self.K,
+                    number_of_neighbors=int(self.number_of_neighbors),
+                    neighbors_percentage=self.neighbors_percentage,
+                    min_neighbors_per_generation_method=self.minimum_number_of_neighbors,
                     tabu_list=self.tabu_list,
-                    sorting_function=self.evaluate_solution_greedy,
+                    sorting_function=self.evaluate_solution_optimal,
                     sorting_reversed=False,
                     generation_methods=VNS.SolutionGenerationMethods.LOCAL_SEARCH_METHODS,
                 )
 
-                # keep all local neighbors
-                current_solution.add_childs_solutions(local_neighbors)
+                # keep best h local neighbors
+                current_solution.add_childs_solutions(local_neighbors[: self.h])
 
                 # filter out corrupted solutions
                 current_solution.childs = list(
