@@ -94,14 +94,14 @@ class HybridAlgorithm:
                     return best_solution_candidate
         return current_solution
 
-    @lru_cache(maxsize=2 ** 15)
+    @lru_cache(maxsize=2 ** 22)
     def evaluate_solution_optimal(self, solution):
         return Solution.evaluate_solution_optimal(
             solution=solution,
             network=self._private_network,
         )
 
-    @lru_cache(maxsize=2 ** 15)
+    @lru_cache(maxsize=2 ** 22)
     def evaluate_solution_greedy(self, solution):
         return Solution.evaluate_solution_greedy(
             solution=solution,
