@@ -132,7 +132,7 @@ class HybridAlgorithm:
                 logging.info(
                     f"changing best solution to {self.evaluate_solution_optimal(self.best_solution)}"
                 )
-
+        logging.info(f"value of K is: {self.K}")
         while self.T > self.Tf:
             k = 0
             while k < self.K:
@@ -155,7 +155,7 @@ class HybridAlgorithm:
                 # if there is no selected solution,
                 if len(neighbors) == 0:
                     # backtrack
-                    logging.debug("No shaking solutions found. Backtracking..")
+                    logging.info("No shaking solutions found. Backtracking..")
                     backtracked_solution = self.get_backtracked_solution(
                         current_solution
                     )
@@ -189,7 +189,7 @@ class HybridAlgorithm:
 
                 # add best h solutions to the tabu list
                 self.tabu_list.extend(neighbors[: self.h])
-                logging.debug(f"tabu list size: {len(self.tabu_list)}")
+                logging.info(f"tabu list size: {len(self.tabu_list)}")
 
                 # make best h solutions as childs to the current solutions
                 current_solution.add_childs_solutions(neighbors[: self.h])
@@ -264,7 +264,7 @@ class HybridAlgorithm:
                 logging.debug(
                     f"best solution up to now: {self.best_solution} value: {self.evaluate_solution_optimal(self.best_solution)}"
                 )
-                logging.debug(f"updating k from {k} to {k+1}")
+                logging.info(f"updating k from {k} to {k+1}")
                 k += 1
             if self.evaluate_solution_optimal(
                 self.best_solution
