@@ -112,6 +112,7 @@ for tabu_size in tabu_sizes:
                         greedy_multi_objective_value = model.multi_objective_value
                         start_time = time.time()
                         optimizer = HybridAlgorithm(
+                            tabu_size=tabu_size,
                             network=net,
                             T=T,
                             Tf=Tf,
