@@ -31,11 +31,14 @@ raw_materials_count = int(config["facilities"]["raw_materials_count"])
 N = facilities_count * products_count + markets_count
 
 
-tabu_sizes = [5, 7, 15]
+
+# tabu_sizes = [5, 7, 15]
+tabu_sizes = [7]
 
 T_values = [50, 200, 300]
 
-Tf_values = [1, 20, 50]
+# Tf_values = [1, 20, 50]
+Tf_values = [1]
 
 alpha_values = [0.9, 0.95, 0.99]
 
@@ -43,7 +46,7 @@ K_values = [int(0.5 * N), int(0.75 * N), N]
 
 number_of_neighbors = facilities_count * 4
 
-neighbors_percentages = [0.1, 0.2, 0.3]
+neighbors_percentages = [0.15, 0.3, 0.5]
 
 results_file = open(
     f"{current_directory}/results.csv",
