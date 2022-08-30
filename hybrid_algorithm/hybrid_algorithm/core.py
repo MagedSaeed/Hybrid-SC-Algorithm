@@ -98,14 +98,14 @@ class HybridAlgorithm:
                     return best_solution_candidate
         return current_solution
 
-    @lru_cache(maxsize=2 ** 22)
+    @lru_cache(maxsize=2**22)
     def evaluate_solution_optimal(self, solution):
         return Solution.evaluate_solution_optimal(
             solution=solution,
             network=self._private_network,
         )
 
-    @lru_cache(maxsize=2 ** 22)
+    @lru_cache(maxsize=2**22)
     def evaluate_solution_greedy(self, solution):
         return Solution.evaluate_solution_greedy(
             solution=solution,
@@ -271,7 +271,7 @@ class HybridAlgorithm:
             ) > self.evaluate_solution_optimal(current_solution):
                 self.best_solution = current_solution
                 logging.info(
-                    f"chaning best solution to {self.evaluate_solution_optimal(self.best_solution)}"
+                    f"changing best solution to {self.evaluate_solution_optimal(self.best_solution)}"
                 )
             logging.debug(f'{"previous T".center(40, "-")}{self.T}')
             self.T *= self.alpha
