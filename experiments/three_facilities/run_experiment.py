@@ -28,7 +28,7 @@ markets_count = int(config["facilities"]["markets_count"])
 products_count = int(config["facilities"]["products_count"])
 raw_materials_count = int(config["facilities"]["raw_materials_count"])
 
-N = facilities_count * products_count + markets_count
+N = facilities_count * 4
 
 
 # tabu_sizes = [5, 7, 15]
@@ -41,7 +41,9 @@ Tf_values = [1]
 
 alpha_values = [0.9, 0.95, 0.99]
 
-K_values = [int(0.5 * N), int(0.75 * N), N]
+K_values = sorted(
+    set([max(int(0.15 * N), 10), max(int(0.3 * N), 10), max(int(0.5 * N), 10)])
+)
 
 number_of_neighbors = facilities_count * 4
 
