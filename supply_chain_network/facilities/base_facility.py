@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from hybrid_algorithm.config import AppConfig
+from supply_chain_network.config import AppConfig
 
 
 @dataclass

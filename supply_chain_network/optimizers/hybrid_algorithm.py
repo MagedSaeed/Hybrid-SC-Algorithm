@@ -4,10 +4,10 @@ import logging
 import math
 from functools import cached_property, lru_cache
 
-from hybrid_algorithm.hybrid_algorithm.vns import VNS
-from hybrid_algorithm.lp_model import LPModel
-from hybrid_algorithm.supply_chain_network import SupplyChainNetwork
-from .util import Solution, TabuList
+from .vns import VNS
+from .lp_model import LPModel
+from supply_chain_network import SupplyChainNetwork
+from .utils import Solution, TabuList
 
 
 class HybridAlgorithm:

@@ -7,11 +7,12 @@ import glob
 import os
 
 import numpy as np
-from hybrid_algorithm import HybridAlgorithm, LPModel, SupplyChainNetwork
-from hybrid_algorithm.config import AppConfig
-from hybrid_algorithm.facilities import warehouses
-from hybrid_algorithm.hybrid_algorithm.util import Solution
-from hybrid_algorithm.utils import get_three_random_weights
+from supply_chain_network import SupplyChainNetwork
+from supply_chain_network.optimizers import HybridAlgorithm, LPModel
+from supply_chain_network.config import AppConfig
+from supply_chain_network.facilities import warehouses
+from supply_chain_network.optimizers.utils import Solution
+from supply_chain_network.utils import get_three_random_weights
 from xlsxwriter.workbook import Workbook
 
 AppConfig.configure(config_file_path="experiments/three_facilities/config.ini")

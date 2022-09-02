@@ -1,7 +1,6 @@
 # this file contains examples on how to use the package
-from lp_model import LPModel
+from supply_chain_network.optimizers import LPModel, HybridAlgorithm
 from supply_chain_network import SupplyChainNetwork
-from hybrid_algorithm.core import HybridAlgorithm
 
 net = SupplyChainNetwork()
 net.apply_initial_greedy_solution()

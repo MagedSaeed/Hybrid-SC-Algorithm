@@ -2,8 +2,8 @@ from dataclasses import dataclass, field
 from typing import Dict, List
 
 import numpy as np
-from hybrid_algorithm.facilities.base_facility import BaseFacility
-from hybrid_algorithm.facilities.raw_materials import RawMaterial
+from .base_facility import BaseFacility
+from .raw_materials import RawMaterial
 
 
 @dataclass

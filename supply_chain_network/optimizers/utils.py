@@ -1,8 +1,8 @@
-from hybrid_algorithm.config import AppConfig
-from hybrid_algorithm.lp_model import LPModel
+from supply_chain_network.config import AppConfig
+from .lp_model import LPModel
 import random
 
-from hybrid_algorithm.utils import get_three_random_weights
+from supply_chain_network.utils import get_three_random_weights
 
 
 class TabuList(list):

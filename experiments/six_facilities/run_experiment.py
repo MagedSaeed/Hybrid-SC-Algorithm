@@ -7,10 +7,11 @@ import numpy as np
 
 if "." not in sys.path:
     sys.path.append(".")
-from hybrid_algorithm import HybridAlgorithm, LPModel, SupplyChainNetwork
-from hybrid_algorithm.config import AppConfig
-from hybrid_algorithm.hybrid_algorithm.util import Solution
-from hybrid_algorithm.utils import get_three_random_weights
+from supply_chain_network import SupplyChainNetwork
+from supply_chain_network.optimizers import HybridAlgorithm, LPModel
+from supply_chain_network.config import AppConfig
+from supply_chain_network.optimizers.utils import Solution
+from supply_chain_network.utils import get_three_random_weights
 from os.path import dirname, abspath
 
 current_directory = dirname(abspath(__file__))

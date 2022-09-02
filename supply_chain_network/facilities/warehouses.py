@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List
 
 import numpy as np
-from hybrid_algorithm.facilities.base_facility import BaseFacility
+from .base_facility import BaseFacility
 
 
 @dataclass

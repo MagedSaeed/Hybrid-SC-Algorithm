@@ -1,16 +1,16 @@
 from dataclasses import dataclass, field
 
 from beautifultable import BeautifulTable
-from hybrid_algorithm.config import AppConfig
+from supply_chain_network.config import AppConfig
 
-from hybrid_algorithm.facilities import (
+from supply_chain_network.facilities import (
     DistributionCenterFacility,
     MarketFacility,
     PlantFacility,
     SupplierFacility,
     WarehouseFacility,
 )
-from hybrid_algorithm.utils import (
+from supply_chain_network.utils import (
     facilities_greedy_sort,
     get_open_facilities_in_echelon,
 )

@@ -1,7 +1,10 @@
 from copy import deepcopy
 import copy
 import random
-from .util import Solution, random_four_digits_binary_string
+from .utils import (
+    Solution,
+    random_four_digits_binary_string,
+)
 
 
 class VNS:

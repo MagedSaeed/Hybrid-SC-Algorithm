@@ -4,6 +4,10 @@ import os
 
 import sys
 
+from os.path import dirname, abspath
+
+current_directory = dirname(abspath(__file__))
+
 # increase recursion level
 # https://stackoverflow.com/questions/6809402/python-maximum-recursion-depth-exceeded-while-calling-a-python-object
 sys.setrecursionlimit(10_000)
@@ -19,7 +23,7 @@ class AppConfigMeta(type):
 
 class AppConfig(metaclass=AppConfigMeta):
     _config = None
-    default_config_file_path = "hybrid_algorithm/default_config.ini"
+    default_config_file_path = f"{current_directory}/default_config.ini"
     config_file_path = None
 
     @classmethod

@@ -1,11 +1,17 @@
 from functools import cached_property
 import itertools
-from hybrid_algorithm.utils import exclude_closed_facilities, get_three_random_weights
+from supply_chain_network.utils import (
+    exclude_closed_facilities,
+    get_three_random_weights,
+)
 
 from pulp import CPLEX_PY, GLPK, LpMaximize, LpMinimize, LpProblem, LpVariable, lpSum
 
-from hybrid_algorithm.config import AppConfig
-from hybrid_algorithm.utils import exclude_closed_facilities, get_three_random_weights
+from supply_chain_network.config import AppConfig
+from supply_chain_network.utils import (
+    exclude_closed_facilities,
+    get_three_random_weights,
+)
 
 
 class LPModel:
