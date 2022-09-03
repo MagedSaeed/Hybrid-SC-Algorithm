@@ -2,13 +2,13 @@ import click
 import random
 import sys
 import time
-from supply_chain_network.config import AppConfig
 
 import numpy as np
 
 if "." not in sys.path:
     sys.path.append(".")
 
+from supply_chain_network.config import AppConfig
 from supply_chain_network import SupplyChainNetwork
 from supply_chain_network.optimizers import HybridAlgorithm, LPModel
 from supply_chain_network.config import AppConfig
