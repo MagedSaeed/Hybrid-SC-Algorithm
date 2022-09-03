@@ -1,7 +1,8 @@
-from hybrid_algorithm import SupplyChainNetwork, LPModel
+from supply_chain_network import SupplyChainNetwork
+from supply_chain_network.optimizers import LPModel
 import random
 import numpy as np
-from hybrid_algorithm.config import AppConfig
+from supply_chain_network.config import AppConfig
 from os.path import dirname, abspath
 
 current_directory = dirname(abspath(__file__))
@@ -21,10 +22,10 @@ raw_materials_count = int(config["facilities"]["raw_materials_count"])
 
 N = facilities_count * products_count + markets_count
 
-max_neighbors = facilities_count ** 4
+max_neighbors = facilities_count**4
 print("max neighbors:", max_neighbors)
 
-max_iterations = 10 ** 4
+max_iterations = 10**4
 print("finding Zmax & Zmin. Max iterations is:", max_iterations)
 
 
