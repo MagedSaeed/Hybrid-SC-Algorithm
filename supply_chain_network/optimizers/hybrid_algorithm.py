@@ -117,7 +117,7 @@ class HybridAlgorithm:
         if current_solution is None:
             network.apply_initial_greedy_solution()
             current_solution = Solution(network.facilities_statuses)
-        logging.info(
+        logging.debug(
             f"initial solution: {current_solution}, value: {self.evaluate_solution_optimal(current_solution)}"
         )
         # add current solution to tabu list
@@ -129,10 +129,10 @@ class HybridAlgorithm:
                 self.best_solution
             ) > self.evaluate_solution_optimal(current_solution):
                 self.best_solution = current_solution
-                logging.info(
+                logging.debug(
                     f"changing best solution to {self.evaluate_solution_optimal(self.best_solution)}"
                 )
-        logging.info(f"value of K is: {self.K}")
+        logging.debug(f"value of K is: {self.K}")
         while self.T > self.Tf:
             k = 0
             while k < self.K:
@@ -155,7 +155,7 @@ class HybridAlgorithm:
                 # if there is no selected solution,
                 if len(neighbors) == 0:
                     # backtrack
-                    logging.info("No shaking solutions found. Backtracking..")
+                    logging.debug("No shaking solutions found. Backtracking..")
                     backtracked_solution = self.get_backtracked_solution(
                         current_solution
                     )
@@ -189,7 +189,7 @@ class HybridAlgorithm:
 
                 # add best h solutions to the tabu list
                 self.tabu_list.extend(neighbors[: self.h])
-                logging.info(f"tabu list size: {len(self.tabu_list)}")
+                logging.debug(f"tabu list size: {len(self.tabu_list)}")
 
                 # make best h solutions as childs to the current solutions
                 current_solution.add_childs_solutions(neighbors[: self.h])
@@ -216,8 +216,8 @@ class HybridAlgorithm:
                     self.best_solution
                 ) > self.evaluate_solution_optimal(current_solution):
                     self.best_solution = current_solution
-                    logging.info(
-                        f"chaning best solution to {self.evaluate_solution_optimal(self.best_solution)}"
+                    logging.debug(
+                        f"changing best solution to {self.evaluate_solution_optimal(self.best_solution)}"
                     )
                 # -------------------------------
                 # Local Search
@@ -255,7 +255,7 @@ class HybridAlgorithm:
                     self.best_solution
                 ) > self.evaluate_solution_optimal(current_solution):
                     self.best_solution = current_solution
-                    logging.info(
+                    logging.debug(
                         f"changing best solution to {self.evaluate_solution_optimal(self.best_solution)}"
                     )
                 logging.debug(
@@ -264,19 +264,19 @@ class HybridAlgorithm:
                 logging.debug(
                     f"best solution up to now: {self.best_solution} value: {self.evaluate_solution_optimal(self.best_solution)}"
                 )
-                logging.info(f"updating k from {k} to {k+1}")
+                logging.debug(f"updating k from {k} to {k+1}")
                 k += 1
             if self.evaluate_solution_optimal(
                 self.best_solution
             ) > self.evaluate_solution_optimal(current_solution):
                 self.best_solution = current_solution
-                logging.info(
+                logging.debug(
                     f"changing best solution to {self.evaluate_solution_optimal(self.best_solution)}"
                 )
             logging.debug(f'{"previous T".center(40, "-")}{self.T}')
             self.T *= self.alpha
-            logging.info(f'{"new T".center(40, "-")}{self.T}')
-            logging.info(
+            logging.debug(f'{"new T".center(40, "-")}{self.T}')
+            logging.debug(
                 f"best solution up to now: {self.best_solution} value: {self.evaluate_solution_optimal(self.best_solution)}"
             )
         if return_intermediate_solutions:
