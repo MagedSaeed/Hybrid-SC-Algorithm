@@ -92,8 +92,8 @@ do
       done
     done
   done
-  wait
 done
+wait
 
 ###############################
 
