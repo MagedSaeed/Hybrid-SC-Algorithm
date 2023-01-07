@@ -16,7 +16,7 @@ setup(
     name="Hybrid-SC-Algorithm",
 
     # Packages to include into the distribution
-    packages=find_packages('supply_chain_network'), 
+    packages=find_packages('.',include=['supply_chain_network']), 
 
     # Start with a small number and increase it with every change you make
     # https://semver.org
