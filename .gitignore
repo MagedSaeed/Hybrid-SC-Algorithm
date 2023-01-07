@@ -132,3 +132,5 @@ dmypy.json
 
 /scripts/net_to_csv_*
 scripts/net_to_*.zip
+
+from_cluster*
