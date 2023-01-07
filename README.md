@@ -1,6 +1,6 @@
 # Hybrid-SC-Algorithm
 
-This repository contains an implementation to a proposed algorithm to optimize supply chains. This novel algorithm is a hybridization  of three well-known algorithms: Neighborhood-Structures, Simulated Annealing, and Tabu Search. Further details about this algorithm and its implementation can be found in this file: [link to the pdf file]
+This repository contains an implementation to a proposed algorithm to optimize supply chains. This novel algorithm is a hybridization  of three well-known algorithms: Neighborhood-Structures, Simulated Annealing, and Tabu Search. Further details about this algorithm and its implementation can be found in this file: [https://github.com/MagedSaeed/Hybrid-SC-Algorithm/blob/main/A%20hybrid%20algorithm%20fot%20SC%20design.PDF]
 
 # Requirements:
 
