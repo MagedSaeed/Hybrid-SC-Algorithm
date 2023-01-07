@@ -22,7 +22,7 @@ class RawMaterial(BaseFacility):  # raw material t
         """
         assert (
             howmany == number_of_products
-        ), "number of raw material should be equal to number of products"
+        ), f"number of raw material should be equal to number of products. Got {number_of_products} products and {howmany} materials"
         random_yields = np.identity(number_of_products)
         # random_yields = np.ones((howmany, number_of_products))
         # random_yields = 1000 * np.random.rand(

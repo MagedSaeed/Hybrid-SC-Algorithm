@@ -31,7 +31,7 @@ class SupplyChainNetwork:
         # rest AppConfig with the new values first
         config = AppConfig.config
         config["facilities"]["facilities_count"] = str(self.facilities_count)
-        config["facilities"]["raw_meterials_count"] = str(self.raw_materials_count)
+        config["facilities"]["raw_materials_count"] = str(self.raw_materials_count)
         config["facilities"]["markets_count"] = str(self.markets_count)
         config["facilities"]["products_count"] = str(self.products_count)
         AppConfig.set_config(config=config)
