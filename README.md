@@ -4,6 +4,7 @@ This repository contains an implementation to a proposed algorithm to optimize s
 
 # Requirements:
 
+- CPLEX
 - This project works on `python3.8` as this is a dependency of the current CPLEX [CPLEX_Studio201] version.
 
 
