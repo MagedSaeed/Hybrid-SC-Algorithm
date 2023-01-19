@@ -29,6 +29,8 @@ from supply_chain_network.optimizers import LPModel, HybridAlgorithm
 
 from supply_chain_network import SupplyChainNetwork
 
+from pulp import GLPK # in case of not using CPLEX solver
+
 # define the supply chain network characteristics
 
 facilities_count = 3
@@ -51,19 +53,18 @@ network.initialize_random_network()
 network.apply_initial_greedy_solution()
 
 # evaluate the greedy solution
-model = LPModel(network)
-model.multi_objective_value
+model = LPModel(network, solver=GLPK(msg=False)) # if solver argument is not passed, CPLEX will be used by default
 
 # instantiate the algorithm optimizer
 hybrid_optimizer = HybridAlgorithm(network)
 
 # optimize with default values and get the solutions
-best_solution, intermediate_solutions = optimizer.optimize()
+best_solution, intermediate_solutions = hybrid_optimizer.optimize()
 
 # evaluate the best solution:
 network.apply_solution(best_solution)
 
-model = LPModel(network)
+model = LPModel(network, solver=GLPK(msg=False))
 
 hybrid_z1 = model.Z1_objective_value
 normalized_hybrid_z1 = model.Z1_normalized_objective_value
@@ -80,21 +81,23 @@ normalized_hybrid_multi_objective_value = model.normalized_multi_objective_value
 weighted_multi_objective_value = model.weighted_multi_objective_value
 
 print(
-    'Hybrid Z1:',hybrid_z1
-    'Normalized Hybrid Z1:', normalized_hybrid_z1
-
-    'Hybrid Z2:',hybrid_z2
-    'Normalized Hybrid Z2:', normalized_hybrid_z2
-
-    'Hybrid Z3:',hybrid_z3
-    'Normalized Hybrid Z3:', normalized_hybrid_z3
-
-    'Hybrid Multi-objective Value:', hybrid_multi_objective_value
-    'Normalized Hybrid Multi-objective Value:', normalized_hybrid_multi_objective_value
-
+    'Hybrid Z1:',hybrid_z1,
+    'Normalized Hybrid Z1:', normalized_hybrid_z1,
+)
+print(
+    'Hybrid Z2:',hybrid_z2,
+    'Normalized Hybrid Z2:', normalized_hybrid_z2,
+)
+print(
+    'Hybrid Z3:',hybrid_z3,
+    'Normalized Hybrid Z3:', normalized_hybrid_z3,
+)
+print(
+    'Hybrid Multi-objective Value:', hybrid_multi_objective_value,
+    'Normalized Hybrid Multi-objective Value:', normalized_hybrid_multi_objective_value,
+)
+print(
     'Weighted Multi-objective Value:', weighted_multi_objective_value,
-    
-
 )
 
 ```

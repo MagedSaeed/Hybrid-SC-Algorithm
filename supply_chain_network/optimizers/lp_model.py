@@ -15,8 +15,10 @@ from supply_chain_network.utils import (
 
 
 class LPModel:
-    def __init__(self, network):
+    # def __init__(self, network,solver=GLPK(msg=False)):
+    def __init__(self, network,solver=CPLEX_PY(msg=False)):
         self.network = exclude_closed_facilities(network, inplace=False)
+        self.solver = solver
         # self.network = network
 
     @cached_property
@@ -508,8 +510,8 @@ class LPModel:
         model += objective_function
         for constraint in self.constraints:
             model += constraint
-        # status = model.solve(solver=GLPK(msg=False))
-        status = model.solve(solver=CPLEX_PY(msg=False))
+        # status = model.solve(solver=self.solver)
+        status = model.solve(solver=self.solver)
         if status == 1:
             return model.objective.value()
         return None
