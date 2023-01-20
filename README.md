@@ -118,9 +118,9 @@ print(
 
 ```
 
-#Liscence
+# Liscence
 
-This implementation is under MIT liscense
+This implementation is under MIT liscense.
 
 
 # Contribution
