@@ -117,6 +117,12 @@ print(
 )
 
 ```
+
+#Liscence
+
+This implementation is under MIT liscense
+
+
 # Contribution
 
 Any contribution is welcomed for this project.
