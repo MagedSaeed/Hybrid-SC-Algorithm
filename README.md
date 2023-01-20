@@ -5,7 +5,7 @@ This repository contains an implementation to a proposed algorithm to optimize s
 # Architecture
 
  <p align="center"> 
- <img src = "https://raw.githubusercontent.com/MagedSaeed/Hybrid-SC-Algorithm/main/software_architecture.drawio.png" width = "200px"/>
+ <img src = "https://raw.githubusercontent.com/MagedSaeed/Hybrid-SC-Algorithm/main/software_architecture.drawio.png"/>
  </p>
 
 # Requirements:
