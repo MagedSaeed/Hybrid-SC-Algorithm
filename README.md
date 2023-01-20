@@ -10,7 +10,7 @@ The network defination contains a set of data classes to collect the values of e
 
 The second major component is the algorithm implementaiton as described in the paper. This implemenation depends on two main modules. The first one is the linear programming solver module, named as `lp_model.py`, and the second one is the VNS module which is used to find the nighbor solutions, i.e. to make a step twoards the optimal solution.
 
-The following picture overviews this software architecture. A full example is provided twords the end of this file.
+The following picture overviews this software architecture. A full example is provided twords the end of this file in the `getting started` section.
 
 
  <p align="center"> 
