@@ -4,6 +4,15 @@ This repository contains an implementation to a proposed algorithm to optimize s
 
 # Architecture
 
+The framework contains two major components, the network definiation and the hybrid algorithm implementation.
+
+The network defination contains a set of data classes to collect the values of each facilities. The framework also supports random initialization for these values for experimentation setups.
+
+The second major component is the algorithm implementaiton as described in the paper. This implemenation depends on two main modules. The first one is the linear programming solver module, named as `lp_model.py`, and the second one is the VNS module which is used to find the nighbor solutions, i.e. to make a step twoards the optimal solution.
+
+The following picture overviews this software architecture. A full example is provided twords the end of this file.
+
+
  <p align="center"> 
  <img src = "https://raw.githubusercontent.com/MagedSaeed/Hybrid-SC-Algorithm/main/software_architecture.drawio.png"/>
  </p>
